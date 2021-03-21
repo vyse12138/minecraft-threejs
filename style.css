@@ -2,3 +2,8 @@ body {
   margin: 0;
   overflow: hidden;
 }
+.help {
+  position: fixed;
+  right: 1rem;
+
+}
