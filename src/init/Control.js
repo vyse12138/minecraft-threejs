@@ -161,7 +161,6 @@ export default class Control {
       }
       this.velocity -= 0.0075;
       this.camera.position.y += this.velocity;
-      console.log(this.camera.position.y);
       if (this.camera.position.y < 2) {
         this.velocity = 0;
         this.camera.position.y = 2;
