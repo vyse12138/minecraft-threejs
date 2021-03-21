@@ -1,23 +1,24 @@
+import * as THREE from "three";
 import "../style.css";
+
 import initCamera from "./init/Camera.js";
 import initScene from "./init/Scene.js";
 import initRenderer from "./init/Renderer.js";
-import initAmbientLight from "./init/Light.js";
+import initStats from "./init/Stats.js";
+
 import Control from "./init/Control.js";
 import Block from "./mesh/Block.js";
 import BlockMaterial from "./materials/BlockMaterial.js";
 import BlockGeometry from "./geometries/BlockGeometry.js";
-import * as THREE from "three";
-import { BufferGeometryUtils } from "./utils/BufferGeometryUtils";
+import BufferGeometryUtils  from "./utils/BufferGeometryUtils";
 
-import Stats from "./utils/Stats";
 let scene = initScene();
-
 let camera = initCamera();
-let lightAmbient = initAmbientLight();
-scene.add(lightAmbient);
-
 let renderer = initRenderer();
+let stats = initStats();
+const control = new Control(camera);
+
+
 
 let block = BlockGeometry();
 let gs = [];
@@ -36,13 +37,8 @@ scene.add(mesh);
 
 
 
-let stats = new Stats();
-stats.showPanel(0);
-document.body.appendChild(stats.dom);
 
-document.body.appendChild(renderer.domElement);
 
-const control = new Control(camera);
 
 
 

@@ -5,6 +5,7 @@ export default function initRenderer() {
   renderer.name = "RENDERER";
 
   renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
 
   return renderer;
 }

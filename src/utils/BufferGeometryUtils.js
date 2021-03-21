@@ -8,7 +8,7 @@ import {
   TriangleStripDrawMode,
   TrianglesDrawMode,
   Vector3
-} from 'three';
+} from "three";
 
 var BufferGeometryUtils = {
   computeTangents: function (geometry) {
@@ -871,4 +871,4 @@ var BufferGeometryUtils = {
   }
 };
 
-export { BufferGeometryUtils };
+export default BufferGeometryUtils;
