@@ -1,13 +1,17 @@
 import * as THREE from "three";
-const stone = new THREE.TextureLoader().load("../assets/blocks/dirt.png");
+import stoneTexture from '../assets/blocks/stone.png'
+import coalTexture from '../assets/blocks/coal_ore.png'
+import ironTexture from '../assets/blocks/iron_ore.png'
+
+const stone = new THREE.TextureLoader().load(stoneTexture);
 stone.magFilter = THREE.NearestFilter;
 const stoneMaterial = new THREE.MeshBasicMaterial({ map: stone });
 
-const coal = new THREE.TextureLoader().load("../assets/assets/blocks/coal_ore.png");
+const coal = new THREE.TextureLoader().load(coalTexture);
 coal.magFilter = THREE.NearestFilter;
 const coalMaterial = new THREE.MeshBasicMaterial({ map: coal });
 
-const iron = new THREE.TextureLoader().load("../assets/blocks/iron_ore.png");
+const iron = new THREE.TextureLoader().load(ironTexture);
 iron.magFilter = THREE.NearestFilter;
 const ironMaterial = new THREE.MeshBasicMaterial({ map: iron });
 
