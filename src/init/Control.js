@@ -3,13 +3,14 @@ import * as THREE from "three";
 export default class Control {
   constructor(camera) {
     this.camera = camera;
+    this.godMode = false;
     this.movingForward = false;
     this.movingBackward = false;
     this.movingLeftwa = false;
     this.movingRight = false;
     this.movingUp = false;
     this.movingDown = false;
-
+    this.velocity = 0;
     this.euler = new THREE.Euler(0, 0, 0, "YXZ");
     this.vec = new THREE.Vector3();
 
@@ -74,10 +75,19 @@ export default class Control {
         this.movingRight = true;
         break;
       case "Space":
-        this.movingUp = true;
+        if (this.godMode) {
+          this.movingUp = true;
+        } else {
+          this.velocity = 0.15;
+        }
         break;
       case "ControlLeft":
-        this.movingDown = true;
+        if (this.godMode) {
+          this.movingDown = true;
+        }
+        break;
+      case "KeyQ":
+        this.godMode = !this.godMode;
         break;
     }
   };
@@ -115,23 +125,47 @@ export default class Control {
   }
 
   update() {
-    if (this.movingForward) {
-      this.moveForward(0.25);
-    }
-    if (this.movingBackward) {
-      this.moveForward(-0.25);
-    }
-    if (this.movingLeft) {
-      this.moveRight(-0.25);
-    }
-    if (this.movingRight) {
-      this.moveRight(0.25);
-    }
-    if (this.movingUp) {
-      this.camera.position.y += 0.25;
-    }
-    if (this.movingDown) {
-      this.camera.position.y -= 0.25;
+    if (this.godMode) {
+      // god mode on
+      if (this.movingForward) {
+        this.moveForward(0.25);
+      }
+      if (this.movingBackward) {
+        this.moveForward(-0.25);
+      }
+      if (this.movingLeft) {
+        this.moveRight(-0.25);
+      }
+      if (this.movingRight) {
+        this.moveRight(0.25);
+      }
+      if (this.movingUp) {
+        this.camera.position.y += 0.25;
+      }
+      if (this.movingDown) {
+        this.camera.position.y -= 0.25;
+      }
+    } else {
+      // god mode off
+      if (this.movingForward) {
+        this.moveForward(0.1);
+      }
+      if (this.movingBackward) {
+        this.moveForward(-0.1);
+      }
+      if (this.movingLeft) {
+        this.moveRight(-0.1);
+      }
+      if (this.movingRight) {
+        this.moveRight(0.1);
+      }
+      this.velocity -= 0.0075;
+      this.camera.position.y += this.velocity;
+      console.log(this.camera.position.y);
+      if (this.camera.position.y < 2) {
+        this.velocity = 0;
+        this.camera.position.y = 2;
+      }
     }
   }
 }
