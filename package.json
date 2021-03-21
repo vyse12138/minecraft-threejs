@@ -1,0 +1,15 @@
+{
+  "name": "three-minecraft",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^2.1.0"
+  },
+  "dependencies": {
+    "three": "^0.126.1"
+  }
+}
