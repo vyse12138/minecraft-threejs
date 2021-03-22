@@ -1,46 +1,48 @@
 import * as THREE from "three";
-import stoneTexture from '../assets/blocks/stone.png'
-import coalTexture from '../assets/blocks/coal_ore.png'
-import ironTexture from '../assets/blocks/iron_ore.png'
-import grass_side from '../assets/blocks/grass_side.png'
-import grass_top_green from '../assets/blocks/grass_top_green.png'
-import dirt from '../assets/blocks/dirt.png'
+import stoneTexture from "../assets/blocks/stone.png";
+import coalTexture from "../assets/blocks/coal_ore.png";
+import ironTexture from "../assets/blocks/iron_ore.png";
+import grass_side from "../assets/blocks/grass_side.png";
+import grass_top_green from "../assets/blocks/grass_top_green.png";
+import dirt from "../assets/blocks/dirt.png";
 
 
+let loader = new THREE.TextureLoader();
 
-const grass = new THREE.TextureLoader().load(grass_top_green);
-grass.magFilter = THREE.NearestFilter;
+const grassTop = loader.load(grass_top_green);
+grassTop.magFilter = THREE.NearestFilter;
 
+const grassSide = loader.load(grass_side);
+grassSide.magFilter = THREE.NearestFilter;
 
-const stone = new THREE.TextureLoader().load(stoneTexture);
+const dirtT = loader.load(dirt);
+dirtT.magFilter = THREE.NearestFilter;
+
+const stone = loader.load(stoneTexture);
 stone.magFilter = THREE.NearestFilter;
 
-const coal = new THREE.TextureLoader().load(coalTexture);
+const coal = loader.load(coalTexture);
 coal.magFilter = THREE.NearestFilter;
 
-const iron = new THREE.TextureLoader().load(ironTexture);
+const iron = loader.load(ironTexture);
 iron.magFilter = THREE.NearestFilter;
 
+
+
+
 export default function BlockMaterial(name) {
-  // let materials = [];
-  // while (count--) {
-  //   if (Math.random() > 0.97) {
-  //     materials.push(coalMaterial);
-  //   } else if (Math.random() > 0.97) {
-  //     materials.push(ironMaterial);
-
-  //   }else{
-  //     materials.push(stoneMaterial);
-  //   }
-  // }
-  // return materials;
   let material;
-if (name === 'grass'){
-  material = new THREE.MeshBasicMaterial({ map: grass });
-
-} else  {
-  material = new THREE.MeshBasicMaterial({ map: stone });
-
-}
-  return    material 
+  if (name === "grass") {
+    material = [
+      new THREE.MeshBasicMaterial( { map: grassSide }),
+      new THREE.MeshBasicMaterial( { map: grassSide }),
+        new THREE.MeshBasicMaterial( { map: grassTop }),
+        new THREE.MeshBasicMaterial( { map: dirtT }),
+        new THREE.MeshBasicMaterial( { map: grassSide }),
+        new THREE.MeshBasicMaterial( { map: grassSide })
+    ];
+  } else {
+    material = new THREE.MeshBasicMaterial({ map: dirtT });
+  }
+  return material;
 }

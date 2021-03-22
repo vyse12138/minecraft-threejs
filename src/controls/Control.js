@@ -1,7 +1,8 @@
 import * as THREE from "three";
 
 export default class Control {
-  constructor(camera) {
+  constructor(camera, scene) {
+    this.scene = scene;
     this.camera = camera;
     this.godMode = false;
     this.movingForward = false;
@@ -13,7 +14,6 @@ export default class Control {
     this.velocity = 0;
     this.euler = new THREE.Euler(0, 0, 0, "YXZ");
     this.vec = new THREE.Vector3();
-
     this.initEventListeners();
   }
 
@@ -21,6 +21,9 @@ export default class Control {
     // click to lock
     document.addEventListener("click", () => {
       document.body.requestPointerLock();
+    });
+    document.addEventListener("mousewheel", () => {
+      document.exitPointerLock();
     });
     // when lock/unlock, trigger corresponding callback
     document.addEventListener("pointerlockchange", () => {
@@ -30,6 +33,7 @@ export default class Control {
         this.onUnlock();
       }
     });
+
   }
 
   // when locked, add control eventListeners
@@ -37,14 +41,49 @@ export default class Control {
     document.addEventListener("mousemove", this.onMouseMove);
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
+    document.addEventListener("mousedown", this.onClick);
+
   }
   // when unlocked, remove control eventListeners
   onUnlock() {
     document.removeEventListener("mousemove", this.onMouseMove);
     document.removeEventListener("keydown", this.onKeyDown);
     document.removeEventListener("keyup", this.onKeyUp);
+    document.removeEventListener("mousedown", this.onClick);
+
   }
 
+
+  onClick = e => {
+    switch (e.button) {
+      case 0:
+        let raycaster = new THREE.Raycaster();
+
+        raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
+        const intersects = raycaster.intersectObjects(this.scene.children);
+        if (intersects.length > 0) {
+          intersects[0].object.material.wireframe = true;
+
+          const object = this.scene.getObjectById(intersects[0].object.id);
+          object.geometry.dispose();
+          if (Array.isArray(object.material)) {
+            object.material.forEach(m => {
+              m.dispose();
+            });
+          }else {
+            object.material.dispose();
+
+          }
+          this.scene.remove(object);
+        }
+        break;
+      case 1:
+
+      case 2:
+        console.log("Right Mouse button pressed.");
+        break;
+    }
+  }
   onMouseMove = e => {
     let movementX = e.movementX;
     let movementY = e.movementY;
@@ -52,7 +91,7 @@ export default class Control {
     this.euler.y -= movementX * 0.002;
     this.euler.x -= movementY * 0.002;
     // make sure that -pi/2 <= eulerX <= pi/2
-		this.euler.x = Math.max( -Math.PI/2, Math.min(Math.PI/2, this.euler.x ) );
+    this.euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.euler.x));
 
     this.camera.quaternion.setFromEuler(this.euler);
   };
