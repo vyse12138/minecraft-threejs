@@ -7,5 +7,10 @@ export default function initRenderer() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
+  window.addEventListener("resize", onWindowResize);
+  function onWindowResize() {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
   return renderer;
 }

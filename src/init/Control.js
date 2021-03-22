@@ -52,11 +52,8 @@ export default class Control {
     this.euler.y -= movementX * 0.002;
     this.euler.x -= movementY * 0.002;
     // make sure that -pi/2 <= eulerX <= pi/2
-    this.euler.x < -Math.PI / 2
-      ? -Math.PI / 2
-      : this.euler.x > Math.PI / 2
-      ? Math.PI / 2
-      : this.euler.x;
+		this.euler.x = Math.max( -Math.PI/2, Math.min(Math.PI/2, this.euler.x ) );
+
     this.camera.quaternion.setFromEuler(this.euler);
   };
 

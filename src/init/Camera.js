@@ -11,6 +11,12 @@ export default function initCamera() {
   camera.position.x = 0;
   camera.position.y = 3;
   camera.position.z = 0;
-  camera.lookAt(new THREE.Vector3(10,0,10));
+  camera.lookAt(new THREE.Vector3(10, 0, 10));
+
+  window.addEventListener("resize", onWindowResize);
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  }
   return camera;
 }
