@@ -6,6 +6,8 @@ import initRenderer from "./init/Renderer.js";
 import initStats from "./init/Stats.js";
 
 import Control from "./controls/Control.js";
+import BlockBorder from "./mesh/BlockBorder.js";
+
 import Block from "./mesh/Block.js";
 import BlockMaterial from "./materials/BlockMaterial.js";
 import BlockGeometry from "./geometries/BlockGeometry.js";
@@ -16,7 +18,7 @@ const camera = initCamera();
 const renderer = initRenderer();
 const stats = initStats();
 const control = new Control(camera, scene);
-
+const blockBorder = new BlockBorder(camera, scene);
 let block, mesh;
 
 for (let i = 0; i < 16; i++) {
@@ -35,37 +37,11 @@ for (let i = 0; i < 16; i++) {
   }
 }
 
-let raycaster = new THREE.Raycaster();
-let last, wireframe, geo;
-const mat = new THREE.LineBasicMaterial({ color: 0x000000});
-
 (function animate() {
   requestAnimationFrame(animate);
   control.update();
   stats.update();
-
-
-
-  raycaster.setFromCamera({ x: 0, y: 0 }, camera);
-  const intersects = raycaster.intersectObjects(scene.children);
-  if (intersects.length > 0) {
-    if (last) {
-      last.remove(wireframe);
-      geo = new THREE.EdgesGeometry(intersects[0].object.geometry);
-      wireframe = new THREE.LineSegments(geo, mat);
-      intersects[0].object.add(wireframe);
-      
-    }
-    last = intersects[0].object;
-  } else {
-    if (last) {
-      last.remove(wireframe);
-
-    }
-
-  }
-
-  
+  blockBorder.update();
 
   renderer.render(scene, camera);
 })();
