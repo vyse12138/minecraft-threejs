@@ -25,7 +25,6 @@ for (let i = 0; i < 16; i++) {
   for (let j = 0; j < 16; j++) {
     for (let k = 0; k < 2; k++) {
       block = new THREE.BoxGeometry();
-
       block.translate(i, k - 1, j);
       if (k === 0) {
         mesh = new THREE.Mesh(block, new BlockMaterial("dirt"));

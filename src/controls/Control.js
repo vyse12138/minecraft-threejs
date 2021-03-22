@@ -4,7 +4,7 @@ export default class Control {
   constructor(camera, scene) {
     this.scene = scene;
     this.camera = camera;
-    this.godMode = false;
+    this.flyingMode = false;
     this.movingForward = false;
     this.movingBackward = false;
     this.movingLeftwa = false;
@@ -111,19 +111,19 @@ export default class Control {
         this.movingRight = true;
         break;
       case "Space":
-        if (this.godMode) {
+        if (this.flyingMode) {
           this.movingUp = true;
         } else {
           this.velocity = 0.15;
         }
         break;
-      case "ControlLeft":
-        if (this.godMode) {
+      case "ShiftLeft":
+        if (this.flyingMode) {
           this.movingDown = true;
         }
         break;
       case "KeyQ":
-        this.godMode = !this.godMode;
+        this.flyingMode = !this.flyingMode;
         break;
     }
   };
@@ -144,7 +144,7 @@ export default class Control {
       case "Space":
         this.movingUp = false;
         break;
-      case "ControlLeft":
+      case "ShiftLeft":
         this.movingDown = false;
         break;
     }
@@ -161,7 +161,7 @@ export default class Control {
   }
 
   update() {
-    if (this.godMode) {
+    if (this.flyingMode) {
       // god mode on
       if (this.movingForward) {
         this.moveForward(0.25);
