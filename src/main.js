@@ -20,8 +20,8 @@ const stats = initStats();
 const control = new Control(camera, scene);
 const blockBorder = new BlockBorder(camera, scene);
 
-
-
+const grassMaterial = new BlockMaterial("grass")
+const dirtMaterial =  new BlockMaterial("dirt");
 let block, mesh;
 
 for (let i = 0; i < 16; i++) {
@@ -29,15 +29,16 @@ for (let i = 0; i < 16; i++) {
     for (let k = 0; k < 2; k++) {
       block = new THREE.BoxGeometry();
       if (k === 0) {
-        mesh = new THREE.Mesh(block, new BlockMaterial("dirt"));
+        mesh = new THREE.Mesh(block, dirtMaterial);
       } else {
-        mesh = new THREE.Mesh(block, new BlockMaterial("grass"));
+        mesh = new THREE.Mesh(block, grassMaterial);
       }
       mesh.position.x = i;
       mesh.position.y = k;
       mesh.position.z = j;
-
+      mesh.matrixAutoUpdate = false;
       scene.add(mesh);
+      mesh.updateMatrix();
     }
   }
 }

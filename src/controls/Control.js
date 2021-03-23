@@ -8,7 +8,7 @@ export default class Control {
     this.flyingMode = false;
     this.movingForward = false;
     this.movingBackward = false;
-    this.movingLeftwa = false;
+    this.movingLeft = false;
     this.movingRight = false;
     this.movingUp = false;
     this.movingDown = false;
@@ -45,6 +45,12 @@ export default class Control {
   }
   // when unlocked, remove control eventListeners
   onUnlock() {
+    this.movingForward = false;
+    this.movingBackward = false;
+    this.movingLeft = false;
+    this.movingRight = false;
+    this.movingUp = false;
+    this.movingDown = false;
     document.removeEventListener("mousemove", this.onMouseMove);
     document.removeEventListener("keydown", this.onKeyDown);
     document.removeEventListener("keyup", this.onKeyUp);
@@ -61,13 +67,6 @@ export default class Control {
         if (intersects.length > 0) {
           const object = this.scene.getObjectById(intersects[0].object.id);
           object.geometry.dispose();
-          if (Array.isArray(object.material)) {
-            object.material.forEach(material => {
-              material.dispose();
-            });
-          } else {
-            object.material.dispose();
-          }
           this.scene.remove(object);
         }
         break;
@@ -79,7 +78,6 @@ export default class Control {
         let intersects = raycaster.intersectObjects(this.scene.children);
         if (intersects.length > 0) {
           const object = this.scene.getObjectById(intersects[0].object.id);
-          console.log(object.geometry)
           const normal = intersects[0].face.normal
           let block = new THREE.BoxGeometry();
           let mesh = new THREE.Mesh(block, new BlockMaterial("grass"));
