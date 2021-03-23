@@ -34,15 +34,15 @@ export default function BlockMaterial(name) {
   let material;
   if (name === "grass") {
     material = [
-      new THREE.MeshBasicMaterial( { map: grassSide }),
-      new THREE.MeshBasicMaterial( { map: grassSide }),
-        new THREE.MeshBasicMaterial( { map: grassTop }),
-        new THREE.MeshBasicMaterial( { map: dirtT }),
-        new THREE.MeshBasicMaterial( { map: grassSide }),
-        new THREE.MeshBasicMaterial( { map: grassSide })
+      new THREE.MeshStandardMaterial( { map: grassSide }),
+      new THREE.MeshStandardMaterial( { map: grassSide }),
+        new THREE.MeshStandardMaterial( { map: grassTop }),
+        new THREE.MeshStandardMaterial( { map: dirtT }),
+        new THREE.MeshStandardMaterial( { map: grassSide }),
+        new THREE.MeshStandardMaterial( { map: grassSide })
     ];
   } else {
-    material = new THREE.MeshBasicMaterial({ map: dirtT });
+    material = new THREE.MeshStandardMaterial({ map: dirtT });
   }
   return material;
 }

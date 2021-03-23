@@ -5,12 +5,14 @@ export default class BlockBorder {
     this.camera = camera;
     this.scene = scene;
     this.raycaster = new THREE.Raycaster();
+    this.raycaster.far = 8;
     this.material = new THREE.LineBasicMaterial({ color: 0x000000 });
     this.lastMesh = null;
     this.border = null;
     this.geometry = null;
     this.intersects = [];
   }
+
   update() {
     this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
     this.intersects = this.raycaster.intersectObjects(this.scene.children);
