@@ -19,18 +19,24 @@ const renderer = initRenderer();
 const stats = initStats();
 const control = new Control(camera, scene);
 const blockBorder = new BlockBorder(camera, scene);
+
+
+
 let block, mesh;
 
 for (let i = 0; i < 16; i++) {
   for (let j = 0; j < 16; j++) {
     for (let k = 0; k < 2; k++) {
       block = new THREE.BoxGeometry();
-      block.translate(i, k - 1, j);
       if (k === 0) {
         mesh = new THREE.Mesh(block, new BlockMaterial("dirt"));
       } else {
         mesh = new THREE.Mesh(block, new BlockMaterial("grass"));
       }
+      mesh.position.x = i;
+      mesh.position.y = k;
+      mesh.position.z = j;
+
       scene.add(mesh);
     }
   }

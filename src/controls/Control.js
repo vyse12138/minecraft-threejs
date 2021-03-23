@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import BlockMaterial from "../materials/BlockMaterial.js";
 
 export default class Control {
   constructor(camera, scene) {
@@ -72,12 +73,20 @@ export default class Control {
         break;
       }
       case 2: {
-        const raycaster = new THREE.Raycaster();
+        let raycaster = new THREE.Raycaster();
+        raycaster.far = 8;
         raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
-        const intersects = raycaster.intersectObjects(this.scene.children);
+        let intersects = raycaster.intersectObjects(this.scene.children);
         if (intersects.length > 0) {
           const object = this.scene.getObjectById(intersects[0].object.id);
-
+          console.log(object.geometry)
+          const normal = intersects[0].face.normal
+          let block = new THREE.BoxGeometry();
+          let mesh = new THREE.Mesh(block, new BlockMaterial("grass"));
+          mesh.position.x = normal.x + object.position.x
+          mesh.position.y = normal.y + object.position.y
+          mesh.position.z = normal.z + object.position.z
+          this.scene.add(mesh);
         }
         break;
       }
