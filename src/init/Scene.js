@@ -8,9 +8,16 @@ export default function initScene() {
   const light1 = new THREE.PointLight( 0xffffff, 1 );
   light1.position.set( 500, 500, 500 );
   scene.add( light1 );
-  const light2 = new THREE.PointLight( 0xffffff, 0.75 );
+  const light2 = new THREE.PointLight( 0xffffff, 0.5 );
   light2.position.set( -500, 500, -500 );
   scene.add( light2 );
+  const light3 = new THREE.PointLight( 0xffffff, 0.5 );
+  light3.position.set( 500, -500, 500 );
+  scene.add( light3 );
+  const light4 = new THREE.PointLight( 0xffffff, 0.25 );
+  light4.position.set( -500, -500, -500 );
+  scene.add( light4 );
+
   const geometry = new THREE.SphereGeometry( 2, 32, 32 );
   const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
   const sphere = new THREE.Mesh( geometry, material );
