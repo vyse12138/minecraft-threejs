@@ -204,9 +204,9 @@ export default class Control {
       }
       this.velocity -= 0.0075;
       this.camera.position.y += this.velocity;
-      if (this.camera.position.y < 2) {
+      if (this.camera.position.y < 3) {
         this.velocity = 0;
-        this.camera.position.y = 2;
+        this.camera.position.y = 3;
       }
     }
   }
