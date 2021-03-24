@@ -12,6 +12,7 @@ import Block from "./mesh/Block.js";
 import BlockMaterial from "./materials/BlockMaterial.js";
 import BlockGeometry from "./geometries/BlockGeometry.js";
 import BufferGeometryUtils from "./utils/BufferGeometryUtils";
+import { simplex } from "./utils/simplex-noise";
 
 const scene = initScene();
 const camera = initCamera();
@@ -20,26 +21,23 @@ const stats = initStats();
 const control = new Control(camera, scene);
 const blockBorder = new BlockBorder(camera, scene);
 
-const grassMaterial = new BlockMaterial("grass")
-const dirtMaterial =  new BlockMaterial("dirt");
+const grassMaterial = new BlockMaterial("grass");
+const dirtMaterial = new BlockMaterial("dirt");
 let block, mesh;
 
-for (let i = 0; i < 16; i++) {
-  for (let j = 0; j < 16; j++) {
-    for (let k = 0; k < 2; k++) {
-      block = new THREE.BoxGeometry();
-      if (k === 0) {
-        mesh = new THREE.Mesh(block, dirtMaterial);
-      } else {
-        mesh = new THREE.Mesh(block, grassMaterial);
-      }
-      mesh.position.x = i;
-      mesh.position.y = k;
-      mesh.position.z = j;
-      mesh.matrixAutoUpdate = false;
-      scene.add(mesh);
-      mesh.updateMatrix();
-    }
+let noise = new simplex.SimplexNoise();
+let v;
+
+for (let i = 0; i < 25; i++) {
+  for (let j = 0; j < 25; j++) {
+    v = Math.round(noise.noise2D(i / 16, j / 16) * 3);
+    block = new THREE.BoxGeometry();
+    mesh = new THREE.Mesh(block, new BlockMaterial("grass"));
+    mesh.position.x = i;
+    mesh.position.y = v;
+    mesh.position.z = j;
+
+    scene.add(mesh);
   }
 }
 

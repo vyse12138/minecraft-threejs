@@ -19,16 +19,26 @@ export default class BlockBorder {
     if (this.intersects.length > 0) {
       if (this.lastMesh) {
         this.lastMesh.remove(this.border);
+        this.lastMesh.material.forEach(m => {
+          m.color = new THREE.Color(1,1,1)
+        })
         this.geometry = new THREE.EdgesGeometry(
           this.intersects[0].object.geometry
         );
         this.border = new THREE.LineSegments(this.geometry, this.material);
         this.intersects[0].object.add(this.border);
+
+        this.intersects[0].object.material.forEach(m => {
+          m.color = new THREE.Color(1.25,1.25,1.25)
+        })
       }
       this.lastMesh = this.intersects[0].object;
     } else {
       if (this.lastMesh) {
         this.lastMesh.remove(this.border);
+        this.lastMesh.material.forEach(m => {
+          m.color = new THREE.Color(1,1,1)
+        })
       }
     }
   }
