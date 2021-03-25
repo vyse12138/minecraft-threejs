@@ -1,10 +1,10 @@
-# three-minecraft
+# three-minecraft ✌
 
-Minecraft made with JavaScript and three.js 
+Minecraft made with JavaScript and three.js 😝
 
 Check it out: [three-minecraft](https://three-minecraft.netlify.app/)
 
-## Features:
+## ✔Features:
 - Left click to remove block
 - Right click to put block
 - Press Q to toggle between normal / flying mode
@@ -12,7 +12,7 @@ Check it out: [three-minecraft](https://three-minecraft.netlify.app/)
 - Randomly generated terrain
 - Highlight the block at crosshair
 
-## Todos:
+## ⚠Todos:
 - Infinite world
 - More block types
 - Generates trees
