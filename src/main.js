@@ -12,48 +12,37 @@ import Block from "./mesh/Block.js";
 import BlockMaterial from "./materials/BlockMaterial.js";
 import BlockGeometry from "./geometries/BlockGeometry.js";
 import BufferGeometryUtils from "./utils/BufferGeometryUtils";
-import { simplex } from "./utils/simplex-noise";
-
+import TerrainGenerator from "./terrains/TerrainGenerator.js";
 const scene = initScene();
 const camera = initCamera();
 const renderer = initRenderer();
 const stats = initStats();
 const control = new Control(camera, scene);
-let noise = new simplex.SimplexNoise();
-
-const blockBorder = new BlockBorder(camera, scene);
 
 const grassMaterial = new BlockMaterial("grass");
 const dirtMaterial = new BlockMaterial("dirt");
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-let mesh = new THREE.InstancedMesh(geometry, grassMaterial, 180000);
+const terrainGenerator = new TerrainGenerator(scene);
+const terrain = terrainGenerator.build();
 
-let i = 0;
-const matrix = new THREE.Matrix4();
+const blockBorder = new BlockBorder(camera, scene, terrain);
 
-for (let x = 0; x < 300; x++) {
-  for (let y = 0; y < 2; y++) {
-    for (let z = 0; z < 300; z++) {
-      let v = Math.round(noise.noise2D(x /160, z / 160) * 10);
-      matrix.setPosition(x,y +v, z);
-      mesh.setMatrixAt(i++, matrix);
 
-    }
+
+
+let flag = false;
+document.addEventListener("mousemove", () => {
+  if (flag) {
+    return;
   }
-}
+  flag = true;
 
+  setTimeout(() => {
+    flag = false;
 
-scene.add(mesh);
-
-
-
-
-
-
-
-
-
+    blockBorder.update();
+  }, 250);
+});
 
 
 
@@ -64,7 +53,6 @@ scene.add(mesh);
   requestAnimationFrame(animate);
   control.update();
   stats.update();
-  // blockBorder.update();
 
   renderer.render(scene, camera);
 })();
