@@ -17,7 +17,13 @@ export default class Control {
     this.euler = new THREE.Euler(0, 0, 0, "YXZ");
     this.vec = new THREE.Vector3();
     this.initEventListeners();
-    this.i = 45001;
+    this.i = 32768;
+    this.raycaster = new THREE.Raycaster(
+      this.camera.position,
+      new THREE.Vector3(0, -1, 0),
+      0,
+      10
+    );
   }
 
   initEventListeners() {
@@ -67,7 +73,7 @@ export default class Control {
         raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
         const intersects = raycaster.intersectObjects(this.terrain);
         if (intersects.length > 0) {
-          let instanceId = intersects[0].instanceId
+          let instanceId = intersects[0].instanceId;
           intersects[0].object.setMatrixAt(instanceId, new THREE.Matrix4());
           intersects[0].object.instanceMatrix.needsUpdate = true;
         }
@@ -78,21 +84,23 @@ export default class Control {
         raycaster.far = 8;
         raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
         const intersects = raycaster.intersectObjects(this.terrain);
-        
+
         if (intersects.length > 0) {
           let instanceId = intersects[0].instanceId;
-          let matrix = new THREE.Matrix4()
+          let matrix = new THREE.Matrix4();
           intersects[0].object.getMatrixAt(instanceId, matrix);
-          let position = new THREE.Vector3().setFromMatrixPosition(matrix)
-
+          let position = new THREE.Vector3().setFromMatrixPosition(matrix);
 
           const normal = intersects[0].face.normal;
 
           const matrix2 = new THREE.Matrix4();
-          matrix2.setPosition(normal.x + position.x, normal.y + position.y, normal.z + position.z);
-          intersects[0].object.setMatrixAt(this.i++, matrix2)
+          matrix2.setPosition(
+            normal.x + position.x,
+            normal.y + position.y,
+            normal.z + position.z
+          );
+          intersects[0].object.setMatrixAt(this.i++, matrix2);
           intersects[0].object.instanceMatrix.needsUpdate = true;
-
         }
         break;
       }
@@ -175,7 +183,7 @@ export default class Control {
 
   update() {
     if (this.flyingMode) {
-      // god mode on
+      // flying mode on
       if (this.movingForward) {
         this.moveForward(0.25);
       }
@@ -195,7 +203,7 @@ export default class Control {
         this.camera.position.y -= 0.25;
       }
     } else {
-      // god mode off
+      // flying mode off
       if (this.movingForward) {
         this.moveForward(0.1);
       }
@@ -210,9 +218,18 @@ export default class Control {
       }
       this.velocity -= 0.0075;
       this.camera.position.y += this.velocity;
-      if (this.camera.position.y < 3) {
-        this.velocity = 0;
-        this.camera.position.y = 3;
+
+      const intersects = this.raycaster.intersectObjects(this.terrain);
+      if (intersects.length > 0) {
+        let instanceId = intersects[0].instanceId;
+        let matrix = new THREE.Matrix4();
+        intersects[0].object.getMatrixAt(instanceId, matrix);
+        let position = new THREE.Vector3().setFromMatrixPosition(matrix);
+        if (this.camera.position.y < position.y + 2) {
+          this.camera.position.y = position.y + 2;
+          this.velocity = 0;
+        }
+
       }
     }
   }

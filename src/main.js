@@ -30,9 +30,6 @@ const control = new Control(camera, scene, terrain);
 
 
 
-
-
-
 (function animate() {
   requestAnimationFrame(animate);
   control.update();
