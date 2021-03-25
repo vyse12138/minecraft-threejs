@@ -24,54 +24,33 @@ const blockBorder = new BlockBorder(camera, scene);
 const grassMaterial = new BlockMaterial("grass");
 const dirtMaterial = new BlockMaterial("dirt");
 
-let block = new BlockGeometry();
-console.log(block);
-const meshes = {
-  positions: [],
-  uvs: [],
-  normals: [],
-  indices: [],
-  groups: []
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = dirtMaterial;
+let mesh = new THREE.InstancedMesh(geometry, material, 55 * 55 * 20);
 
-};
-let k = 0;
-for (let i = 0; i < 6; ++i) {
-  meshes.positions.push(...block[i].attributes.position.array);
-  meshes.uvs.push(...block[i].attributes.uv.array);
-  meshes.normals.push(...block[i].attributes.normal.array);
+let i = 0;
+const offset = (5 - 1) / 2;
 
-  const localIndices = [...block[i].index.array];
-  for (let j = 0; j < localIndices.length; ++j) {
-    localIndices[j] += k;
+const matrix = new THREE.Matrix4();
+
+for (let x = 0; x < 5; x++) {
+  for (let y = 0; y < 5; y++) {
+    for (let z = 0; z < 55; z++) {
+      matrix.setPosition(x,y, z);
+      console.log(matrix);
+      mesh.setMatrixAt(i, matrix);
+
+      i++;
+    }
   }
-  k += 4;
-  meshes.indices.push(...localIndices);
-  meshes.groups.push(6*i);
-
 }
 
-const positionsArray = new Float32Array(meshes.positions);
 
-const normalsArray = new Float32Array(meshes.normals);
-const uvsArray = new Float32Array(meshes.uvs);
-
-let a = new THREE.BoxGeometry();
-console.log(a);
-
-let geo = new THREE.BufferGeometry();
-
-geo.setAttribute("position", new THREE.BufferAttribute(positionsArray, 3));
-geo.setAttribute("normal", new THREE.BufferAttribute(normalsArray, 3));
-geo.setAttribute("uv", new THREE.BufferAttribute(uvsArray, 2));
-for (let i of meshes.groups) {
-  geo.addGroup(i, 6, i/6)
-}
-geo.setIndex(meshes.indices);
-
-console.log(geo);
-
-const mesh = new THREE.Mesh(geo, grassMaterial);
 scene.add(mesh);
+
+
+
+
 
 
 
