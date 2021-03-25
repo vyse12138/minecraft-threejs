@@ -19,28 +19,26 @@ const camera = initCamera();
 const renderer = initRenderer();
 const stats = initStats();
 const control = new Control(camera, scene);
+let noise = new simplex.SimplexNoise();
+
 const blockBorder = new BlockBorder(camera, scene);
 
 const grassMaterial = new BlockMaterial("grass");
 const dirtMaterial = new BlockMaterial("dirt");
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = dirtMaterial;
-let mesh = new THREE.InstancedMesh(geometry, material, 55 * 55 * 20);
+let mesh = new THREE.InstancedMesh(geometry, grassMaterial, 180000);
 
 let i = 0;
-const offset = (5 - 1) / 2;
-
 const matrix = new THREE.Matrix4();
 
-for (let x = 0; x < 5; x++) {
-  for (let y = 0; y < 5; y++) {
-    for (let z = 0; z < 55; z++) {
-      matrix.setPosition(x,y, z);
-      console.log(matrix);
-      mesh.setMatrixAt(i, matrix);
+for (let x = 0; x < 300; x++) {
+  for (let y = 0; y < 2; y++) {
+    for (let z = 0; z < 300; z++) {
+      let v = Math.round(noise.noise2D(x /160, z / 160) * 10);
+      matrix.setPosition(x,y +v, z);
+      mesh.setMatrixAt(i++, matrix);
 
-      i++;
     }
   }
 }
