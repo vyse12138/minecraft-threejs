@@ -17,7 +17,6 @@ const scene = initScene();
 const camera = initCamera();
 const renderer = initRenderer();
 const stats = initStats();
-const control = new Control(camera, scene);
 
 const grassMaterial = new BlockMaterial("grass");
 const dirtMaterial = new BlockMaterial("dirt");
@@ -26,23 +25,8 @@ const terrainGenerator = new TerrainGenerator(scene);
 const terrain = terrainGenerator.build();
 
 const blockBorder = new BlockBorder(camera, scene, terrain);
+const control = new Control(camera, scene, terrain);
 
-
-
-
-let flag = false;
-document.addEventListener("mousemove", () => {
-  if (flag) {
-    return;
-  }
-  flag = true;
-
-  setTimeout(() => {
-    flag = false;
-
-    blockBorder.update();
-  }, 250);
-});
 
 
 
@@ -53,6 +37,7 @@ document.addEventListener("mousemove", () => {
   requestAnimationFrame(animate);
   control.update();
   stats.update();
+  blockBorder.update();
 
   renderer.render(scene, camera);
 })();
