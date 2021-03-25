@@ -7,14 +7,15 @@ export default function initScene() {
 
   const light1 = new THREE.PointLight( 0xffffff, 1 );
   light1.position.set( 500, 500, 500 );
+  // light1.castShadow = true; 
   scene.add( light1 );
-  const light2 = new THREE.PointLight( 0xffffff, 0.5 );
+  const light2 = new THREE.PointLight( 0xffffff, 0.33 );
   light2.position.set( -500, 500, -500 );
   scene.add( light2 );
-  const light3 = new THREE.PointLight( 0xffffff, 0.5 );
+  const light3 = new THREE.PointLight( 0xffffff, 0.1 );
   light3.position.set( 500, -500, 500 );
   scene.add( light3 );
-  const light4 = new THREE.PointLight( 0xffffff, 0.25 );
+  const light4 = new THREE.PointLight( 0xffffff, 0.1 );
   light4.position.set( -500, -500, -500 );
   scene.add( light4 );
 

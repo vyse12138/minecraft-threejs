@@ -16,6 +16,7 @@ import TerrainGenerator from "./terrains/TerrainGenerator.js";
 const scene = initScene();
 const camera = initCamera();
 const renderer = initRenderer();
+
 const stats = initStats();
 
 const grassMaterial = new BlockMaterial("grass");

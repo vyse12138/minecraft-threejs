@@ -11,6 +11,6 @@ export default function initRenderer() {
   function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
   }
-
+  // renderer.shadowMap.enabled = true;
   return renderer;
 }
