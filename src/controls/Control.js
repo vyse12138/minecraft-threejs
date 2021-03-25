@@ -217,6 +217,7 @@ export default class Control {
         this.moveRight(0.1);
       }
       this.velocity -= 0.0075;
+      this.velocity = Math.max(this.velocity, -0.5)
       this.camera.position.y += this.velocity;
 
       const intersects = this.raycaster.intersectObjects(this.terrain);
@@ -229,7 +230,9 @@ export default class Control {
           this.camera.position.y = position.y + 2;
           this.velocity = 0;
         }
-
+      }
+      if (this.camera.position.y < -100) {
+        this.camera.position.y = 100
       }
     }
   }
