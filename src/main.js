@@ -23,29 +23,50 @@ const blockBorder = new BlockBorder(camera, scene);
 
 const grassMaterial = new BlockMaterial("grass");
 const dirtMaterial = new BlockMaterial("dirt");
-let block, mesh;
 
-let noise = new simplex.SimplexNoise();
-let v;
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = dirtMaterial;
+let mesh = new THREE.InstancedMesh(geometry, material, 55 * 55 * 20);
 
-for (let i = 0; i < 25; i++) {
-  for (let j = 0; j < 25; j++) {
-    v = Math.round(noise.noise2D(i / 16, j / 16) * 3);
-    block = new THREE.BoxGeometry();
-    mesh = new THREE.Mesh(block, new BlockMaterial("grass"));
-    mesh.position.x = i;
-    mesh.position.y = v;
-    mesh.position.z = j;
+let i = 0;
+const offset = (5 - 1) / 2;
 
-    scene.add(mesh);
+const matrix = new THREE.Matrix4();
+
+for (let x = 0; x < 5; x++) {
+  for (let y = 0; y < 5; y++) {
+    for (let z = 0; z < 55; z++) {
+      matrix.setPosition(x,y, z);
+      console.log(matrix);
+      mesh.setMatrixAt(i, matrix);
+
+      i++;
+    }
   }
 }
+
+
+scene.add(mesh);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 (function animate() {
   requestAnimationFrame(animate);
   control.update();
   stats.update();
-  blockBorder.update();
+  // blockBorder.update();
 
   renderer.render(scene, camera);
 })();
