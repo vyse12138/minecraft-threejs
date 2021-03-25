@@ -11,7 +11,7 @@ export default class TerrainGenerator {
   }
   build() {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    let mesh = new THREE.InstancedMesh(geometry, this.grassMaterial, 32768);
+    let mesh = new THREE.InstancedMesh(geometry, this.grassMaterial, 35000);
 
     let i = 0;
     const matrix = new THREE.Matrix4();
