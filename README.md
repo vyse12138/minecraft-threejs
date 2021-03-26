@@ -18,3 +18,4 @@ Check it out: [three-minecraft](https://three-minecraft.netlify.app/)
 - Generates trees
 - Generates water
 - Some basic UIs
+- Shift to walk and not falling off
