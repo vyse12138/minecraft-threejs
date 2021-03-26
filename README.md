@@ -1,6 +1,6 @@
 # three-minecraft ✌
 
-Minecraft made with JavaScript and three.js 😝
+Minecraft clone made with JavaScript and three.js 😝
 
 Check it out: [three-minecraft](https://three-minecraft.netlify.app/)
 
