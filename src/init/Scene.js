@@ -19,14 +19,14 @@ export default function initScene() {
   light4.position.set( -500, -500, -500 );
   scene.add( light4 );
 
-  const geometry = new THREE.SphereGeometry( 2, 32, 32 );
+  const geometry = new THREE.SphereGeometry( 5, 32, 32 );
   const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-  const sphere = new THREE.Mesh( geometry, material );
-  sphere.position.y = 50;
-  sphere.position.x = 50;
-  sphere.position.z = 50;
+  const sun = new THREE.Mesh( geometry, material );
+  sun.position.y = 100;
+  sun.position.x = 200;
+  sun.position.z = 150;
 
-  scene.add( sphere );
+  scene.add( sun );
 
   scene.background = new THREE.Color(backgroundColor);
 
