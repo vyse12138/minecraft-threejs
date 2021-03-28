@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import BlockMaterial from "../materials/BlockMaterial.js";
 
 export default class Control {
   constructor(camera, scene, terrain) {
@@ -17,7 +16,7 @@ export default class Control {
     this.euler = new THREE.Euler(0, 0, 0, "YXZ");
     this.vec = new THREE.Vector3();
     this.initEventListeners();
-    this.i = 32768;
+    this.i = 16384;
     this.raycaster = new THREE.Raycaster(
       this.camera.position,
       new THREE.Vector3(0, -1, 0),
@@ -66,6 +65,7 @@ export default class Control {
   }
 
   onClick = e => {
+    e.preventDefault();
     switch (e.button) {
       case 0: {
         const raycaster = new THREE.Raycaster();

@@ -19,9 +19,6 @@ const renderer = initRenderer();
 
 const stats = initStats();
 
-const grassMaterial = new BlockMaterial("grass");
-const dirtMaterial = new BlockMaterial("dirt");
-
 const terrainGenerator = new TerrainGenerator(scene);
 const terrain = terrainGenerator.build();
 
