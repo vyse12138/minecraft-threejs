@@ -11,6 +11,7 @@ export default class TerrainGenerator {
     this.leafMaterial = new BlockMaterial("leaf");
     this.leafMap = new Set();
     this.noise = new simplex.SimplexNoise();
+    this.terrain = [];
   }
   build() {
     const grassGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -65,7 +66,7 @@ export default class TerrainGenerator {
                     y + noise + noiseY + height,
                     z + noiseZ
                   );
-                  if (!this.hasBlock(matrix)) {
+                  if (!this.hasLeafAt(matrix)) {
                     leaf.setMatrixAt(leafCount, matrix);
                     leaf.setColorAt(leafCount++, color);
                   }
@@ -81,16 +82,20 @@ export default class TerrainGenerator {
     this.scene.add(leaf);
     console.log(grass);
     console.log(leaf);
-
-    return [grass, tree, leaf];
+    this.terrain = [grass, tree, leaf];
+    return this.terrain;
   }
 
-  hasBlock(matrix) {
+  hasLeafAt(matrix) {
     if (this.leafMap.has(matrix.elements.join())) {
       return true;
     } else {
       this.leafMap.add(matrix.elements.join());
       return false;
     }
+  }
+
+  isFaceVisible(face) {
+    return true;
   }
 }

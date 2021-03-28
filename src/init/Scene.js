@@ -2,27 +2,23 @@ import * as THREE from "three";
 export default function initScene() {
   let scene = new THREE.Scene();
   let backgroundColor = 0x87ceeb;
-  scene.name = "SCENE";
   scene.fog = new THREE.FogExp2(backgroundColor, 0.003);
+  scene.background = new THREE.Color(backgroundColor);
 
-  const light1 = new THREE.PointLight(0xffffff, 0.5);
-  light1.position.set(500, 500, 500);
-  // light1.castShadow = true;
-  scene.add(light1);
+  const sunLight = new THREE.PointLight(0xffffff, 0.5);
+  sunLight.position.set(500, 500, 500);
+  scene.add(sunLight);
 
-  const light = new THREE.AmbientLight(0x404040); // soft white light
-  scene.add(light);
+  const reflectionLight = new THREE.AmbientLight(0x404040);
+  scene.add(reflectionLight);
 
-  const geometry = new THREE.SphereGeometry(5, 32, 32);
-  const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-  const sun = new THREE.Mesh(geometry, material);
+  const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+  const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+  const sun = new THREE.Mesh(sunGeometry, sunMaterial);
   sun.position.y = 100;
   sun.position.x = 200;
   sun.position.z = 150;
-
   scene.add(sun);
-
-  scene.background = new THREE.Color(backgroundColor);
 
   return scene;
 }

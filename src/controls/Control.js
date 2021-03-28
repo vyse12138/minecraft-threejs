@@ -23,7 +23,6 @@ export default class Control {
       0,
       10
     );
-    this.grass = this.terrain[0];
   }
 
   initEventListeners() {
@@ -100,8 +99,8 @@ export default class Control {
             normal.y + position.y,
             normal.z + position.z
           );
-          this.grass.setMatrixAt(this.i++, matrix2);
-          this.grass.instanceMatrix.needsUpdate = true;
+          this.terrain[0].setMatrixAt(this.i++, matrix2);
+          this.terrain[0].instanceMatrix.needsUpdate = true;
         }
         break;
       }

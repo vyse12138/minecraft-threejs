@@ -8,9 +8,7 @@ import initStats from "./init/Stats.js";
 import Control from "./controls/Control.js";
 import BlockBorder from "./mesh/BlockBorder.js";
 
-import Block from "./mesh/Block.js";
 import BlockMaterial from "./materials/BlockMaterial.js";
-import BlockGeometry from "./geometries/BlockGeometry.js";
 import BufferGeometryUtils from "./utils/BufferGeometryUtils";
 import TerrainGenerator from "./terrains/TerrainGenerator.js";
 const scene = initScene();
