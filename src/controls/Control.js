@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import BlockMaterial from "../materials/BlockMaterial.js";
 
 export default class Control {
   constructor(camera, scene, terrain) {
@@ -17,6 +18,13 @@ export default class Control {
     this.vec = new THREE.Vector3();
     this.initEventListeners();
     this.i = 16384;
+    this.mixer = null;
+    this.blockGeometry = new THREE.BoxGeometry(1, 1, 1);
+    this.onClickTimeout = true;
+    this.color = new THREE.Color();
+    this.e = {};
+
+    this.mouse = false;
     this.centerRay = new THREE.Raycaster(
       new THREE.Vector3(),
       new THREE.Vector3(),
@@ -39,7 +47,7 @@ export default class Control {
     document.addEventListener("mousewheel", () => {
       document.exitPointerLock();
     });
-    // when lock/unlock, trigger corresponding callback
+    // when lock / unlock, trigger corresponding callback
     document.addEventListener("pointerlockchange", () => {
       if (document.pointerLockElement) {
         this.onLock();
@@ -55,6 +63,7 @@ export default class Control {
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("mousedown", this.onClick);
+    document.addEventListener("mouseup", this.onClickOff);
   }
   // when unlocked, remove control eventListeners
   onUnlock() {
@@ -68,43 +77,117 @@ export default class Control {
     document.removeEventListener("keydown", this.onKeyDown);
     document.removeEventListener("keyup", this.onKeyUp);
     document.removeEventListener("mousedown", this.onClick);
+    document.removeEventListener("mouseup", this.onClickOff);
   }
 
   onClick = e => {
-    e.preventDefault();
+    //code triggers on hold
+    this.mouse = true;
     switch (e.button) {
-      case 0: {
-        this.centerRay.setFromCamera({ x: 0, y: 0 }, this.camera);
-        const intersects = this.centerRay.intersectObjects(this.terrain);
-        if (intersects.length) {
-          const instanceId = intersects[0].instanceId;
-          intersects[0].object.setMatrixAt(instanceId, new THREE.Matrix4());
-          intersects[0].object.instanceMatrix.needsUpdate = true;
-        }
+      case 0:
+        this.e.button = 0;
         break;
-      }
-      case 2: {
-        this.centerRay.setFromCamera({ x: 0, y: 0 }, this.camera);
-        const intersects = this.centerRay.intersectObjects(this.terrain);
-        if (intersects.length) {
-          const instanceId = intersects[0].instanceId;
-          const matrix = new THREE.Matrix4();
-          intersects[0].object.getMatrixAt(instanceId, matrix);
-          const position = new THREE.Vector3().setFromMatrixPosition(matrix);
-          const normal = intersects[0].face.normal;
-          const matrix2 = new THREE.Matrix4();
-          matrix2.setPosition(
-            normal.x + position.x,
-            normal.y + position.y,
-            normal.z + position.z
-          );
-          this.terrain[0].setMatrixAt(this.i++, matrix2);
-          this.terrain[0].instanceMatrix.needsUpdate = true;
-        }
-        break;
-      }
+      case 2:
+        this.e.button = 2;
     }
   };
+  onClickOff = e => {
+    this.mouse = false;
+  };
+  onMouseHold(e) {
+    if (this.onClickTimeout) {
+      switch (e.button) {
+        case 0: {
+          this.centerRay.setFromCamera({ x: 0, y: 0 }, this.camera);
+          const intersects = this.centerRay.intersectObjects(this.terrain);
+          if (intersects.length) {
+            const instanceId = intersects[0].instanceId;
+            // remove block animation
+            const m = new THREE.Matrix4();
+            intersects[0].object.getMatrixAt(instanceId, m);
+            const p = new THREE.Vector3().setFromMatrixPosition(m);
+
+            const material = new BlockMaterial(intersects[0].object.name);
+            const mesh = new THREE.Mesh(this.blockGeometry, material);
+            mesh.position.x = p.x;
+            mesh.position.y = p.y;
+            mesh.position.z = p.z;
+            this.scene.add(mesh);
+
+            const scaleKF = new THREE.VectorKeyframeTrack(
+              ".scale",
+              [0, 1],
+              [1, 1, 1, 0, 0, 0]
+            );
+            const clip = new THREE.AnimationClip("Action", 10, [scaleKF]);
+            this.mixer = new THREE.AnimationMixer(mesh);
+            const clipAction = this.mixer.clipAction(clip);
+            clipAction.setLoop(THREE.LoopOnce);
+            clipAction.play();
+            setTimeout(() => {
+              this.scene.remove(mesh);
+            }, 150);
+
+            // remove block
+            intersects[0].object.setMatrixAt(instanceId, new THREE.Matrix4());
+            intersects[0].object.instanceMatrix.needsUpdate = true;
+          }
+
+          break;
+        }
+        case 2: {
+          this.centerRay.setFromCamera({ x: 0, y: 0 }, this.camera);
+          const intersects = this.centerRay.intersectObjects(this.terrain);
+          if (intersects.length) {
+            const instanceId = intersects[0].instanceId;
+            const matrix = new THREE.Matrix4();
+            intersects[0].object.getMatrixAt(instanceId, matrix);
+            const position = new THREE.Vector3().setFromMatrixPosition(matrix);
+            const normal = intersects[0].face.normal;
+
+            // add block animation
+            const material = new BlockMaterial("grass");
+            const mesh = new THREE.Mesh(this.blockGeometry, material);
+            mesh.position.x = normal.x + position.x;
+            mesh.position.y = normal.y + position.y;
+            mesh.position.z = normal.z + position.z;
+            this.scene.add(mesh);
+            const scaleKF = new THREE.VectorKeyframeTrack(
+              ".scale",
+              [0, 1],
+              [0, 0, 0, 1, 1, 1]
+            );
+            const clip = new THREE.AnimationClip("Action", 1, [scaleKF]);
+            this.mixer = new THREE.AnimationMixer(mesh);
+            const clipAction = this.mixer.clipAction(clip);
+            clipAction.setLoop(THREE.LoopOnce);
+            clipAction.play();
+            setTimeout(() => {
+              this.scene.remove(mesh);
+              const matrix2 = new THREE.Matrix4();
+              matrix2.setPosition(
+                normal.x + position.x,
+                normal.y + position.y,
+                normal.z + position.z
+              );
+
+              this.terrain[0].setMatrixAt(this.i, matrix2);
+              this.terrain[0].setColorAt(this.i++, this.color);
+              this.terrain[0].instanceColor.needsUpdate = true;
+
+              this.terrain[0].instanceMatrix.needsUpdate = true;
+            }, 150);
+          }
+
+          break;
+        }
+      }
+      this.onClickTimeout = false;
+      setTimeout(() => {
+        this.onClickTimeout = true;
+      }, 150);
+    }
+  }
   onMouseMove = e => {
     const movementX = e.movementX;
     const movementY = e.movementY;
@@ -184,6 +267,12 @@ export default class Control {
   }
 
   update() {
+    if (this.mouse) {
+      this.onMouseHold(this.e);
+    }
+    if (this.mixer) {
+      this.mixer.update(0.085);
+    }
     if (this.flyingMode) {
       // flying mode on
       if (this.movingForward) {

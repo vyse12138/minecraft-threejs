@@ -8,6 +8,7 @@ import dirt from "../assets/blocks/dirt.png";
 import oak_log from "../assets/blocks/oak_log.png";
 import oak_log_top from "../assets/blocks/oak_log_top.png";
 import oak_leaves from "../assets/blocks/oak_leaves.png";
+import sand from "../assets/blocks/sand.png";
 
 let loader = new THREE.TextureLoader();
 
@@ -20,6 +21,7 @@ const stoneMaterial = loader.load(stone);
 const coalMaterial = loader.load(coal_ore);
 const ironMaterial = loader.load(iron_ore);
 const leafMaterial = loader.load(oak_leaves);
+const sandMaterial = loader.load(sand);
 
 grassTopMaterial.magFilter = THREE.NearestFilter;
 grassMaterial.magFilter = THREE.NearestFilter;
@@ -30,6 +32,7 @@ stoneMaterial.magFilter = THREE.NearestFilter;
 coalMaterial.magFilter = THREE.NearestFilter;
 ironMaterial.magFilter = THREE.NearestFilter;
 leafMaterial.magFilter = THREE.NearestFilter;
+sandMaterial.magFilter = THREE.NearestFilter;
 
 export default function BlockMaterial(name) {
   let material;
@@ -59,7 +62,7 @@ export default function BlockMaterial(name) {
       break;
     case "leaf":
       material = new THREE.MeshStandardMaterial({ map: leafMaterial });
-      material.color = new THREE.Color(0,1,0);
+      material.color = new THREE.Color(0, 1, 0);
       material.transparent = true;
       break;
     case "stone":
@@ -70,6 +73,11 @@ export default function BlockMaterial(name) {
       break;
     case "coal":
       material = new THREE.MeshStandardMaterial({ map: coalMaterial });
+      break;
+    case "sand":
+      material = new THREE.MeshStandardMaterial({
+        map: sandMaterial
+      });
       break;
     default:
       material = [

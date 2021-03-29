@@ -7,7 +7,6 @@ export default function initCamera() {
     0.1,
     500
   );
-  camera.name = "CAMERA";
   camera.position.x = 30;
   camera.position.y = 15;
   camera.position.z = 30;

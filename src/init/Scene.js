@@ -2,12 +2,16 @@ import * as THREE from "three";
 export default function initScene() {
   let scene = new THREE.Scene();
   let backgroundColor = 0x87ceeb;
-  scene.fog = new THREE.FogExp2(backgroundColor, 0.003);
+  scene.fog = new THREE.FogExp2(backgroundColor, 0.01);
   scene.background = new THREE.Color(backgroundColor);
 
   const sunLight = new THREE.PointLight(0xffffff, 0.5);
   sunLight.position.set(500, 500, 500);
   scene.add(sunLight);
+
+  const sunLight2 = new THREE.PointLight(0xffffff, 0.2);
+  sunLight2.position.set(-500, 500, -500);
+  scene.add(sunLight2);
 
   const reflectionLight = new THREE.AmbientLight(0x404040);
   scene.add(reflectionLight);
