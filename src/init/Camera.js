@@ -8,9 +8,9 @@ export default function initCamera() {
     500
   );
   camera.position.x = 30;
-  camera.position.y = 15;
+  camera.position.y = 17;
   camera.position.z = 30;
-  camera.lookAt(new THREE.Vector3(31, 15, 31));
+  camera.lookAt(new THREE.Vector3(31, 17, 31));
 
   window.addEventListener("resize", onWindowResize);
   function onWindowResize() {

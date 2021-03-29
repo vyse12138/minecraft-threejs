@@ -13,6 +13,7 @@ export default class Control {
     this.movingRight = false;
     this.movingUp = false;
     this.movingDown = false;
+    this.canJump = true;
     this.velocity = 0;
     this.euler = new THREE.Euler(0, 0, 0, "YXZ");
     this.vec = new THREE.Vector3();
@@ -20,11 +21,9 @@ export default class Control {
     this.i = 16384;
     this.mixer = null;
     this.blockGeometry = new THREE.BoxGeometry(1, 1, 1);
-    this.onClickTimeout = true;
+    this.canHold = true;
     this.color = new THREE.Color();
-    this.e = {};
-
-    this.mouse = false;
+    this.mouseHold = {};
     this.centerRay = new THREE.Raycaster(
       new THREE.Vector3(),
       new THREE.Vector3(),
@@ -62,8 +61,8 @@ export default class Control {
     document.addEventListener("mousemove", this.onMouseMove);
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
-    document.addEventListener("mousedown", this.onClick);
-    document.addEventListener("mouseup", this.onClickOff);
+    document.addEventListener("mousedown", this.onMouseDown);
+    document.addEventListener("mouseup", this.onMouseUp);
   }
   // when unlocked, remove control eventListeners
   onUnlock() {
@@ -76,33 +75,40 @@ export default class Control {
     document.removeEventListener("mousemove", this.onMouseMove);
     document.removeEventListener("keydown", this.onKeyDown);
     document.removeEventListener("keyup", this.onKeyUp);
-    document.removeEventListener("mousedown", this.onClick);
-    document.removeEventListener("mouseup", this.onClickOff);
+    document.removeEventListener("mousedown", this.onMouseDown);
+    document.removeEventListener("mouseup", this.onMouseUp);
   }
 
-  onClick = e => {
-    //code triggers on hold
-    this.mouse = true;
+  onMouseDown = e => {
     switch (e.button) {
       case 0:
-        this.e.button = 0;
+        this.mouseHold.button = 0;
         break;
       case 2:
-        this.e.button = 2;
+        this.mouseHold.button = 2;
     }
+
+    this.onMouseHold(this.mouseHold)
+    setTimeout(() => {
+      this.mouseHold.value = true;
+    }, 500)
+
   };
-  onClickOff = e => {
-    this.mouse = false;
+
+  onMouseUp = () => {
+    this.mouseHold.value = false;
   };
+
   onMouseHold(e) {
-    if (this.onClickTimeout) {
+    if (this.canHold) {
       switch (e.button) {
+        // left click to remove block at crosshair
         case 0: {
           this.centerRay.setFromCamera({ x: 0, y: 0 }, this.camera);
           const intersects = this.centerRay.intersectObjects(this.terrain);
           if (intersects.length) {
             const instanceId = intersects[0].instanceId;
-            // remove block animation
+            // remove animation
             const m = new THREE.Matrix4();
             intersects[0].object.getMatrixAt(instanceId, m);
             const p = new THREE.Vector3().setFromMatrixPosition(m);
@@ -126,15 +132,17 @@ export default class Control {
             clipAction.play();
             setTimeout(() => {
               this.scene.remove(mesh);
-            }, 150);
+            }, 200);
 
-            // remove block
+            // remove the block
             intersects[0].object.setMatrixAt(instanceId, new THREE.Matrix4());
             intersects[0].object.instanceMatrix.needsUpdate = true;
           }
 
           break;
         }
+
+        // right click to put block at crosshair
         case 2: {
           this.centerRay.setFromCamera({ x: 0, y: 0 }, this.camera);
           const intersects = this.centerRay.intersectObjects(this.terrain);
@@ -145,7 +153,7 @@ export default class Control {
             const position = new THREE.Vector3().setFromMatrixPosition(matrix);
             const normal = intersects[0].face.normal;
 
-            // add block animation
+            // put animation
             const material = new BlockMaterial("grass");
             const mesh = new THREE.Mesh(this.blockGeometry, material);
             mesh.position.x = normal.x + position.x;
@@ -164,28 +172,26 @@ export default class Control {
             clipAction.play();
             setTimeout(() => {
               this.scene.remove(mesh);
+              // put the block
               const matrix2 = new THREE.Matrix4();
               matrix2.setPosition(
                 normal.x + position.x,
                 normal.y + position.y,
                 normal.z + position.z
               );
-
               this.terrain[0].setMatrixAt(this.i, matrix2);
               this.terrain[0].setColorAt(this.i++, this.color);
               this.terrain[0].instanceColor.needsUpdate = true;
-
               this.terrain[0].instanceMatrix.needsUpdate = true;
-            }, 150);
+            }, 200);
           }
-
           break;
         }
       }
-      this.onClickTimeout = false;
+      this.canHold = false;
       setTimeout(() => {
-        this.onClickTimeout = true;
-      }, 150);
+        this.canHold = true;
+      }, 200);
     }
   }
   onMouseMove = e => {
@@ -195,6 +201,8 @@ export default class Control {
     this.euler.y -= movementX * 0.002;
     this.euler.x -= movementY * 0.002;
     // make sure that -pi/2 <= eulerX <= pi/2
+    // so that when camera reaches the top / bottom,
+    // it won't flip to the opposite direction
     this.euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.euler.x));
     this.camera.quaternion.setFromEuler(this.euler);
   };
@@ -217,7 +225,11 @@ export default class Control {
         if (this.flyingMode) {
           this.movingUp = true;
         } else {
-          this.velocity = 0.15;
+          if (this.canJump){
+            this.velocity = 0.15;
+            this.canJump = false;
+          }
+
         }
         break;
       case "ShiftLeft":
@@ -267,8 +279,8 @@ export default class Control {
   }
 
   update() {
-    if (this.mouse) {
-      this.onMouseHold(this.e);
+    if (this.mouseHold.value) {
+      this.onMouseHold(this.mouseHold);
     }
     if (this.mixer) {
       this.mixer.update(0.085);
@@ -319,6 +331,7 @@ export default class Control {
         intersects[0].object.getMatrixAt(instanceId, matrix);
         const position = new THREE.Vector3().setFromMatrixPosition(matrix);
         if (this.camera.position.y < position.y + 2) {
+          this.canJump = true;
           this.camera.position.y = position.y + 2;
           this.velocity = 0;
         }

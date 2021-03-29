@@ -8,10 +8,11 @@
   </head>
   <body>
     <div class="help">
-      Q: toggle dev mode<br />
-      WASD: move<br />
-      Space: jump / fly higher<br />
-      Shift: fly lower<br />
+      Left click: Remove block<br />
+      Right click: Add block<br />
+      WASD: Move<br />
+      Space: Jump<br />
+      Q: Toggle dev mode<br />
     </div>
     <div class="center">+</div>
     <script type="module" src="./src/main.js"></script>
@@ -25,8 +26,13 @@
     user-select: none;
   }
   .help {
+    background-color: #0d2b49;
+    color:#0dfafd;
+    font-size: 0.9rem;
     position: fixed;
-    right: 1rem;
+    line-height: 1.25rem;
+    padding: 0.2rem 0.5rem;
+    right: 0;
   }
   .center {
     position: fixed;

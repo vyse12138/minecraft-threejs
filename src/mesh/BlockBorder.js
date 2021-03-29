@@ -22,7 +22,11 @@ export default class BlockBorder {
     this.intersects = this.raycaster.intersectObjects(this.terrain);
     if (this.intersects.length) {
       this.instanceId = this.intersects[0].instanceId;
-      this.intersects[0].object.setColorAt(this.lastID, this.normalColor);
+      if (this.lastIntersect) {
+        this.lastIntersect.object.setColorAt(this.lastID, this.normalColor);
+        this.lastIntersect.object.instanceColor.needsUpdate = true;
+
+      }
       this.intersects[0].object.setColorAt(this.instanceId, this.highLightColor);
       this.intersects[0].object.instanceColor.needsUpdate = true;
       this.lastID = this.instanceId;
