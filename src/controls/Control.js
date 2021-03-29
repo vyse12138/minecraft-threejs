@@ -17,7 +17,13 @@ export default class Control {
     this.vec = new THREE.Vector3();
     this.initEventListeners();
     this.i = 16384;
-    this.raycaster = new THREE.Raycaster(
+    this.centerRay = new THREE.Raycaster(
+      new THREE.Vector3(),
+      new THREE.Vector3(),
+      0,
+      8
+    );
+    this.downRay = new THREE.Raycaster(
       this.camera.position,
       new THREE.Vector3(0, -1, 0),
       0,
@@ -68,31 +74,24 @@ export default class Control {
     e.preventDefault();
     switch (e.button) {
       case 0: {
-        const raycaster = new THREE.Raycaster();
-        raycaster.far = 8;
-        raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
-        const intersects = raycaster.intersectObjects(this.terrain);
-        if (intersects.length > 0) {
-          let instanceId = intersects[0].instanceId;
+        this.centerRay.setFromCamera({ x: 0, y: 0 }, this.camera);
+        const intersects = this.centerRay.intersectObjects(this.terrain);
+        if (intersects.length) {
+          const instanceId = intersects[0].instanceId;
           intersects[0].object.setMatrixAt(instanceId, new THREE.Matrix4());
           intersects[0].object.instanceMatrix.needsUpdate = true;
         }
         break;
       }
       case 2: {
-        const raycaster = new THREE.Raycaster();
-        raycaster.far = 8;
-        raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
-        const intersects = raycaster.intersectObjects(this.terrain);
-
-        if (intersects.length > 0) {
-          let instanceId = intersects[0].instanceId;
-          let matrix = new THREE.Matrix4();
+        this.centerRay.setFromCamera({ x: 0, y: 0 }, this.camera);
+        const intersects = this.centerRay.intersectObjects(this.terrain);
+        if (intersects.length) {
+          const instanceId = intersects[0].instanceId;
+          const matrix = new THREE.Matrix4();
           intersects[0].object.getMatrixAt(instanceId, matrix);
-          let position = new THREE.Vector3().setFromMatrixPosition(matrix);
-
+          const position = new THREE.Vector3().setFromMatrixPosition(matrix);
           const normal = intersects[0].face.normal;
-
           const matrix2 = new THREE.Matrix4();
           matrix2.setPosition(
             normal.x + position.x,
@@ -107,8 +106,8 @@ export default class Control {
     }
   };
   onMouseMove = e => {
-    let movementX = e.movementX;
-    let movementY = e.movementY;
+    const movementX = e.movementX;
+    const movementY = e.movementY;
     this.euler.setFromQuaternion(this.camera.quaternion);
     this.euler.y -= movementX * 0.002;
     this.euler.x -= movementY * 0.002;
@@ -180,6 +179,9 @@ export default class Control {
     this.vec.setFromMatrixColumn(this.camera.matrix, 0);
     this.camera.position.addScaledVector(this.vec, distance);
   }
+  moveUp(distance) {
+    this.camera.position.y += distance;
+  }
 
   update() {
     if (this.flyingMode) {
@@ -197,10 +199,10 @@ export default class Control {
         this.moveRight(0.25);
       }
       if (this.movingUp) {
-        this.camera.position.y += 0.25;
+        this.moveUp(0.25);
       }
       if (this.movingDown) {
-        this.camera.position.y -= 0.25;
+        this.moveUp(-0.25);
       }
     } else {
       // flying mode off
@@ -217,22 +219,24 @@ export default class Control {
         this.moveRight(0.1);
       }
       this.velocity -= 0.0075;
-      this.velocity = Math.max(this.velocity, -0.5)
-      this.camera.position.y += this.velocity;
+      this.velocity = Math.max(this.velocity, -0.5);
+      this.moveUp(this.velocity);
 
-      const intersects = this.raycaster.intersectObjects(this.terrain);
-      if (intersects.length > 0) {
-        let instanceId = intersects[0].instanceId;
-        let matrix = new THREE.Matrix4();
+      // falling check
+      const intersects = this.downRay.intersectObjects(this.terrain);
+      if (intersects.length) {
+        const instanceId = intersects[0].instanceId;
+        const matrix = new THREE.Matrix4();
         intersects[0].object.getMatrixAt(instanceId, matrix);
-        let position = new THREE.Vector3().setFromMatrixPosition(matrix);
+        const position = new THREE.Vector3().setFromMatrixPosition(matrix);
         if (this.camera.position.y < position.y + 2) {
           this.camera.position.y = position.y + 2;
           this.velocity = 0;
         }
       }
+      // catching net
       if (this.camera.position.y < -100) {
-        this.camera.position.y = 100
+        this.camera.position.y = 100;
       }
     }
   }

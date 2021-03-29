@@ -9,7 +9,6 @@ import Control from "./controls/Control.js";
 import BlockBorder from "./mesh/BlockBorder.js";
 
 import BlockMaterial from "./materials/BlockMaterial.js";
-import BufferGeometryUtils from "./utils/BufferGeometryUtils";
 import TerrainGenerator from "./terrains/TerrainGenerator.js";
 const scene = initScene();
 const camera = initCamera();
