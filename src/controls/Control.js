@@ -322,8 +322,14 @@ export default class Control {
     this.vec.setFromMatrixColumn(this.camera.matrix, 0);
     this.camera.position.addScaledVector(this.vec, distance);
   }
-  moveUp(distance) {
+  moveX(distance, factor = 0.2 / Math.PI) {
+    this.camera.position.x += distance * factor;
+  }
+  moveY(distance) {
     this.camera.position.y += distance;
+  }
+  moveZ(distance, factor = 0.2 / Math.PI) {
+    this.camera.position.z += distance * factor;
   }
 
   update() {
@@ -348,12 +354,14 @@ export default class Control {
         this.moveRight(0.25);
       }
       if (this.movingUp) {
-        this.moveUp(0.25);
+        this.moveY(0.25);
       }
       if (this.movingDown) {
-        this.moveUp(-0.25);
+        this.moveY(-0.25);
       }
     } else {
+      // flying mode off
+
       // forward block check
       let origin = new THREE.Vector3(
         this.camera.position.x,
@@ -375,72 +383,195 @@ export default class Control {
         this.movingRight
       ];
 
-      let pi = Math.PI;
       const intersectF = this.forwardRay.intersectObjects(this.terrain);
       const intersectB = this.backwardRay.intersectObjects(this.terrain);
       const intersectL = this.leftRay.intersectObjects(this.terrain);
       const intersectR = this.rightRay.intersectObjects(this.terrain);
       if (intersectF.length) {
-        if ((direction < -pi / 2 || direction > pi / 2) && this.movingRight) {
-          this.movingRight = false;
-        }
-        if (direction < pi && direction > 0 && this.movingForward) {
+        if (direction < Math.PI && direction > 0 && this.movingForward) {
           this.movingForward = false;
+          if (
+            (!intersectL.length && direction > Math.PI / 2) ||
+            (!intersectR.length && direction < Math.PI / 2)
+          ) {
+            this.moveZ(Math.PI / 2 - direction);
+          }
         }
-        if (direction < pi / 2 && direction > -pi / 2 && this.movingLeft) {
-          this.movingLeft = false;
-        }
-        if (direction < 0 && direction > -pi && this.movingBackward) {
+        if (direction < 0 && direction > -Math.PI && this.movingBackward) {
           this.movingBackward = false;
+          if (
+            (!intersectL.length && direction > -Math.PI / 2) ||
+            (!intersectR.length && direction < -Math.PI / 2)
+          ) {
+            this.moveZ(-Math.PI / 2 - direction);
+          }
+        }
+        if (
+          direction < Math.PI / 2 &&
+          direction > -Math.PI / 2 &&
+          this.movingLeft
+        ) {
+          this.movingLeft = false;
+          if (
+            (!intersectR.length && direction < 0) ||
+            (!intersectL.length && direction > 0)
+          ) {
+            this.moveZ(-direction);
+          }
+        }
+        if (
+          (direction < -Math.PI / 2 || direction > Math.PI / 2) &&
+          this.movingRight
+        ) {
+          this.movingRight = false;
+          if (!intersectR.length && direction > 0) {
+            this.moveZ(Math.PI - direction);
+          }
+          if (!intersectL.length && direction < 0) {
+            this.moveZ(-Math.PI - direction);
+          }
         }
       }
 
       if (intersectB.length) {
-        if (direction < -pi / 2 || direction > pi / 2) {
-          this.movingLeft = false;
-        }
-        if (direction < pi && direction > 0) {
-          this.movingBackward = false;
-        }
-        if (direction < pi / 2 && direction > -pi / 2) {
-          this.movingRight = false;
-        }
-        if (direction < 0 && direction > -pi) {
+        if (direction < 0 && direction > -Math.PI && this.movingForward) {
           this.movingForward = false;
+          if (
+            (!intersectL.length && direction < -Math.PI / 2) ||
+            (!intersectR.length && direction > -Math.PI / 2)
+          ) {
+            this.moveZ(Math.PI / 2 + direction);
+          }
+        }
+        if (direction < Math.PI && direction > 0 && this.movingBackward) {
+          this.movingBackward = false;
+          if (
+            (!intersectL.length && direction < Math.PI / 2) ||
+            (!intersectR.length && direction > Math.PI / 2)
+          ) {
+            this.moveZ(direction - Math.PI / 2);
+          }
+        }
+        if (
+          (direction < -Math.PI / 2 || direction > Math.PI / 2) &&
+          this.movingLeft
+        ) {
+          this.movingLeft = false;
+          if (!intersectL.length && direction > 0) {
+            this.moveZ(-Math.PI + direction);
+          }
+          if (!intersectR.length && direction < 0) {
+            this.moveZ(Math.PI + direction);
+          }
+        }
+        if (
+          direction < Math.PI / 2 &&
+          direction > -Math.PI / 2 &&
+          this.movingRight
+        ) {
+          this.movingRight = false;
+          if (
+            (!intersectL.length && direction < 0) ||
+            (!intersectR.length && direction > 0)
+          ) {
+            this.moveZ(direction);
+          }
         }
       }
 
       if (intersectL.length) {
-        if (direction < -pi / 2 || direction > pi / 2) {
+        if (
+          (direction < -Math.PI / 2 || direction > Math.PI / 2) &&
+          this.movingForward
+        ) {
           this.movingForward = false;
+          if (!intersectF.length && direction > 0) {
+            this.moveX(Math.PI - direction);
+          }
+          if (!intersectB.length && direction < 0) {
+            this.moveX(-Math.PI - direction);
+          }
         }
-        if (direction < pi && direction > 0) {
-          this.movingLeft = false;
-        }
-        if (direction < pi / 2 && direction > -pi / 2) {
+        if (
+          direction < Math.PI / 2 &&
+          direction > -Math.PI / 2 &&
+          this.movingBackward
+        ) {
           this.movingBackward = false;
+          if (
+            (!intersectF.length && direction < 0) ||
+            (!intersectB.length && direction > 0)
+          ) {
+            this.moveX(-direction);
+          }
         }
-        if (direction < 0 && direction > -pi) {
+        if (direction > 0 && direction < Math.PI && this.movingLeft) {
+          this.movingLeft = false;
+          if (
+            (!intersectB.length && direction > Math.PI / 2) ||
+            (!intersectF.length && direction < Math.PI / 2)
+          ) {
+            this.moveX(Math.PI / 2 - direction);
+          }
+        }
+        if (direction < 0 && direction > -Math.PI && this.movingRight) {
           this.movingRight = false;
+          if (
+            (!intersectB.length && direction > -Math.PI / 2) ||
+            (!intersectF.length && direction < -Math.PI / 2)
+          ) {
+            this.moveX(-Math.PI / 2 - direction);
+          }
         }
       }
 
       if (intersectR.length) {
-        if (direction < -pi / 2 || direction > pi / 2) {
-          this.movingBackward = false;
-        }
-        if (direction < pi && direction > 0) {
-          this.movingRight = false;
-        }
-        if (direction < pi / 2 && direction > -pi / 2) {
+        if (
+          direction < Math.PI / 2 &&
+          direction > -Math.PI / 2 &&
+          this.movingForward
+        ) {
           this.movingForward = false;
+          if (
+            (!intersectB.length && direction < 0) ||
+            (!intersectF.length && direction > 0)
+          ) {
+            this.moveX(direction);
+          }
         }
-        if (direction < 0 && direction > -pi) {
+        if (
+          (direction < -Math.PI / 2 || direction > Math.PI / 2) &&
+          this.movingBackward
+        ) {
+          this.movingBackward = false;
+          if (!intersectB.length && direction > 0) {
+            this.moveX(-Math.PI + direction);
+          }
+          if (!intersectF.length && direction < 0) {
+            this.moveX(Math.PI + direction);
+          }
+
+        }
+        if (direction < 0 && direction > -Math.PI && this.movingLeft) {
           this.movingLeft = false;
+          if (
+            (!intersectF.length && direction > -Math.PI / 2) ||
+            (!intersectB.length && direction < -Math.PI / 2)
+          ) {
+            this.moveX(Math.PI / 2 + direction);
+          }
+        }
+        if (direction > 0 && direction < Math.PI && this.movingRight) {
+          this.movingRight = false;
+          if (
+            (!intersectF.length && direction > Math.PI / 2) ||
+            (!intersectB.length && direction < Math.PI / 2)
+          ) {
+            this.moveX(direction- Math.PI / 2  );
+          }
         }
       }
 
-      // flying mode off
       if (this.movingForward) {
         this.moveForward(0.1);
       }
@@ -455,7 +586,7 @@ export default class Control {
       }
       this.velocity -= 0.0075;
       this.velocity = Math.max(this.velocity, -0.5);
-      this.moveUp(this.velocity);
+      this.moveY(this.velocity);
       [
         this.movingForward,
         this.movingBackward,
