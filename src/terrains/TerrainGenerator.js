@@ -19,10 +19,10 @@ export default class TerrainGenerator {
   }
   build() {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const grass = new THREE.InstancedMesh(geometry, this.grassMaterial, 17000);
-    const sand = new THREE.InstancedMesh(geometry, this.sandMaterial, 8000);
-    const tree = new THREE.InstancedMesh(geometry, this.treeMaterial, 3000);
-    const leaf = new THREE.InstancedMesh(geometry, this.leafMaterial, 8000);
+    const grass = new THREE.InstancedMesh(geometry, this.grassMaterial, 4500);
+    const sand = new THREE.InstancedMesh(geometry, this.sandMaterial, 3000);
+    const tree = new THREE.InstancedMesh(geometry, this.treeMaterial, 300);
+    const leaf = new THREE.InstancedMesh(geometry, this.leafMaterial, 800);
     grass.name = 'grass';
     sand.name = 'sand';
     tree.name = 'tree';
@@ -34,9 +34,9 @@ export default class TerrainGenerator {
     const matrix = new THREE.Matrix4();
     const color = new THREE.Color();
 
-    for (let x = 0; x < 128; x++) {
+    for (let x = 0; x < 64; x++) {
       for (let y = 0; y < 1; y++) {
-        for (let z = 0; z < 128; z++) {
+        for (let z = 0; z < 64; z++) {
           let noise = Math.round(this.noise.noise2D(x / 160, z / 160) * 15);
           matrix.setPosition(x, y + noise, z);
           if (noise < -8) {

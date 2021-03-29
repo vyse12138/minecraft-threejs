@@ -18,7 +18,7 @@ export default class Control {
     this.euler = new THREE.Euler(0, 0, 0, "YXZ");
     this.vec = new THREE.Vector3();
     this.initEventListeners();
-    this.i = 16384;
+    this.i = 4096;
     this.mixer = null;
     this.blockGeometry = new THREE.BoxGeometry(1, 1, 1);
     this.canHold = true;
@@ -35,6 +35,46 @@ export default class Control {
       new THREE.Vector3(0, -1, 0),
       0,
       10
+    );
+    this.forwardRay = new THREE.Raycaster(
+      new THREE.Vector3(
+        this.camera.position.x,
+        this.camera.position.y - 1,
+        this.camera.position.z
+      ),
+      new THREE.Vector3(1, 0, 0),
+      0,
+      0.2
+    );
+    this.backwardRay = new THREE.Raycaster(
+      new THREE.Vector3(
+        this.camera.position.x,
+        this.camera.position.y - 1,
+        this.camera.position.z
+      ),
+      new THREE.Vector3(-1, 0, 0),
+      0,
+      0.2
+    );
+    this.leftRay = new THREE.Raycaster(
+      new THREE.Vector3(
+        this.camera.position.x,
+        this.camera.position.y - 1,
+        this.camera.position.z
+      ),
+      new THREE.Vector3(0, 0, -1),
+      0,
+      0.2
+    );
+    this.rightRay = new THREE.Raycaster(
+      new THREE.Vector3(
+        this.camera.position.x,
+        this.camera.position.y - 1,
+        this.camera.position.z
+      ),
+      new THREE.Vector3(0, 0, 1),
+      0,
+      0.2
     );
   }
 
@@ -88,19 +128,25 @@ export default class Control {
         this.mouseHold.button = 2;
     }
 
-    this.onMouseHold(this.mouseHold)
-    setTimeout(() => {
+    this.onMouseHold(this.mouseHold);
+    this.mouseHold.callback = setTimeout(() => {
       this.mouseHold.value = true;
-    }, 500)
-
+    }, 500);
   };
 
   onMouseUp = () => {
+    clearTimeout(this.mouseHold.callback);
     this.mouseHold.value = false;
   };
 
   onMouseHold(e) {
     if (this.canHold) {
+      let vector = new THREE.Vector3(0, 0, -1);
+      vector.applyQuaternion(this.camera.quaternion);
+      console.log(vector);
+      let theta = Math.atan2(vector.x, vector.z);
+      console.log(theta);
+      // this.camera.getWorldDirection(vector)
       switch (e.button) {
         // left click to remove block at crosshair
         case 0: {
@@ -112,7 +158,6 @@ export default class Control {
             const m = new THREE.Matrix4();
             intersects[0].object.getMatrixAt(instanceId, m);
             const p = new THREE.Vector3().setFromMatrixPosition(m);
-
             const material = new BlockMaterial(intersects[0].object.name);
             const mesh = new THREE.Mesh(this.blockGeometry, material);
             mesh.position.x = p.x;
@@ -225,11 +270,14 @@ export default class Control {
         if (this.flyingMode) {
           this.movingUp = true;
         } else {
-          if (this.canJump){
+          if (this.canJump) {
             this.velocity = 0.15;
             this.canJump = false;
+            this.downRay.far = 0;
+            setTimeout(() => {
+              this.downRay.far = 10;
+            }, 150);
           }
-
         }
         break;
       case "ShiftLeft":
@@ -306,6 +354,92 @@ export default class Control {
         this.moveUp(-0.25);
       }
     } else {
+      // forward block check
+      let origin = new THREE.Vector3(
+        this.camera.position.x,
+        this.camera.position.y - 1,
+        this.camera.position.z
+      );
+      let vector = new THREE.Vector3(0, 0, -1);
+      vector.applyQuaternion(this.camera.quaternion);
+      vector = this.camera.getWorldDirection(vector);
+      let direction = Math.atan2(vector.x, vector.z);
+      this.forwardRay.ray.origin = origin;
+      this.backwardRay.ray.origin = origin;
+      this.leftRay.ray.origin = origin;
+      this.rightRay.ray.origin = origin;
+      let temp = [
+        this.movingForward,
+        this.movingBackward,
+        this.movingLeft,
+        this.movingRight
+      ];
+
+      let pi = Math.PI;
+      const intersectF = this.forwardRay.intersectObjects(this.terrain);
+      const intersectB = this.backwardRay.intersectObjects(this.terrain);
+      const intersectL = this.leftRay.intersectObjects(this.terrain);
+      const intersectR = this.rightRay.intersectObjects(this.terrain);
+      if (intersectF.length) {
+        if ((direction < -pi / 2 || direction > pi / 2) && this.movingRight) {
+          this.movingRight = false;
+        }
+        if (direction < pi && direction > 0 && this.movingForward) {
+          this.movingForward = false;
+        }
+        if (direction < pi / 2 && direction > -pi / 2 && this.movingLeft) {
+          this.movingLeft = false;
+        }
+        if (direction < 0 && direction > -pi && this.movingBackward) {
+          this.movingBackward = false;
+        }
+      }
+
+      if (intersectB.length) {
+        if (direction < -pi / 2 || direction > pi / 2) {
+          this.movingLeft = false;
+        }
+        if (direction < pi && direction > 0) {
+          this.movingBackward = false;
+        }
+        if (direction < pi / 2 && direction > -pi / 2) {
+          this.movingRight = false;
+        }
+        if (direction < 0 && direction > -pi) {
+          this.movingForward = false;
+        }
+      }
+
+      if (intersectL.length) {
+        if (direction < -pi / 2 || direction > pi / 2) {
+          this.movingForward = false;
+        }
+        if (direction < pi && direction > 0) {
+          this.movingLeft = false;
+        }
+        if (direction < pi / 2 && direction > -pi / 2) {
+          this.movingBackward = false;
+        }
+        if (direction < 0 && direction > -pi) {
+          this.movingRight = false;
+        }
+      }
+
+      if (intersectR.length) {
+        if (direction < -pi / 2 || direction > pi / 2) {
+          this.movingBackward = false;
+        }
+        if (direction < pi && direction > 0) {
+          this.movingRight = false;
+        }
+        if (direction < pi / 2 && direction > -pi / 2) {
+          this.movingForward = false;
+        }
+        if (direction < 0 && direction > -pi) {
+          this.movingLeft = false;
+        }
+      }
+
       // flying mode off
       if (this.movingForward) {
         this.moveForward(0.1);
@@ -322,7 +456,12 @@ export default class Control {
       this.velocity -= 0.0075;
       this.velocity = Math.max(this.velocity, -0.5);
       this.moveUp(this.velocity);
-
+      [
+        this.movingForward,
+        this.movingBackward,
+        this.movingLeft,
+        this.movingRight
+      ] = temp;
       // falling check
       const intersects = this.downRay.intersectObjects(this.terrain);
       if (intersects.length) {
