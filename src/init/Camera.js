@@ -4,7 +4,7 @@ export default function initCamera() {
   const camera = new THREE.PerspectiveCamera(
     50,
     window.innerWidth / window.innerHeight,
-    0.001,
+    0.1,
     500
   );
   camera.position.x = 30;

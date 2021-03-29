@@ -18,7 +18,7 @@ export default class Control {
     this.euler = new THREE.Euler(0, 0, 0, "YXZ");
     this.vec = new THREE.Vector3();
     this.initEventListeners();
-    this.i = 4096;
+    this.i = 8300;
     this.mixer = null;
     this.blockGeometry = new THREE.BoxGeometry(1, 1, 1);
     this.canHold = true;
@@ -44,7 +44,7 @@ export default class Control {
       ),
       new THREE.Vector3(1, 0, 0),
       0,
-      0.2
+      0.4
     );
     this.backwardRay = new THREE.Raycaster(
       new THREE.Vector3(
@@ -54,7 +54,7 @@ export default class Control {
       ),
       new THREE.Vector3(-1, 0, 0),
       0,
-      0.2
+      0.4
     );
     this.leftRay = new THREE.Raycaster(
       new THREE.Vector3(
@@ -64,7 +64,7 @@ export default class Control {
       ),
       new THREE.Vector3(0, 0, -1),
       0,
-      0.2
+      0.4
     );
     this.rightRay = new THREE.Raycaster(
       new THREE.Vector3(
@@ -74,7 +74,7 @@ export default class Control {
       ),
       new THREE.Vector3(0, 0, 1),
       0,
-      0.2
+      0.4
     );
   }
 
