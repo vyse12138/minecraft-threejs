@@ -3,75 +3,70 @@ import BlockMaterial from "../materials/BlockMaterial.js";
 
 export default class Control {
   constructor(camera, scene, terrain) {
+    // init
     this.scene = scene;
     this.camera = camera;
     this.terrain = terrain;
     this.flyingMode = false;
+    this.initEventListeners();
+
+    // flag for current movement state
     this.movingForward = false;
     this.movingBackward = false;
     this.movingLeft = false;
     this.movingRight = false;
     this.movingUp = false;
     this.movingDown = false;
-    this.canJump = true;
+    this.canJump = false;
+
+    // vertical velocity
     this.velocity = 0;
+
+    // some global variables
     this.euler = new THREE.Euler(0, 0, 0, "YXZ");
     this.vec = new THREE.Vector3();
-    this.initEventListeners();
     this.i = 8300;
     this.mixer = null;
     this.blockGeometry = new THREE.BoxGeometry(1, 1, 1);
     this.canHold = true;
     this.color = new THREE.Color();
     this.mouseHold = {};
+
+    // raycaster for add / remove block
     this.centerRay = new THREE.Raycaster(
       new THREE.Vector3(),
       new THREE.Vector3(),
       0,
       8
     );
+
+    // raycaster for movement collision check
     this.downRay = new THREE.Raycaster(
       this.camera.position,
       new THREE.Vector3(0, -1, 0),
       0,
-      10
+      2
     );
     this.forwardRay = new THREE.Raycaster(
-      new THREE.Vector3(
-        this.camera.position.x,
-        this.camera.position.y - 1,
-        this.camera.position.z
-      ),
+      new THREE.Vector3(),
       new THREE.Vector3(1, 0, 0),
       0,
       0.4
     );
     this.backwardRay = new THREE.Raycaster(
-      new THREE.Vector3(
-        this.camera.position.x,
-        this.camera.position.y - 1,
-        this.camera.position.z
-      ),
+      new THREE.Vector3(),
       new THREE.Vector3(-1, 0, 0),
       0,
       0.4
     );
     this.leftRay = new THREE.Raycaster(
-      new THREE.Vector3(
-        this.camera.position.x,
-        this.camera.position.y - 1,
-        this.camera.position.z
-      ),
+      new THREE.Vector3(),
       new THREE.Vector3(0, 0, -1),
       0,
       0.4
     );
     this.rightRay = new THREE.Raycaster(
-      new THREE.Vector3(
-        this.camera.position.x,
-        this.camera.position.y - 1,
-        this.camera.position.z
-      ),
+      new THREE.Vector3(),
       new THREE.Vector3(0, 0, 1),
       0,
       0.4
@@ -83,6 +78,7 @@ export default class Control {
     document.addEventListener("click", () => {
       document.body.requestPointerLock();
     });
+    // mousewheel to unlock (for testing)
     document.addEventListener("mousewheel", () => {
       document.exitPointerLock();
     });
@@ -104,7 +100,7 @@ export default class Control {
     document.addEventListener("mousedown", this.onMouseDown);
     document.addEventListener("mouseup", this.onMouseUp);
   }
-  // when unlocked, remove control eventListeners
+  // when unlocked, remove control eventListeners and reset movement state
   onUnlock() {
     this.movingForward = false;
     this.movingBackward = false;
@@ -112,6 +108,7 @@ export default class Control {
     this.movingRight = false;
     this.movingUp = false;
     this.movingDown = false;
+    this.mouseHold.value = false;
     document.removeEventListener("mousemove", this.onMouseMove);
     document.removeEventListener("keydown", this.onKeyDown);
     document.removeEventListener("keyup", this.onKeyUp);
@@ -127,7 +124,6 @@ export default class Control {
       case 2:
         this.mouseHold.button = 2;
     }
-
     this.onMouseHold(this.mouseHold);
     this.mouseHold.callback = setTimeout(() => {
       this.mouseHold.value = true;
@@ -141,12 +137,6 @@ export default class Control {
 
   onMouseHold(e) {
     if (this.canHold) {
-      let vector = new THREE.Vector3(0, 0, -1);
-      vector.applyQuaternion(this.camera.quaternion);
-      console.log(vector);
-      let theta = Math.atan2(vector.x, vector.z);
-      console.log(theta);
-      // this.camera.getWorldDirection(vector)
       switch (e.button) {
         // left click to remove block at crosshair
         case 0: {
@@ -183,7 +173,6 @@ export default class Control {
             intersects[0].object.setMatrixAt(instanceId, new THREE.Matrix4());
             intersects[0].object.instanceMatrix.needsUpdate = true;
           }
-
           break;
         }
 
@@ -197,6 +186,17 @@ export default class Control {
             intersects[0].object.getMatrixAt(instanceId, matrix);
             const position = new THREE.Vector3().setFromMatrixPosition(matrix);
             const normal = intersects[0].face.normal;
+
+            // return when block overlaps with player
+            if (
+              position.x + normal.x === Math.round(this.camera.position.x) &&
+              position.z + normal.z === Math.round(this.camera.position.z) &&
+              (position.y + normal.y === Math.round(this.camera.position.y) ||
+                position.y + normal.y ===
+                  Math.round(this.camera.position.y - 1))
+            ) {
+              return;
+            }
 
             // put animation
             const material = new BlockMaterial("grass");
@@ -215,17 +215,20 @@ export default class Control {
             const clipAction = this.mixer.clipAction(clip);
             clipAction.setLoop(THREE.LoopOnce);
             clipAction.play();
+
+            // put the block
+            const matrix2 = new THREE.Matrix4();
+            matrix2.setPosition(
+              normal.x + position.x,
+              normal.y + position.y,
+              normal.z + position.z
+            );
+            this.terrain[0].setMatrixAt(this.i, matrix2);
+            this.terrain[0].setColorAt(this.i++, this.color);
             setTimeout(() => {
+              // remove animation effect 
               this.scene.remove(mesh);
-              // put the block
-              const matrix2 = new THREE.Matrix4();
-              matrix2.setPosition(
-                normal.x + position.x,
-                normal.y + position.y,
-                normal.z + position.z
-              );
-              this.terrain[0].setMatrixAt(this.i, matrix2);
-              this.terrain[0].setColorAt(this.i++, this.color);
+              // update the block
               this.terrain[0].instanceColor.needsUpdate = true;
               this.terrain[0].instanceMatrix.needsUpdate = true;
             }, 200);
@@ -239,6 +242,7 @@ export default class Control {
       }, 200);
     }
   }
+
   onMouseMove = e => {
     const movementX = e.movementX;
     const movementY = e.movementY;
@@ -275,7 +279,7 @@ export default class Control {
             this.canJump = false;
             this.downRay.far = 0;
             setTimeout(() => {
-              this.downRay.far = 10;
+              this.downRay.far = 2;
             }, 150);
           }
         }
@@ -313,6 +317,7 @@ export default class Control {
     }
   };
 
+  // movements based on camera direction
   moveForward(distance) {
     this.vec.setFromMatrixColumn(this.camera.matrix, 0);
     this.vec.crossVectors(this.camera.up, this.vec);
@@ -322,6 +327,8 @@ export default class Control {
     this.vec.setFromMatrixColumn(this.camera.matrix, 0);
     this.camera.position.addScaledVector(this.vec, distance);
   }
+
+  // movements based on camera position
   moveX(distance, factor = 0.2 / Math.PI) {
     this.camera.position.x += distance * factor;
   }
@@ -333,12 +340,16 @@ export default class Control {
   }
 
   update() {
+    // check for mouse hold event
     if (this.mouseHold.value) {
       this.onMouseHold(this.mouseHold);
     }
+
+    // check for animations
     if (this.mixer) {
       this.mixer.update(0.085);
     }
+
     if (this.flyingMode) {
       // flying mode on
       if (this.movingForward) {
@@ -362,31 +373,43 @@ export default class Control {
     } else {
       // flying mode off
 
-      // forward block check
+      // horizontal block check
+
+      // setup horizontal raycasters based on camera position
       let origin = new THREE.Vector3(
         this.camera.position.x,
         this.camera.position.y - 1,
         this.camera.position.z
       );
-      let vector = new THREE.Vector3(0, 0, -1);
-      vector.applyQuaternion(this.camera.quaternion);
-      vector = this.camera.getWorldDirection(vector);
-      let direction = Math.atan2(vector.x, vector.z);
       this.forwardRay.ray.origin = origin;
       this.backwardRay.ray.origin = origin;
       this.leftRay.ray.origin = origin;
       this.rightRay.ray.origin = origin;
-      let temp = [
+
+      // calculate radian angle of camera facing direction
+      // the result is: -pi < direction < pi
+      let vector = new THREE.Vector3(0, 0, -1);
+      vector.applyQuaternion(this.camera.quaternion);
+      let direction = Math.atan2(vector.x, vector.z);
+
+      // store current movement state
+      let movementState = [
         this.movingForward,
         this.movingBackward,
         this.movingLeft,
         this.movingRight
       ];
 
+      // check collision based on camera position's direction
       const intersectF = this.forwardRay.intersectObjects(this.terrain);
       const intersectB = this.backwardRay.intersectObjects(this.terrain);
       const intersectL = this.leftRay.intersectObjects(this.terrain);
       const intersectR = this.rightRay.intersectObjects(this.terrain);
+
+      // update movementState based on collision checks and camera's direction and position
+      // there's four sections, one for each camera position's direction
+      // which are forward, backward, left and right
+      // in each section, udpate movement state based on the key pressed and the camera facing direction
       if (intersectF.length) {
         if (direction < Math.PI && direction > 0 && this.movingForward) {
           this.movingForward = false;
@@ -550,7 +573,6 @@ export default class Control {
           if (!intersectF.length && direction < 0) {
             this.moveX(Math.PI + direction);
           }
-
         }
         if (direction < 0 && direction > -Math.PI && this.movingLeft) {
           this.movingLeft = false;
@@ -567,11 +589,12 @@ export default class Control {
             (!intersectF.length && direction > Math.PI / 2) ||
             (!intersectB.length && direction < Math.PI / 2)
           ) {
-            this.moveX(direction- Math.PI / 2  );
+            this.moveX(direction - Math.PI / 2);
           }
         }
       }
 
+      // update camera position based on movement state
       if (this.movingForward) {
         this.moveForward(0.1);
       }
@@ -584,28 +607,36 @@ export default class Control {
       if (this.movingRight) {
         this.moveRight(0.1);
       }
-      this.velocity -= 0.0075;
-      this.velocity = Math.max(this.velocity, -0.5);
-      this.moveY(this.velocity);
+      
+      // restore movement state
       [
         this.movingForward,
         this.movingBackward,
         this.movingLeft,
         this.movingRight
-      ] = temp;
+      ] = movementState;
+
+      // gravity simulation
+      this.velocity -= 0.0075;
+      this.velocity = Math.max(this.velocity, -0.5);
+      this.moveY(this.velocity);
+
       // falling check
-      const intersects = this.downRay.intersectObjects(this.terrain);
-      if (intersects.length) {
-        const instanceId = intersects[0].instanceId;
+      const intersectD = this.downRay.intersectObjects(this.terrain);
+      if (intersectD.length) {
+        const instanceId = intersectD[0].instanceId;
         const matrix = new THREE.Matrix4();
-        intersects[0].object.getMatrixAt(instanceId, matrix);
+        intersectD[0].object.getMatrixAt(instanceId, matrix);
         const position = new THREE.Vector3().setFromMatrixPosition(matrix);
+
+        // set canJump flag to true when player touches the 
         if (this.camera.position.y < position.y + 2) {
           this.canJump = true;
           this.camera.position.y = position.y + 2;
           this.velocity = 0;
         }
       }
+
       // catching net
       if (this.camera.position.y < -100) {
         this.camera.position.y = 100;

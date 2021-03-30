@@ -12,6 +12,7 @@ import sand from "../assets/blocks/sand.png";
 
 let loader = new THREE.TextureLoader();
 
+// load texture
 const grassTopMaterial = loader.load(grass_top_green);
 const grassMaterial = loader.load(grass_side);
 const treeMaterial = loader.load(oak_log);
@@ -23,6 +24,7 @@ const ironMaterial = loader.load(iron_ore);
 const leafMaterial = loader.load(oak_leaves);
 const sandMaterial = loader.load(sand);
 
+// pixelize texture
 grassTopMaterial.magFilter = THREE.NearestFilter;
 grassMaterial.magFilter = THREE.NearestFilter;
 treeMaterial.magFilter = THREE.NearestFilter;

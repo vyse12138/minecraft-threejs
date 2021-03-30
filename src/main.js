@@ -5,7 +5,7 @@ import initRenderer from "./init/Renderer.js";
 import initStats from "./init/Stats.js";
 
 import Control from "./controls/Control.js";
-import BlockBorder from "./mesh/BlockBorder.js";
+import BlockHighlight from "./mesh/BlockHighlight.js";
 
 import TerrainGenerator from "./terrains/TerrainGenerator.js";
 
@@ -16,16 +16,15 @@ const stats = initStats();
 
 const terrainGenerator = new TerrainGenerator(scene);
 terrainGenerator.build();
-const terrain = terrainGenerator.terrain;
 
-const blockBorder = new BlockBorder(camera, scene, terrain);
-const control = new Control(camera, scene, terrain);
+const blockHighlight = new BlockHighlight(camera, scene, terrainGenerator.terrain);
+const control = new Control(camera, scene, terrainGenerator.terrain);
 
 (function animate() {
   requestAnimationFrame(animate);
   control.update();
   stats.update();
-  blockBorder.update();
+  blockHighlight.update();
 
   renderer.render(scene, camera);
 })();

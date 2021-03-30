@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export default class BlockBorder {
+export default class BlockHighlight {
   constructor(camera, scene, terrain) {
     this.camera = camera;
     this.scene = scene;
@@ -18,6 +18,7 @@ export default class BlockBorder {
   }
 
   update() {
+    // highlight the block at crosshair
     this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
     this.intersects = this.raycaster.intersectObjects(this.terrain);
     if (this.intersects.length) {
@@ -25,7 +26,6 @@ export default class BlockBorder {
       if (this.lastIntersect) {
         this.lastIntersect.object.setColorAt(this.lastID, this.normalColor);
         this.lastIntersect.object.instanceColor.needsUpdate = true;
-
       }
       this.intersects[0].object.setColorAt(this.instanceId, this.highLightColor);
       this.intersects[0].object.instanceColor.needsUpdate = true;
