@@ -216,18 +216,18 @@ export default class Control {
             clipAction.setLoop(THREE.LoopOnce);
             clipAction.play();
 
-            // put the block
-            const matrix2 = new THREE.Matrix4();
-            matrix2.setPosition(
-              normal.x + position.x,
-              normal.y + position.y,
-              normal.z + position.z
-            );
-            this.terrain[0].setMatrixAt(this.i, matrix2);
-            this.terrain[0].setColorAt(this.i++, this.color);
             setTimeout(() => {
-              // remove animation effect 
+              // remove animation effect
               this.scene.remove(mesh);
+              // put the block
+              const matrix2 = new THREE.Matrix4();
+              matrix2.setPosition(
+                normal.x + position.x,
+                normal.y + position.y,
+                normal.z + position.z
+              );
+              this.terrain[0].setMatrixAt(this.i, matrix2);
+              this.terrain[0].setColorAt(this.i++, this.color);
               // update the block
               this.terrain[0].instanceColor.needsUpdate = true;
               this.terrain[0].instanceMatrix.needsUpdate = true;
@@ -607,7 +607,7 @@ export default class Control {
       if (this.movingRight) {
         this.moveRight(0.1);
       }
-      
+
       // restore movement state
       [
         this.movingForward,
@@ -629,7 +629,7 @@ export default class Control {
         intersectD[0].object.getMatrixAt(instanceId, matrix);
         const position = new THREE.Vector3().setFromMatrixPosition(matrix);
 
-        // set canJump flag to true when player touches the 
+        // set canJump flag to true when player touches the
         if (this.camera.position.y < position.y + 2) {
           this.canJump = true;
           this.camera.position.y = position.y + 2;
