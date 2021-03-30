@@ -25,7 +25,7 @@ export default class TerrainGenerator {
   build() {
     // arranges memory for instanced meshes
     const grass = new THREE.InstancedMesh(this.geometry, this.grassMaterial, 8500);
-    const sand = new THREE.InstancedMesh(this.geometry, this.sandMaterial, 2000);
+    const sand = new THREE.InstancedMesh(this.geometry, this.sandMaterial, 2200);
     const tree = new THREE.InstancedMesh(this.geometry, this.treeMaterial, 50);
     const leaf = new THREE.InstancedMesh(this.geometry, this.leafMaterial, 1000);
 

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import BlockMaterial from "../materials/BlockMaterial.js";
-
+import Audio from "../terrains/Audio.js";
 export default class Control {
   constructor(camera, scene, terrain) {
     // init
@@ -9,6 +9,7 @@ export default class Control {
     this.terrain = terrain;
     this.flyingMode = false;
     this.initEventListeners();
+    this.audio = new Audio(this.camera);
 
     // flag for current movement state
     this.movingForward = false;
@@ -143,6 +144,7 @@ export default class Control {
           this.centerRay.setFromCamera({ x: 0, y: 0 }, this.camera);
           const intersects = this.centerRay.intersectObjects(this.terrain);
           if (intersects.length) {
+            this.audio.playSound(intersects[0].object.name);
             const instanceId = intersects[0].instanceId;
             // remove animation
             const m = new THREE.Matrix4();
@@ -170,7 +172,27 @@ export default class Control {
             }, 200);
 
             // remove the block
-            intersects[0].object.setMatrixAt(instanceId, new THREE.Matrix4());
+            intersects[0].object.setMatrixAt(
+              instanceId,
+              new THREE.Matrix4().set(
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              )
+            );
             intersects[0].object.instanceMatrix.needsUpdate = true;
           }
           break;
@@ -197,6 +219,7 @@ export default class Control {
             ) {
               return;
             }
+            this.audio.playSound('grass');
 
             // put animation
             const material = new BlockMaterial("grass");
