@@ -35,7 +35,7 @@ export default class Audio {
     this.bgm = new THREE.Audio(this.listener);
     this.audioLoader.load(bgm, buffer => {
       this.bgm.setBuffer(buffer);
-      this.grassSound3.setVolume(0.5);
+      this.bgm.setVolume(0.5);
       this.bgm.setLoop(true);
       this.bgm.play();
     });
@@ -133,6 +133,7 @@ export default class Audio {
       this.leafSound4.setVolume(0.5);
     });
   }
+  
   playSound(material) {
     switch (material) {
       case "grass":
