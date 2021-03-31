@@ -75,6 +75,9 @@ export default class Control {
   }
 
   initEventListeners() {
+    // disable right click context menu for safari
+    document.addEventListener("contextmenu", e => e.preventDefault());
+
     // click to lock
     document.addEventListener("click", () => {
       document.body.requestPointerLock();
@@ -219,7 +222,7 @@ export default class Control {
             ) {
               return;
             }
-            this.audio.playSound('grass');
+            this.audio.playSound("grass");
 
             // put animation
             const material = new BlockMaterial("grass");
