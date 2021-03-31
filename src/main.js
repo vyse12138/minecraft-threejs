@@ -20,8 +20,6 @@ terrainGenerator.build();
 const blockHighlight = new BlockHighlight(camera, scene, terrainGenerator.terrain);
 const control = new Control(camera, scene, terrainGenerator.terrain);
 
-document.addEventListener('contextmenu', event => event.preventDefault());
-
 (function animate() {
   requestAnimationFrame(animate);
   control.update();
