@@ -17,8 +17,8 @@ const stats = initStats();
 const terrainGenerator = new TerrainGenerator(scene);
 terrainGenerator.build();
 
-const blockHighlight = new BlockHighlight(camera, scene, terrainGenerator.terrain);
-const control = new Control(camera, scene, terrainGenerator.terrain);
+const blockHighlight = new BlockHighlight(camera, scene, terrainGenerator);
+const control = new Control(camera, scene, terrainGenerator);
 
 (function animate() {
   requestAnimationFrame(animate);

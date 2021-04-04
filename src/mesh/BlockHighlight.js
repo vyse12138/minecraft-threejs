@@ -1,10 +1,10 @@
 import * as THREE from "three";
 
 export default class BlockHighlight {
-  constructor(camera, scene, terrain) {
+  constructor(camera, scene, terrainGenerator) {
     this.camera = camera;
     this.scene = scene;
-    this.terrain = terrain;
+    this.terrain = terrainGenerator.terrain;
     this.raycaster = new THREE.Raycaster();
     this.raycaster.far = 8;
     this.material = new THREE.LineBasicMaterial({ color: 0x000000 });
@@ -27,6 +27,7 @@ export default class BlockHighlight {
         this.lastIntersect.object.setColorAt(this.lastID, this.normalColor);
         this.lastIntersect.object.instanceColor.needsUpdate = true;
       }
+
       this.intersects[0].object.setColorAt(this.instanceId, this.highLightColor);
       this.intersects[0].object.instanceColor.needsUpdate = true;
       this.lastID = this.instanceId;

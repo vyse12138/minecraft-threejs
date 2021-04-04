@@ -8,7 +8,7 @@ export default class TerrainGenerator {
     this.scene = scene;
     this.terrain = [];
     this.noise = new simplex.SimplexNoise();
-    
+
     // set up materials
     this.grassMaterial = new BlockMaterial("grass");
     this.dirtMaterial = new BlockMaterial("dirt");
@@ -16,43 +16,66 @@ export default class TerrainGenerator {
     this.sandMaterial = new BlockMaterial("sand");
     this.treeMaterial = new BlockMaterial("tree");
     this.leafMaterial = new BlockMaterial("leaf");
-    
+
     // some global variables
+    this.terrainMap = new Set();
     this.leafMap = new Set();
     this.treeCount = 0;
     this.geometry = new THREE.BoxGeometry(1, 1, 1);
+    this.dirtBlockCount = 0;
+    this.vector3 = new THREE.Vector3(); 
   }
   build() {
     // arranges memory for instanced meshes
-    const grass = new THREE.InstancedMesh(this.geometry, this.grassMaterial, 8500);
-    const sand = new THREE.InstancedMesh(this.geometry, this.sandMaterial, 2200);
+    const grass = new THREE.InstancedMesh(
+      this.geometry,
+      this.grassMaterial,
+      8500
+    );
+    const sand = new THREE.InstancedMesh(
+      this.geometry,
+      this.sandMaterial,
+      2200
+    );
     const tree = new THREE.InstancedMesh(this.geometry, this.treeMaterial, 50);
-    const leaf = new THREE.InstancedMesh(this.geometry, this.leafMaterial, 1000);
+    const leaf = new THREE.InstancedMesh(
+      this.geometry,
+      this.leafMaterial,
+      1000
+    );
+    const dirt = new THREE.InstancedMesh(this.geometry, this.dirtMaterial, 500);
 
     grass.name = "grass";
     sand.name = "sand";
     tree.name = "tree";
     leaf.name = "leaf";
+    dirt.name = "dirt";
     let grassBlockCount = 0,
       treeBlockCount = 0,
       leafBlockCount = 0,
       sandBlockCount = 0;
     const matrix = new THREE.Matrix4();
     const color = new THREE.Color();
-
+    
+    dirt.setColorAt(0, color);
     for (let x = 0; x < 96; x++) {
       for (let y = 0; y < 1; y++) {
         for (let z = 0; z < 96; z++) {
           let noise = Math.round(this.noise.noise2D(x / 36, z / 36) * 3);
           matrix.setPosition(x, y + noise, z);
+
+          // 
           if (noise < -1) {
             // generates sand
             sand.setMatrixAt(sandBlockCount, matrix);
             sand.setColorAt(sandBlockCount++, color);
+            this.terrainMap.add(Object.values(this.vector3.setFromMatrixPosition(matrix)).join());
           } else {
             // generates grasses
             grass.setMatrixAt(grassBlockCount, matrix);
             grass.setColorAt(grassBlockCount++, color);
+            this.terrainMap.add(Object.values(this.vector3.setFromMatrixPosition(matrix)).join());
+
           }
 
           // generates trees
@@ -62,6 +85,9 @@ export default class TerrainGenerator {
             for (let i = 0; i < height; i++) {
               matrix.setPosition(x, y + noise + 1 + i, z);
               this.leafMap.add(matrix.elements.join());
+              this.terrainMap.add(Object.values(this.vector3.setFromMatrixPosition(matrix)).join());
+
+
               tree.setMatrixAt(treeBlockCount, matrix);
               tree.setColorAt(treeBlockCount++, color);
             }
@@ -85,6 +111,9 @@ export default class TerrainGenerator {
                     z + noiseZ
                   );
                   if (!this.hasLeafAt(matrix)) {
+                    this.terrainMap.add(Object.values(this.vector3.setFromMatrixPosition(matrix)).join());
+
+
                     leaf.setMatrixAt(leafBlockCount, matrix);
                     leaf.setColorAt(leafBlockCount++, color);
                   }
@@ -95,9 +124,15 @@ export default class TerrainGenerator {
         }
       }
     }
-    console.log(grassBlockCount, treeBlockCount, leafBlockCount, sandBlockCount);
-    this.scene.add(grass, tree, leaf, sand);
-    this.terrain = [grass, tree, leaf, sand];
+    console.log(
+      grassBlockCount,
+      treeBlockCount,
+      leafBlockCount,
+      sandBlockCount
+    );
+    console.log(this.terrainMap);
+    this.scene.add(grass, tree, leaf, sand, dirt);
+    this.terrain = [grass, tree, leaf, sand, dirt];
   }
 
   hasLeafAt(matrix) {
@@ -113,7 +148,47 @@ export default class TerrainGenerator {
     return true;
   }
 
-  reBuild() {
+  reBuild() {}
+
+  // build adjacent blocks
+  buildAB(matrix) {
+
+    const dirt = this.terrain[4];
+    let position = new THREE.Vector3().setFromMatrixPosition(matrix);
+    position.y--;
+    matrix.setPosition(position)
+    const color = new THREE.Color();
+
+
     
+
+
+    if (!this.terrainMap.has(Object.values(position).join())) {
+      matrix.setPosition(position.x, position.y, position.z);
+      dirt.setMatrixAt(this.dirtBlockCount, matrix);
+      dirt.setColorAt(this.dirtBlockCount++, color);
+    }
+      // matrix.setPosition(position.x, position.y - 1, position.z);
+      // dirt.setMatrixAt(this.dirtBlockCount, matrix);
+      // dirt.setColorAt(this.dirtBlockCount++, color);
+
+      // matrix.setPosition(position.x+1, position.y-1, position.z);
+      // dirt.setMatrixAt(this.dirtBlockCount, matrix);
+      // dirt.setColorAt(this.dirtBlockCount++, color);
+
+      // matrix.setPosition(position.x-1, position.y-1, position.z);
+      // dirt.setMatrixAt(this.dirtBlockCount, matrix);
+      // dirt.setColorAt(this.dirtBlockCount++, color);
+
+      // matrix.setPosition(position.x, position.y-1, position.z+1);
+      // dirt.setMatrixAt(this.dirtBlockCount, matrix);
+      // dirt.setColorAt(this.dirtBlockCount++, color);
+
+      // matrix.setPosition(position.x, position.y-1, position.z-1);
+      // dirt.setMatrixAt(this.dirtBlockCount, matrix);
+      // dirt.setColorAt(this.dirtBlockCount++, color);
+
+      dirt.instanceMatrix.needsUpdate = true;
+    dirt.instanceColor.needsUpdate = true;
   }
 }

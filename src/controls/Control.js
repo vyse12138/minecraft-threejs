@@ -1,16 +1,18 @@
 import * as THREE from "three";
 import BlockMaterial from "../materials/BlockMaterial.js";
 import Audio from "../terrains/Audio.js";
+
 export default class Control {
-  constructor(camera, scene, terrain) {
+  constructor(camera, scene, terrainGenerator) {
     // init
     this.scene = scene;
     this.camera = camera;
-    this.terrain = terrain;
+    this.terrainGenerator = terrainGenerator;
+    this.terrain = terrainGenerator.terrain;
     this.flyingMode = false;
     this.initEventListeners();
     this.audio = new Audio(this.camera);
-
+    
     // flag for current movement state
     this.movingForward = false;
     this.movingBackward = false;
@@ -150,14 +152,15 @@ export default class Control {
             this.audio.playSound(intersects[0].object.name);
             const instanceId = intersects[0].instanceId;
             // remove animation
-            const m = new THREE.Matrix4();
-            intersects[0].object.getMatrixAt(instanceId, m);
-            const p = new THREE.Vector3().setFromMatrixPosition(m);
+            const matrix = new THREE.Matrix4();
+
+            intersects[0].object.getMatrixAt(instanceId, matrix);
+            const position = new THREE.Vector3().setFromMatrixPosition(matrix);
             const material = new BlockMaterial(intersects[0].object.name);
             const mesh = new THREE.Mesh(this.blockGeometry, material);
-            mesh.position.x = p.x;
-            mesh.position.y = p.y;
-            mesh.position.z = p.z;
+            mesh.position.x = position.x;
+            mesh.position.y = position.y;
+            mesh.position.z = position.z;
             this.scene.add(mesh);
 
             const scaleKF = new THREE.VectorKeyframeTrack(
@@ -197,6 +200,10 @@ export default class Control {
               )
             );
             intersects[0].object.instanceMatrix.needsUpdate = true;
+
+            // generate adjacent blocks
+            // this.terrainGenerator.buildAB(matrix)
+
           }
           break;
         }
