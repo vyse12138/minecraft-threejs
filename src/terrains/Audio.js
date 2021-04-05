@@ -12,6 +12,16 @@ import sand2 from "../assets/audios/blocks/sand2.ogg";
 import sand3 from "../assets/audios/blocks/sand3.ogg";
 import sand4 from "../assets/audios/blocks/sand4.ogg";
 
+import stone1 from "../assets/audios/blocks/stone1.ogg";
+import stone2 from "../assets/audios/blocks/stone2.ogg";
+import stone3 from "../assets/audios/blocks/stone3.ogg";
+import stone4 from "../assets/audios/blocks/stone4.ogg";
+
+import dirt1 from "../assets/audios/blocks/dirt1.ogg";
+import dirt2 from "../assets/audios/blocks/dirt2.ogg";
+import dirt3 from "../assets/audios/blocks/dirt3.ogg";
+import dirt4 from "../assets/audios/blocks/dirt4.ogg";
+
 import tree1 from "../assets/audios/blocks/tree1.ogg";
 import tree2 from "../assets/audios/blocks/tree2.ogg";
 import tree3 from "../assets/audios/blocks/tree3.ogg";
@@ -43,7 +53,10 @@ export default class Audio {
     this.grassFlag = 1;
     this.sandFlag = 1;
     this.treeFlag = 1;
+    this.dirtFlag = 1;
     this.leafFlag = 1;
+    this.stoneFlag = 1;
+
 
     this.grassSound1 = new THREE.Audio(this.listener);
     this.grassSound2 = new THREE.Audio(this.listener);
@@ -54,6 +67,16 @@ export default class Audio {
     this.sandSound2 = new THREE.Audio(this.listener);
     this.sandSound3 = new THREE.Audio(this.listener);
     this.sandSound4 = new THREE.Audio(this.listener);
+
+    this.stoneSound1 = new THREE.Audio(this.listener);
+    this.stoneSound2 = new THREE.Audio(this.listener);
+    this.stoneSound3 = new THREE.Audio(this.listener);
+    this.stoneSound4 = new THREE.Audio(this.listener);
+
+    this.dirtSound1 = new THREE.Audio(this.listener);
+    this.dirtSound2 = new THREE.Audio(this.listener);
+    this.dirtSound3 = new THREE.Audio(this.listener);
+    this.dirtSound4 = new THREE.Audio(this.listener);
 
     this.treeSound1 = new THREE.Audio(this.listener);
     this.treeSound2 = new THREE.Audio(this.listener);
@@ -99,6 +122,40 @@ export default class Audio {
       this.sandSound4.setVolume(0.5);
     });
 
+    this.audioLoader.load(stone1, buffer => {
+      this.stoneSound1.setBuffer(buffer);
+      this.stoneSound1.setVolume(0.5);
+    });
+    this.audioLoader.load(stone2, buffer => {
+      this.stoneSound2.setBuffer(buffer);
+      this.stoneSound2.setVolume(0.5);
+    });
+    this.audioLoader.load(stone3, buffer => {
+      this.stoneSound3.setBuffer(buffer);
+      this.stoneSound3.setVolume(0.5);
+    });
+    this.audioLoader.load(stone4, buffer => {
+      this.stoneSound4.setBuffer(buffer);
+      this.stoneSound4.setVolume(0.5);
+    });
+
+    this.audioLoader.load(dirt1, buffer => {
+      this.dirtSound1.setBuffer(buffer);
+      this.dirtSound1.setVolume(0.5);
+    });
+    this.audioLoader.load(dirt2, buffer => {
+      this.dirtSound2.setBuffer(buffer);
+      this.dirtSound2.setVolume(0.5);
+    });
+    this.audioLoader.load(dirt3, buffer => {
+      this.dirtSound3.setBuffer(buffer);
+      this.dirtSound3.setVolume(0.5);
+    });
+    this.audioLoader.load(dirt4, buffer => {
+      this.dirtSound4.setBuffer(buffer);
+      this.dirtSound4.setVolume(0.5);
+    });
+
     this.audioLoader.load(tree1, buffer => {
       this.treeSound1.setBuffer(buffer);
       this.treeSound1.setVolume(0.5);
@@ -133,7 +190,7 @@ export default class Audio {
       this.leafSound4.setVolume(0.5);
     });
   }
-  
+
   playSound(material) {
     switch (material) {
       case "grass":
@@ -173,6 +230,46 @@ export default class Audio {
           case 4:
             this.sandSound4.play();
             this.sandFlag = 1;
+            break;
+        }
+        break;
+        case "stone":
+          switch (this.stoneFlag) {
+            case 1:
+              this.stoneSound1.play();
+              this.stoneFlag = 2;
+              break;
+            case 2:
+              this.stoneSound2.play();
+              this.stoneFlag = 3;
+              break;
+            case 3:
+              this.stoneSound3.play();
+              this.stoneFlag = 4;
+              break;
+            case 4:
+              this.stoneSound4.play();
+              this.stoneFlag = 1;
+              break;
+          }
+          break;
+      case "dirt":
+        switch (this.dirtFlag) {
+          case 1:
+            this.dirtSound1.play();
+            this.dirtFlag = 2;
+            break;
+          case 2:
+            this.dirtSound2.play();
+            this.dirtFlag = 3;
+            break;
+          case 3:
+            this.dirtSound3.play();
+            this.dirtFlag = 4;
+            break;
+          case 4:
+            this.dirtSound4.play();
+            this.dirtFlag = 1;
             break;
         }
         break;
