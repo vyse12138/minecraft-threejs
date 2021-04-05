@@ -9,10 +9,13 @@ export default class Control {
     this.camera = camera;
     this.terrainGenerator = terrainGenerator;
     this.terrain = terrainGenerator.terrain;
+    this.terrainSet = terrainGenerator.terrainSet;
+    this.vector3 = terrainGenerator.vector3;
+
     this.flyingMode = false;
     this.initEventListeners();
     this.audio = new Audio(this.camera);
-    
+
     // flag for current movement state
     this.movingForward = false;
     this.movingBackward = false;
@@ -202,8 +205,7 @@ export default class Control {
             intersects[0].object.instanceMatrix.needsUpdate = true;
 
             // generate adjacent blocks
-            // this.terrainGenerator.buildAB(matrix)
-
+            this.terrainGenerator.buildAB(matrix);
           }
           break;
         }
@@ -219,6 +221,9 @@ export default class Control {
             const position = new THREE.Vector3().setFromMatrixPosition(matrix);
             const normal = intersects[0].face.normal;
 
+            this.terrainSet.add(
+              Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+            );
             // return when block overlaps with player
             if (
               position.x + normal.x === Math.round(this.camera.position.x) &&

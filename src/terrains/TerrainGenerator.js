@@ -18,12 +18,14 @@ export default class TerrainGenerator {
     this.leafMaterial = new BlockMaterial("leaf");
 
     // some global variables
-    this.terrainMap = new Set();
-    this.leafMap = new Set();
+    this.terrainSet = new Set();
+    this.leafSet = new Set();
     this.treeCount = 0;
     this.geometry = new THREE.BoxGeometry(1, 1, 1);
     this.dirtBlockCount = 0;
-    this.vector3 = new THREE.Vector3(); 
+    this.stoneBlockCount = 0;
+    this.sandBlockCount = 0;
+    this.vector3 = new THREE.Vector3();
   }
   build() {
     // arranges memory for instanced meshes
@@ -44,38 +46,48 @@ export default class TerrainGenerator {
       1000
     );
     const dirt = new THREE.InstancedMesh(this.geometry, this.dirtMaterial, 500);
+    const stone = new THREE.InstancedMesh(
+      this.geometry,
+      this.stoneMaterial,
+      500
+    );
 
     grass.name = "grass";
     sand.name = "sand";
     tree.name = "tree";
     leaf.name = "leaf";
     dirt.name = "dirt";
+    stone.name = "stone";
     let grassBlockCount = 0,
       treeBlockCount = 0,
-      leafBlockCount = 0,
-      sandBlockCount = 0;
+      leafBlockCount = 0;
     const matrix = new THREE.Matrix4();
     const color = new THREE.Color();
-    
+
     dirt.setColorAt(0, color);
+    stone.setColorAt(0, color);
+
     for (let x = 0; x < 96; x++) {
       for (let y = 0; y < 1; y++) {
         for (let z = 0; z < 96; z++) {
           let noise = Math.round(this.noise.noise2D(x / 36, z / 36) * 3);
           matrix.setPosition(x, y + noise, z);
 
-          // 
+          //
           if (noise < -1) {
             // generates sand
-            sand.setMatrixAt(sandBlockCount, matrix);
-            sand.setColorAt(sandBlockCount++, color);
-            this.terrainMap.add(Object.values(this.vector3.setFromMatrixPosition(matrix)).join());
+            sand.setMatrixAt(this.sandBlockCount, matrix);
+            sand.setColorAt(this.sandBlockCount++, color);
+            this.terrainSet.add(
+              Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+            );
           } else {
             // generates grasses
             grass.setMatrixAt(grassBlockCount, matrix);
             grass.setColorAt(grassBlockCount++, color);
-            this.terrainMap.add(Object.values(this.vector3.setFromMatrixPosition(matrix)).join());
-
+            this.terrainSet.add(
+              Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+            );
           }
 
           // generates trees
@@ -84,9 +96,10 @@ export default class TerrainGenerator {
             this.treeCount += 1;
             for (let i = 0; i < height; i++) {
               matrix.setPosition(x, y + noise + 1 + i, z);
-              this.leafMap.add(matrix.elements.join());
-              this.terrainMap.add(Object.values(this.vector3.setFromMatrixPosition(matrix)).join());
-
+              this.leafSet.add(matrix.elements.join());
+              this.terrainSet.add(
+                Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+              );
 
               tree.setMatrixAt(treeBlockCount, matrix);
               tree.setColorAt(treeBlockCount++, color);
@@ -111,8 +124,11 @@ export default class TerrainGenerator {
                     z + noiseZ
                   );
                   if (!this.hasLeafAt(matrix)) {
-                    this.terrainMap.add(Object.values(this.vector3.setFromMatrixPosition(matrix)).join());
-
+                    this.terrainSet.add(
+                      Object.values(
+                        this.vector3.setFromMatrixPosition(matrix)
+                      ).join()
+                    );
 
                     leaf.setMatrixAt(leafBlockCount, matrix);
                     leaf.setColorAt(leafBlockCount++, color);
@@ -128,18 +144,18 @@ export default class TerrainGenerator {
       grassBlockCount,
       treeBlockCount,
       leafBlockCount,
-      sandBlockCount
+      this.sandBlockCount
     );
-    console.log(this.terrainMap);
-    this.scene.add(grass, tree, leaf, sand, dirt);
-    this.terrain = [grass, tree, leaf, sand, dirt];
+
+    this.scene.add(grass, tree, leaf, sand, dirt, stone);
+    this.terrain = [grass, tree, leaf, sand, dirt, stone];
   }
 
   hasLeafAt(matrix) {
-    if (this.leafMap.has(matrix.elements.join())) {
+    if (this.leafSet.has(matrix.elements.join())) {
       return true;
     } else {
-      this.leafMap.add(matrix.elements.join());
+      this.leafSet.add(matrix.elements.join());
       return false;
     }
   }
@@ -152,43 +168,198 @@ export default class TerrainGenerator {
 
   // build adjacent blocks
   buildAB(matrix) {
-
-    const dirt = this.terrain[4];
     let position = new THREE.Vector3().setFromMatrixPosition(matrix);
-    position.y--;
-    matrix.setPosition(position)
+    let noise = Math.round(
+      this.noise.noise2D(position.x / 36, position.z / 36) * 3
+    );
+    let tempPosition;
+    let material;
+    let noise2;
+    let materialBlockCount;
     const color = new THREE.Color();
+    if (position.y < noise + 1) {
+      if (position.y < -4) {
+        //stone
+        material = this.terrain[5];
+        materialBlockCount = this.stoneBlockCount;
+      } else if (noise < -1) {
+        //sand
+        material = this.terrain[3];
+        materialBlockCount = this.sandBlockCount;
+      } else {
+        // dirt
 
+        material = this.terrain[4];
+        materialBlockCount = this.dirtBlockCount;
+      }
 
-    
+      tempPosition = position.clone();
+      tempPosition.y--;
+      if (!this.terrainSet.has(Object.values(tempPosition).join())) {
+        matrix.setPosition(tempPosition.x, tempPosition.y, tempPosition.z);
+        material.setMatrixAt(materialBlockCount, matrix);
+        material.setColorAt(materialBlockCount++, color);
+        this.terrainSet.add(
+          Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+        );
+      }
 
+      tempPosition = position.clone();
+      tempPosition.y--;
+      tempPosition.x--;
+      if (!this.terrainSet.has(Object.values(tempPosition).join())) {
+        matrix.setPosition(tempPosition.x, tempPosition.y, tempPosition.z);
+        material.setMatrixAt(materialBlockCount, matrix);
+        material.setColorAt(materialBlockCount++, color);
+        this.terrainSet.add(
+          Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+        );
+      }
 
-    if (!this.terrainMap.has(Object.values(position).join())) {
-      matrix.setPosition(position.x, position.y, position.z);
-      dirt.setMatrixAt(this.dirtBlockCount, matrix);
-      dirt.setColorAt(this.dirtBlockCount++, color);
+      tempPosition = position.clone();
+      tempPosition.y--;
+      tempPosition.x++;
+      if (!this.terrainSet.has(Object.values(tempPosition).join())) {
+        matrix.setPosition(tempPosition.x, tempPosition.y, tempPosition.z);
+        material.setMatrixAt(materialBlockCount, matrix);
+        material.setColorAt(materialBlockCount++, color);
+        this.terrainSet.add(
+          Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+        );
+      }
+
+      tempPosition = position.clone();
+      tempPosition.y--;
+      tempPosition.z--;
+      if (!this.terrainSet.has(Object.values(tempPosition).join())) {
+        matrix.setPosition(tempPosition.x, tempPosition.y, tempPosition.z);
+        material.setMatrixAt(materialBlockCount, matrix);
+        material.setColorAt(materialBlockCount++, color);
+        this.terrainSet.add(
+          Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+        );
+      }
+
+      tempPosition = position.clone();
+      tempPosition.y--;
+      tempPosition.z++;
+      if (!this.terrainSet.has(Object.values(tempPosition).join())) {
+        matrix.setPosition(tempPosition.x, tempPosition.y, tempPosition.z);
+        material.setMatrixAt(materialBlockCount, matrix);
+        material.setColorAt(materialBlockCount++, color);
+        this.terrainSet.add(
+          Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+        );
+      }
+
+      tempPosition = position.clone();
+      tempPosition.x--;
+      noise2 =
+        position.y === noise
+          ? Math.round(
+              this.noise.noise2D(tempPosition.x / 36, tempPosition.z / 36) * 3
+            )
+          : noise;
+      if (
+        noise <= noise2 &&
+        !this.terrainSet.has(Object.values(tempPosition).join())
+      ) {
+        matrix.setPosition(tempPosition.x, tempPosition.y, tempPosition.z);
+        material.setMatrixAt(materialBlockCount, matrix);
+        material.setColorAt(materialBlockCount++, color);
+        this.terrainSet.add(
+          Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+        );
+      }
+
+      tempPosition = position.clone();
+      tempPosition.x++;
+      noise2 =
+        position.y === noise
+          ? Math.round(
+              this.noise.noise2D(tempPosition.x / 36, tempPosition.z / 36) * 3
+            )
+          : noise;
+      if (
+        noise <= noise2 &&
+        !this.terrainSet.has(Object.values(tempPosition).join())
+      ) {
+        matrix.setPosition(tempPosition.x, tempPosition.y, tempPosition.z);
+        material.setMatrixAt(materialBlockCount, matrix);
+        material.setColorAt(materialBlockCount++, color);
+        this.terrainSet.add(
+          Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+        );
+      }
+
+      tempPosition = position.clone();
+      tempPosition.z--;
+      noise2 =
+        position.y === noise
+          ? Math.round(
+              this.noise.noise2D(tempPosition.x / 36, tempPosition.z / 36) * 3
+            )
+          : noise;
+      if (
+        noise <= noise2 &&
+        !this.terrainSet.has(Object.values(tempPosition).join())
+      ) {
+        matrix.setPosition(tempPosition.x, tempPosition.y, tempPosition.z);
+        material.setMatrixAt(materialBlockCount, matrix);
+        material.setColorAt(materialBlockCount++, color);
+        this.terrainSet.add(
+          Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+        );
+      }
+
+      tempPosition = position.clone();
+      tempPosition.z++;
+      noise2 =
+        position.y === noise
+          ? Math.round(
+              this.noise.noise2D(tempPosition.x / 36, tempPosition.z / 36) * 3
+            )
+          : noise;
+      if (
+        noise <= noise2 &&
+        !this.terrainSet.has(Object.values(tempPosition).join())
+      ) {
+        matrix.setPosition(tempPosition.x, tempPosition.y, tempPosition.z);
+        material.setMatrixAt(materialBlockCount, matrix);
+        material.setColorAt(materialBlockCount++, color);
+        this.terrainSet.add(
+          Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+        );
+      }
+
+      if (position.y < noise) {
+        tempPosition = position.clone();
+        tempPosition.y++;
+        if (!this.terrainSet.has(Object.values(tempPosition).join())) {
+          matrix.setPosition(tempPosition.x, tempPosition.y, tempPosition.z);
+          material.setMatrixAt(materialBlockCount, matrix);
+          material.setColorAt(materialBlockCount++, color);
+          this.terrainSet.add(
+            Object.values(this.vector3.setFromMatrixPosition(matrix)).join()
+          );
+        }
+      }
+
+      if (position.y < -4) {
+        //stone
+        this.stoneBlockCount = materialBlockCount;
+      } else if (noise < -1) {
+        //sand
+        material = this.terrain[3];
+        this.sandBlockCount = materialBlockCount;
+      } else {
+        // dirt
+        material = this.terrain[4];
+        this.dirtBlockCount = materialBlockCount;
+      }
+
+      material.instanceMatrix.needsUpdate = true;
+      material.instanceColor.needsUpdate = true;
     }
-      // matrix.setPosition(position.x, position.y - 1, position.z);
-      // dirt.setMatrixAt(this.dirtBlockCount, matrix);
-      // dirt.setColorAt(this.dirtBlockCount++, color);
-
-      // matrix.setPosition(position.x+1, position.y-1, position.z);
-      // dirt.setMatrixAt(this.dirtBlockCount, matrix);
-      // dirt.setColorAt(this.dirtBlockCount++, color);
-
-      // matrix.setPosition(position.x-1, position.y-1, position.z);
-      // dirt.setMatrixAt(this.dirtBlockCount, matrix);
-      // dirt.setColorAt(this.dirtBlockCount++, color);
-
-      // matrix.setPosition(position.x, position.y-1, position.z+1);
-      // dirt.setMatrixAt(this.dirtBlockCount, matrix);
-      // dirt.setColorAt(this.dirtBlockCount++, color);
-
-      // matrix.setPosition(position.x, position.y-1, position.z-1);
-      // dirt.setMatrixAt(this.dirtBlockCount, matrix);
-      // dirt.setColorAt(this.dirtBlockCount++, color);
-
-      dirt.instanceMatrix.needsUpdate = true;
-    dirt.instanceColor.needsUpdate = true;
   }
 }
