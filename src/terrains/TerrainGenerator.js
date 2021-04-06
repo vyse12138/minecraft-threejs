@@ -166,7 +166,7 @@ export default class TerrainGenerator {
 
   reBuild() {}
 
-  // build adjacent blocks
+  // function to build adjacent blocks after revoving a block
   buildAB(matrix) {
     let position = new THREE.Vector3().setFromMatrixPosition(matrix);
     let noise = Math.round(
