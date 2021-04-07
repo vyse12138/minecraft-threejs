@@ -56,7 +56,6 @@ export default class Audio {
     this.leafFlag = 1;
     this.stoneFlag = 1;
 
-
     this.grassSound1 = new THREE.Audio(this.listener);
     this.grassSound2 = new THREE.Audio(this.listener);
     this.grassSound3 = new THREE.Audio(this.listener);
@@ -232,26 +231,26 @@ export default class Audio {
             break;
         }
         break;
-        case "stone":
-          switch (this.stoneFlag) {
-            case 1:
-              this.stoneSound1.play();
-              this.stoneFlag = 2;
-              break;
-            case 2:
-              this.stoneSound2.play();
-              this.stoneFlag = 3;
-              break;
-            case 3:
-              this.stoneSound3.play();
-              this.stoneFlag = 4;
-              break;
-            case 4:
-              this.stoneSound4.play();
-              this.stoneFlag = 1;
-              break;
-          }
-          break;
+      case "stone":
+        switch (this.stoneFlag) {
+          case 1:
+            this.stoneSound1.play();
+            this.stoneFlag = 2;
+            break;
+          case 2:
+            this.stoneSound2.play();
+            this.stoneFlag = 3;
+            break;
+          case 3:
+            this.stoneSound3.play();
+            this.stoneFlag = 4;
+            break;
+          case 4:
+            this.stoneSound4.play();
+            this.stoneFlag = 1;
+            break;
+        }
+        break;
       case "dirt":
         switch (this.dirtFlag) {
           case 1:
@@ -315,11 +314,11 @@ export default class Audio {
     }
   }
 
-  update(paused){
+  update(paused) {
     if (paused) {
-this.bgm.pause();
+      this.bgm.pause();
     } else {
-this.bgm.play();
+      this.bgm.play();
     }
   }
 }
