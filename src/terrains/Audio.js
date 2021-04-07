@@ -35,7 +35,7 @@ import leaf4 from "../assets/audios/blocks/leaf4.ogg";
 export default class Audio {
   constructor(camera) {
     // init
-    this.enable = true;
+    this.paused = true;
     this.camera = camera;
     this.listener = new THREE.AudioListener();
     this.camera.add(this.listener);
@@ -47,7 +47,6 @@ export default class Audio {
       this.bgm.setBuffer(buffer);
       this.bgm.setVolume(0.5);
       this.bgm.setLoop(true);
-      this.bgm.play();
     });
 
     this.grassFlag = 1;
@@ -90,104 +89,104 @@ export default class Audio {
 
     this.audioLoader.load(grass1, buffer => {
       this.grassSound1.setBuffer(buffer);
-      this.grassSound1.setVolume(0.5);
+      this.grassSound1.setVolume(0.25);
     });
     this.audioLoader.load(grass2, buffer => {
       this.grassSound2.setBuffer(buffer);
-      this.grassSound2.setVolume(0.5);
+      this.grassSound2.setVolume(0.25);
     });
     this.audioLoader.load(grass3, buffer => {
       this.grassSound3.setBuffer(buffer);
-      this.grassSound3.setVolume(0.5);
+      this.grassSound3.setVolume(0.25);
     });
     this.audioLoader.load(grass4, buffer => {
       this.grassSound4.setBuffer(buffer);
-      this.grassSound4.setVolume(0.5);
+      this.grassSound4.setVolume(0.25);
     });
 
     this.audioLoader.load(sand1, buffer => {
       this.sandSound1.setBuffer(buffer);
-      this.sandSound1.setVolume(0.5);
+      this.sandSound1.setVolume(0.25);
     });
     this.audioLoader.load(sand2, buffer => {
       this.sandSound2.setBuffer(buffer);
-      this.sandSound2.setVolume(0.5);
+      this.sandSound2.setVolume(0.25);
     });
     this.audioLoader.load(sand3, buffer => {
       this.sandSound3.setBuffer(buffer);
-      this.sandSound3.setVolume(0.5);
+      this.sandSound3.setVolume(0.25);
     });
     this.audioLoader.load(sand4, buffer => {
       this.sandSound4.setBuffer(buffer);
-      this.sandSound4.setVolume(0.5);
+      this.sandSound4.setVolume(0.25);
     });
 
     this.audioLoader.load(stone1, buffer => {
       this.stoneSound1.setBuffer(buffer);
-      this.stoneSound1.setVolume(0.5);
+      this.stoneSound1.setVolume(0.25);
     });
     this.audioLoader.load(stone2, buffer => {
       this.stoneSound2.setBuffer(buffer);
-      this.stoneSound2.setVolume(0.5);
+      this.stoneSound2.setVolume(0.25);
     });
     this.audioLoader.load(stone3, buffer => {
       this.stoneSound3.setBuffer(buffer);
-      this.stoneSound3.setVolume(0.5);
+      this.stoneSound3.setVolume(0.25);
     });
     this.audioLoader.load(stone4, buffer => {
       this.stoneSound4.setBuffer(buffer);
-      this.stoneSound4.setVolume(0.5);
+      this.stoneSound4.setVolume(0.25);
     });
 
     this.audioLoader.load(dirt1, buffer => {
       this.dirtSound1.setBuffer(buffer);
-      this.dirtSound1.setVolume(0.5);
+      this.dirtSound1.setVolume(0.25);
     });
     this.audioLoader.load(dirt2, buffer => {
       this.dirtSound2.setBuffer(buffer);
-      this.dirtSound2.setVolume(0.5);
+      this.dirtSound2.setVolume(0.25);
     });
     this.audioLoader.load(dirt3, buffer => {
       this.dirtSound3.setBuffer(buffer);
-      this.dirtSound3.setVolume(0.5);
+      this.dirtSound3.setVolume(0.25);
     });
     this.audioLoader.load(dirt4, buffer => {
       this.dirtSound4.setBuffer(buffer);
-      this.dirtSound4.setVolume(0.5);
+      this.dirtSound4.setVolume(0.25);
     });
 
     this.audioLoader.load(tree1, buffer => {
       this.treeSound1.setBuffer(buffer);
-      this.treeSound1.setVolume(0.5);
+      this.treeSound1.setVolume(0.25);
     });
     this.audioLoader.load(tree2, buffer => {
       this.treeSound2.setBuffer(buffer);
-      this.treeSound2.setVolume(0.5);
+      this.treeSound2.setVolume(0.25);
     });
     this.audioLoader.load(tree3, buffer => {
       this.treeSound3.setBuffer(buffer);
-      this.treeSound3.setVolume(0.5);
+      this.treeSound3.setVolume(0.25);
     });
     this.audioLoader.load(tree4, buffer => {
       this.treeSound4.setBuffer(buffer);
-      this.treeSound4.setVolume(0.5);
+      this.treeSound4.setVolume(0.25);
     });
 
     this.audioLoader.load(leaf1, buffer => {
       this.leafSound1.setBuffer(buffer);
-      this.leafSound1.setVolume(0.5);
+      this.leafSound1.setVolume(0.25);
     });
     this.audioLoader.load(leaf2, buffer => {
       this.leafSound2.setBuffer(buffer);
-      this.leafSound2.setVolume(0.5);
+      this.leafSound2.setVolume(0.25);
     });
     this.audioLoader.load(leaf3, buffer => {
       this.leafSound3.setBuffer(buffer);
-      this.leafSound3.setVolume(0.5);
+      this.leafSound3.setVolume(0.25);
     });
     this.audioLoader.load(leaf4, buffer => {
       this.leafSound4.setBuffer(buffer);
-      this.leafSound4.setVolume(0.5);
+      this.leafSound4.setVolume(0.25);
     });
   }
 
@@ -313,6 +312,14 @@ export default class Audio {
             break;
         }
         break;
+    }
+  }
+
+  update(paused){
+    if (paused) {
+this.bgm.pause();
+    } else {
+this.bgm.play();
     }
   }
 }

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import BlockMaterial from "../materials/BlockMaterial.js";
 import Audio from "../terrains/Audio.js";
+import UI from "./UI.js";
 
 export default class Control {
   constructor(camera, scene, terrainGenerator) {
@@ -11,7 +12,8 @@ export default class Control {
     this.terrain = terrainGenerator.terrain;
     this.terrainSet = terrainGenerator.terrainSet;
     this.vector3 = terrainGenerator.vector3;
-
+    this.paused = true;
+    this.ui = new UI();
     this.flyingMode = false;
     this.initEventListeners();
     this.audio = new Audio(this.camera);
@@ -108,6 +110,9 @@ export default class Control {
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("mousedown", this.onMouseDown);
     document.addEventListener("mouseup", this.onMouseUp);
+    this.paused = false;
+    this.ui.update(this.paused);
+    this.audio.update(this.paused);
   }
   // when unlocked, remove control eventListeners and reset movement state
   onUnlock() {
@@ -123,6 +128,11 @@ export default class Control {
     document.removeEventListener("keyup", this.onKeyUp);
     document.removeEventListener("mousedown", this.onMouseDown);
     document.removeEventListener("mouseup", this.onMouseUp);
+    this.paused = true;
+    this.ui.update(this.paused);
+    this.audio.update(this.paused);
+
+
   }
 
   onMouseDown = e => {
