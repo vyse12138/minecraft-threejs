@@ -81,14 +81,14 @@ export default class Control {
     );
   }
 
-  initLock =() => {
+  initLock = () => {
     document.body.requestPointerLock();
-  }
+  };
   initEventListeners() {
     // disable right click context menu for safari
     document.addEventListener("contextmenu", e => e.preventDefault());
     // click to lock
-    document.addEventListener("click",this.initLock);
+    document.addEventListener("click", this.initLock);
     // mousewheel to unlock (for testing)
     document.addEventListener("mousewheel", () => {
       document.exitPointerLock();
@@ -111,7 +111,7 @@ export default class Control {
     document.addEventListener("mousedown", this.onMouseDown);
     document.addEventListener("mouseup", this.onMouseUp);
 
-    document.removeEventListener("click",this.initLock);
+    document.removeEventListener("click", this.initLock);
 
     this.paused = false;
     this.ui.update(this.paused);
@@ -132,13 +132,11 @@ export default class Control {
     document.removeEventListener("mousedown", this.onMouseDown);
     document.removeEventListener("mouseup", this.onMouseUp);
 
-    document.addEventListener("click",this.initLock);
-    
+    document.addEventListener("click", this.initLock);
+
     this.paused = true;
     this.ui.update(this.paused);
     this.audio.update(this.paused);
-
-
   }
 
   onMouseDown = e => {
