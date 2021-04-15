@@ -689,7 +689,7 @@ export default class Control {
         }
       }
 
-      // catching net
+      // falling catching net
       if (this.camera.position.y < -100) {
         this.camera.position.y = 100;
       }
