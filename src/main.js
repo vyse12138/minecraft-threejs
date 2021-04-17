@@ -23,9 +23,11 @@ const control = new Control(camera, scene, terrainGenerator);
 (function animate() {
   requestAnimationFrame(animate);
 
-  control.update();
-  stats.update();
-  blockHighlight.update();
+
+  control.update()
+  stats.update()
+  blockHighlight.update()
+
 
   renderer.render(scene, camera);
 })();
