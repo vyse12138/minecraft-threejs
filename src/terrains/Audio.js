@@ -45,7 +45,7 @@ export default class Audio {
     this.bgm = new THREE.Audio(this.listener);
     this.audioLoader.load(bgm, buffer => {
       this.bgm.setBuffer(buffer);
-      this.bgm.setVolume(0.5);
+      this.bgm.setVolume(0.25);
       this.bgm.setLoop(true);
     });
 
