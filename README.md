@@ -2,7 +2,7 @@
 
 Minecraft clone made with JavaScript and three.js
 
-Check it out: [three-minecraft](https://three-minecraft.netlify.app/)
+Check it out: [three-minecraft](https://mc.yuleiz.com/)
 
 ## ✔Features:
 - Left click to remove block
