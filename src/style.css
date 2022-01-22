@@ -1,0 +1,14 @@
+#fps {
+  position: fixed;
+  left: 0%;
+  top: 0%;
+  width: 100px;
+  height: 100px;
+  padding: 10px;
+}
+
+body {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
