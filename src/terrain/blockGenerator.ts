@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import BlockMaterial from './block.js'
+import BlockMaterial from './material.js'
 
 export default class TerrainGenerator {
   grassMaterial: THREE.MeshStandardMaterial | THREE.MeshStandardMaterial[]

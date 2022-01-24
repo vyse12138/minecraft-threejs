@@ -39,6 +39,7 @@ for (let x = 0; x < 100; x++) {
   }
 }
 
+console.log(scene)
 ;(function animate() {
   requestAnimationFrame(animate)
   control.update()
