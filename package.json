@@ -1,6 +1,7 @@
 {
-  "name": "a",
+  "name": "minecraft-threejs",
   "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

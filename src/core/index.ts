@@ -20,9 +20,9 @@ export default class Core {
     this.camera.near = 0.1
     this.camera.far = 500
     this.camera.updateProjectionMatrix()
-    this.camera.position.set(30, 17, 30)
+    this.camera.position.set(-10, 40, -10)
 
-    this.camera.lookAt(31, 17, 30)
+    this.camera.lookAt(0, 30, 0)
 
     window.addEventListener('resize', () => {
       this.camera.aspect = window.innerWidth / window.innerHeight
