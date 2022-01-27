@@ -9,7 +9,7 @@ import UI from './ui'
 
 import './style.css'
 
-const renderDistance = 3
+const renderDistance = 4
 
 const core = new Core()
 const camera = core.camera
@@ -18,9 +18,9 @@ const renderer = core.renderer
 const player = new Player()
 
 const ui = new UI()
-const control = new Control(camera, scene, player)
 
 const terrain = new Terrain(scene, camera, renderDistance)
+const control = new Control(scene, camera, player, terrain)
 
 // an
 console.log(scene)

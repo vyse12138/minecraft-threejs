@@ -1,10 +1,14 @@
 import * as THREE from 'three'
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise'
 // import { SimplexNoise } from 'three/examples/jsm/math/SimplexNoise'
-import Blocks from './mesh/blocks'
-import Materials, { MaterialTypes } from './mesh/materials'
-import Block from './block'
+import Materials, { MaterialType } from './mesh/materials'
+import Block from './mesh/block'
 import Highlight from './highlight'
+
+enum BlockType {
+  grass = 0,
+  sand = 1
+}
 
 export default class Terrain {
   constructor(
@@ -15,30 +19,57 @@ export default class Terrain {
     this.scene = scene
     this.camera = camera
     this.distance = distance
-    const materials = new Materials()
-    this.grass = new Blocks(
-      materials.get(MaterialTypes.grass),
-      (distance * 16 * 2 + 16) ** 2
-    )
-    this.scene.add(this.grass.mesh)
+    this.count = (distance * 16 * 2 + 16) ** 2
+    this.initBlocks()
     this.generate(new THREE.Vector2(0, 0))
-    this.highlight = new Highlight(scene, camera, [this.grass.mesh])
+    this.highlight = new Highlight(scene, camera, this.blocks)
   }
   distance: number
+  count: number
   scene: THREE.Scene
   camera: THREE.PerspectiveCamera
-  blocks: Block[] = []
   position = new THREE.Vector3()
-  grass: Blocks
+
+  blocks: THREE.InstancedMesh[] = []
+
   chunk = new THREE.Vector2(0, 0)
   previousChunk = new THREE.Vector2(0, 0)
   seed = Math.random()
   noise = new ImprovedNoise()
   highlight: Highlight
 
+  initBlocks = () => {
+    const materials = new Materials()
+    const geometry = new THREE.BoxGeometry(1, 1, 1)
+
+    const materialType = [MaterialType.grass, MaterialType.sand]
+    for (let i = 0; i < materialType.length; i++) {
+      let block = new THREE.InstancedMesh(
+        geometry,
+        materials.get(materialType[i]),
+        this.count
+      )
+      this.blocks.push(block)
+      this.scene.add(block)
+    }
+  }
+
+  resetBlocks = () => {
+    for (const block of this.blocks) {
+      block.instanceMatrix = new THREE.InstancedBufferAttribute(
+        new Float32Array(this.count * 16),
+        16
+      )
+      block.instanceColor = null
+    }
+  }
+
   generate = (chunk: THREE.Vector2) => {
+    this.resetBlocks()
+
     const matrix = new THREE.Matrix4()
-    let i = 0
+    let grassCount = 0,
+      sandCount = 0
     for (
       let x = -16 * this.distance + 16 * chunk.x;
       x < 16 * this.distance + 16 + 16 * chunk.x;
@@ -51,16 +82,27 @@ export default class Terrain {
           z++
         ) {
           let noise = Math.floor(
-            this.noise.noise(x / 22, z / 22, this.seed) * 9
+            this.noise.noise(x / 22, z / 22, this.seed) * 8
           )
-
           matrix.setPosition(x, y + noise, z)
-          this.grass.mesh.setColorAt(i, new THREE.Color(1, 1, 1))
-          this.grass.mesh.setMatrixAt(i++, matrix)
+          if (noise < -3) {
+            this.blocks[BlockType.sand].setColorAt(
+              sandCount,
+              new THREE.Color(1, 1, 1)
+            )
+            this.blocks[BlockType.sand].setMatrixAt(sandCount++, matrix)
+          } else {
+            this.blocks[BlockType.grass].setColorAt(
+              grassCount,
+              new THREE.Color(1, 1, 1)
+            )
+            this.blocks[BlockType.grass].setMatrixAt(grassCount++, matrix)
+          }
         }
       }
     }
-    this.grass.mesh.instanceMatrix.needsUpdate = true
+    this.blocks[BlockType.grass].instanceMatrix.needsUpdate = true
+    this.blocks[BlockType.sand].instanceMatrix.needsUpdate = true
   }
 
   i = 0

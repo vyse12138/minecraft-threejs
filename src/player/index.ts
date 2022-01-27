@@ -21,7 +21,7 @@ export default class Player {
     this.mode = Mode
     this.speed = Speed[this.mode]
   }
-  falling = 78.4
+  falling = 38.4
 
   jump = 1.2522
 

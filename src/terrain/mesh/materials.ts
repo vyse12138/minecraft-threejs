@@ -10,11 +10,12 @@ import oak_log_top from '../../../textures/block/oak_log_top.png'
 import oak_leaves from '../../../textures/block/oak_leaves.png'
 import sand from '../../../textures/block/sand.png'
 
-export enum MaterialTypes {
+export enum MaterialType {
   grass = 'grass',
   dirt = 'dirt',
   tree = 'tree',
-  leaf = 'leaf'
+  leaf = 'leaf',
+  sand = 'sand'
 }
 
 let loader = new THREE.TextureLoader()
@@ -56,6 +57,7 @@ export default class Materials {
       new THREE.MeshStandardMaterial({ map: grassMaterial })
     ],
     dirt: new THREE.MeshStandardMaterial({ map: dirtMaterial }),
+    sand: new THREE.MeshStandardMaterial({ map: sandMaterial }),
     tree: [
       new THREE.MeshStandardMaterial({ map: treeMaterial }),
       new THREE.MeshStandardMaterial({ map: treeMaterial }),
@@ -72,7 +74,7 @@ export default class Materials {
   }
 
   get = (
-    type: MaterialTypes
+    type: MaterialType
   ): THREE.MeshStandardMaterial | THREE.MeshStandardMaterial[] => {
     return this.materials[type]
   }
