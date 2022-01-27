@@ -1,18 +1,10 @@
 import * as THREE from 'three'
-import material, { MaterialTypes } from './material'
 
 export default class Block {
-  constructor(position: THREE.Vector3, placed: boolean, type: MaterialTypes) {
-    this.position = position
+  constructor(x: number, y: number, z: number, placed: boolean) {
+    this.position = new THREE.Vector3(x, y, z)
     this.placed = placed
-    this.type = type
-    this.material = material(type)
-    this.mesh = new THREE.InstancedMesh(this.geometry, this.material, 8000)
   }
   position: THREE.Vector3
   placed: boolean
-  type: string
-  geometry = new THREE.BoxGeometry(1, 1, 1)
-  material: THREE.MeshStandardMaterial[]
-  mesh: THREE.InstancedMesh
 }

@@ -1,6 +1,6 @@
 export default class FPS {
   constructor() {
-    this.box.id = 'fps'
+    this.box.className = 'fps'
     this.box.appendChild(this.fps)
     document.body.appendChild(this.box)
   }

@@ -20,9 +20,9 @@ export default class Core {
     this.camera.near = 0.1
     this.camera.far = 500
     this.camera.updateProjectionMatrix()
-    this.camera.position.set(-10, 40, -10)
+    this.camera.position.set(8, 40, 8)
 
-    this.camera.lookAt(0, 30, 0)
+    this.camera.lookAt(100, 30, 100)
 
     window.addEventListener('resize', () => {
       this.camera.aspect = window.innerWidth / window.innerHeight
@@ -47,13 +47,13 @@ export default class Core {
     const reflectionLight = new THREE.AmbientLight(0x404040)
     this.scene.add(reflectionLight)
 
-    const sunGeometry = new THREE.SphereGeometry(5, 32, 32)
-    const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 })
-    const sun = new THREE.Mesh(sunGeometry, sunMaterial)
-    sun.position.y = 100
-    sun.position.x = 200
-    sun.position.z = 150
-    this.scene.add(sun)
+    // const sunGeometry = new THREE.SphereGeometry(5, 32, 32)
+    // const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 })
+    // const sun = new THREE.Mesh(sunGeometry, sunMaterial)
+    // sun.position.y = 100
+    // sun.position.x = 200
+    // sun.position.z = 150
+    // this.scene.add(sun)
   }
   initRenderer = () => {
     this.renderer.setSize(window.innerWidth, window.innerHeight)

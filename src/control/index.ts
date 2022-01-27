@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls'
-import Player, { Mode, Speed } from './player'
+import Player, { Mode, Speed } from '../player'
 
 export default class Control {
   constructor(
@@ -33,42 +33,62 @@ export default class Control {
       this.control.unlock()
     })
     document.body.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.repeat) {
+        return
+      }
       switch (e.key) {
         case 'w':
-          this.velocity.setX(this.player.speed)
+        case 'W':
+          this.velocity.x += this.player.speed
           break
         case 's':
-          this.velocity.setX(-this.player.speed)
+        case 'S':
+          this.velocity.x -= this.player.speed
           break
         case 'a':
-          this.velocity.setZ(-this.player.speed)
+        case 'A':
+          this.velocity.z -= this.player.speed
           break
         case 'd':
-          this.velocity.setZ(this.player.speed)
+        case 'D':
+          this.velocity.z += this.player.speed
           break
         case ' ':
-          this.velocity.setY(this.player.speed)
+          this.velocity.y += this.player.speed
           break
         case 'Shift':
-          this.velocity.setY(-this.player.speed)
+          this.velocity.y -= this.player.speed
           break
         default:
           break
       }
     })
     document.body.addEventListener('keyup', (e: KeyboardEvent) => {
+      if (e.repeat) {
+        return
+      }
       switch (e.key) {
         case 'w':
+        case 'W':
+          this.velocity.x -= this.player.speed
+          break
         case 's':
-          this.velocity.setX(0)
+        case 'S':
+          this.velocity.x += this.player.speed
           break
         case 'a':
+        case 'A':
+          this.velocity.z += this.player.speed
+          break
         case 'd':
-          this.velocity.setZ(0)
+        case 'D':
+          this.velocity.z -= this.player.speed
           break
         case ' ':
+          this.velocity.y -= this.player.speed
+          break
         case 'Shift':
-          this.velocity.setY(0)
+          this.velocity.y += this.player.speed
           break
         default:
           break
