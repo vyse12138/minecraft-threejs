@@ -55,8 +55,10 @@ export default class Control {
   // other properties
   p1 = performance.now()
   p2 = performance.now()
-  far = 1.8
   raycaster: THREE.Raycaster
+
+  // constants
+  far = 1.8
 
   initWorker = () => {
     this.downCollideWorker.onmessage = (msg: MessageEvent<boolean>) => {
@@ -201,15 +203,28 @@ export default class Control {
               // update
               block.object.instanceMatrix.needsUpdate = true
 
-              this.terrain.customBlocks.push(
-                new Block(
-                  position.x,
-                  position.y,
-                  position.z,
-                  BlockType.grass,
-                  false
+              let existed = false
+              for (const block of this.terrain.customBlocks) {
+                if (
+                  block.x === position.x &&
+                  block.y === position.y &&
+                  block.z === position.z
+                ) {
+                  existed = true
+                  block.placed = false
+                }
+              }
+              if (!existed) {
+                this.terrain.customBlocks.push(
+                  new Block(
+                    position.x,
+                    position.y,
+                    position.z,
+                    BlockType.grass,
+                    false
+                  )
                 )
-              )
+              }
             }
           }
           break
@@ -257,15 +272,29 @@ export default class Control {
               // update
               block.object.instanceColor!.needsUpdate = true
               block.object.instanceMatrix.needsUpdate = true
-              this.terrain.customBlocks.push(
-                new Block(
-                  normal.x + position.x,
-                  normal.y + position.y,
-                  normal.z + position.z,
-                  BlockType.grass,
-                  true
+
+              let existed = false
+              for (const block of this.terrain.customBlocks) {
+                if (
+                  block.x === normal.x + position.x &&
+                  block.y === normal.y + position.y &&
+                  block.z === normal.z + position.z
+                ) {
+                  existed = true
+                  block.placed = true
+                }
+              }
+              if (!existed) {
+                this.terrain.customBlocks.push(
+                  new Block(
+                    normal.x + position.x,
+                    normal.y + position.y,
+                    normal.z + position.z,
+                    BlockType.grass,
+                    true
+                  )
                 )
-              )
+              }
             }
           }
           break
@@ -275,6 +304,7 @@ export default class Control {
     })
   }
 
+  i = 0
   update = () => {
     this.p1 = performance.now()
     const delta = (this.p1 - this.p2) / 1000
@@ -290,12 +320,19 @@ export default class Control {
       // non-flying mode
 
       // post calculation to worker
+
       this.downCollideWorker.postMessage({
         position: this.camera.position,
-        matrices: this.terrain.blocks.map(block => block.instanceMatrix),
-        count: this.terrain.maxCount,
-        far: this.far - this.velocity.y * delta
+        far: this.far - this.velocity.y * delta,
+        blocks: this.terrain.customBlocks,
+        seed: this.terrain.seed,
+        noiseAmp: this.terrain.noiseAmp,
+        noiseGap: this.terrain.noiseGap
       })
+
+      if (this.i++ === 60) {
+        this.i = 0
+      }
 
       this.frontCollideWorker.postMessage({
         position: this.camera.position,

@@ -39,6 +39,8 @@ export default class Terrain {
 
   // noise properties
   seed = Math.random()
+  noiseGap = 22
+  noiseAmp = 8
   noise = new ImprovedNoise()
 
   // other properties
@@ -107,7 +109,8 @@ export default class Terrain {
           z++
         ) {
           let noise = Math.floor(
-            this.noise.noise(x / 22, z / 22, this.seed) * 8
+            this.noise.noise(x / this.noiseGap, z / this.noiseGap, this.seed) *
+              this.noiseAmp
           )
           matrix.setPosition(x, y + noise, z)
           if (noise < -3) {
