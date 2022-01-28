@@ -1,0 +1,19 @@
+{
+  "name": "minecraft-threejs",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview --host"
+  },
+  "devDependencies": {
+    "@types/three": "^0.136.1",
+    "typescript": "^4.4.4",
+    "vite": "^2.7.2"
+  },
+  "dependencies": {
+    "simplex-noise": "^3.0.1",
+    "three": "^0.136.0"
+  }
+}
