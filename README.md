@@ -1,6 +1,6 @@
 # three-minecraft
 
-Minecraft clone made with JavaScript and three.js
+Minecraft clone made with TypeScript and three.js
 
 Check it out: [three-minecraft](https://mc.yuleiz.com/)
 
