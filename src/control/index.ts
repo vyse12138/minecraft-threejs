@@ -1,12 +1,13 @@
 import * as THREE from 'three'
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls'
 import Player, { Mode } from '../player'
-import Terrain from '../terrain'
+import Terrain, { BlockType } from '../terrain'
 import DownCollideWorker from './worker/downCollide?worker'
 import FrontCollideWorker from './worker/frontCollide?worker'
 import BackCollideWorker from './worker/backCollide?worker'
 import LeftCollideWorker from './worker/leftCollide?worker'
 import RightCollideWorker from './worker/rightCollide?worker'
+import Block from '../terrain/mesh/block'
 
 export default class Control {
   constructor(
@@ -20,6 +21,9 @@ export default class Control {
     this.player = player
     this.terrain = terrain
     this.control = new PointerLockControls(camera, document.body)
+
+    this.raycaster = new THREE.Raycaster()
+    this.raycaster.far = 8
 
     this.initEventListeners()
     this.initWorker()
@@ -52,6 +56,7 @@ export default class Control {
   p1 = performance.now()
   p2 = performance.now()
   far = 1.8
+  raycaster: THREE.Raycaster
 
   initWorker = () => {
     this.downCollideWorker.onmessage = (msg: MessageEvent<boolean>) => {
@@ -175,6 +180,100 @@ export default class Control {
           break
       }
     })
+    document.addEventListener('mousedown', e => {
+      e.preventDefault()
+      switch (e.button) {
+        case 0:
+          {
+            this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
+            const block = this.raycaster.intersectObjects(
+              this.terrain.blocks
+            )[0]
+            if (block && block.object instanceof THREE.InstancedMesh) {
+              // calculation position
+              let matrix = new THREE.Matrix4()
+              block.object.getMatrixAt(block.instanceId!, matrix)
+              const position = new THREE.Vector3().setFromMatrixPosition(matrix)
+
+              //remove the block
+              block.object.setMatrixAt(block.instanceId!, new THREE.Matrix4())
+
+              // update
+              block.object.instanceMatrix.needsUpdate = true
+
+              this.terrain.customBlocks.push(
+                new Block(
+                  position.x,
+                  position.y,
+                  position.z,
+                  BlockType.grass,
+                  false
+                )
+              )
+            }
+          }
+          break
+        case 2:
+          {
+            this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
+            const block = this.raycaster.intersectObjects(
+              this.terrain.blocks
+            )[0]
+
+            if (block && block.object instanceof THREE.InstancedMesh) {
+              // calculation normal and position
+              const normal = block.face!.normal
+              const matrix = new THREE.Matrix4()
+              block.object.getMatrixAt(block.instanceId!, matrix)
+              const position = new THREE.Vector3().setFromMatrixPosition(matrix)
+
+              // return when block overlaps with player
+              if (
+                position.x + normal.x === Math.round(this.camera.position.x) &&
+                position.z + normal.z === Math.round(this.camera.position.z) &&
+                (position.y + normal.y === Math.round(this.camera.position.y) ||
+                  position.y + normal.y ===
+                    Math.round(this.camera.position.y - 1))
+              ) {
+                return
+              }
+
+              // put the block
+              matrix.setPosition(
+                normal.x + position.x,
+                normal.y + position.y,
+                normal.z + position.z
+              )
+              block.object.setMatrixAt(
+                this.terrain.getCount(BlockType.grass),
+                matrix
+              )
+              block.object.setColorAt(
+                this.terrain.getCount(BlockType.grass),
+                new THREE.Color()
+              )
+              this.terrain.setCount(BlockType.grass)
+
+              // update
+              block.object.instanceColor!.needsUpdate = true
+              block.object.instanceMatrix.needsUpdate = true
+              this.terrain.customBlocks.push(
+                new Block(
+                  normal.x + position.x,
+                  normal.y + position.y,
+                  normal.z + position.z,
+                  BlockType.grass,
+                  true
+                )
+              )
+              console.log(this.terrain.customBlocks)
+            }
+          }
+          break
+        default:
+          break
+      }
+    })
   }
 
   update = () => {
@@ -195,29 +294,29 @@ export default class Control {
       this.downCollideWorker.postMessage({
         position: this.camera.position,
         matrices: this.terrain.blocks.map(block => block.instanceMatrix),
-        count: this.terrain.count,
+        count: this.terrain.maxCount,
         far: this.far - this.velocity.y * delta
       })
 
       this.frontCollideWorker.postMessage({
         position: this.camera.position,
         matrices: this.terrain.blocks.map(block => block.instanceMatrix),
-        count: this.terrain.count
+        count: this.terrain.maxCount
       })
       this.backCollideWorker.postMessage({
         position: this.camera.position,
         matrices: this.terrain.blocks.map(block => block.instanceMatrix),
-        count: this.terrain.count
+        count: this.terrain.maxCount
       })
       this.leftCollideWorker.postMessage({
         position: this.camera.position,
         matrices: this.terrain.blocks.map(block => block.instanceMatrix),
-        count: this.terrain.count
+        count: this.terrain.maxCount
       })
       this.rightCollideWorker.postMessage({
         position: this.camera.position,
         matrices: this.terrain.blocks.map(block => block.instanceMatrix),
-        count: this.terrain.count
+        count: this.terrain.maxCount
       })
 
       // gravity
