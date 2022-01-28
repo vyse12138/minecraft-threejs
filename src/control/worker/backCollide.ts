@@ -5,16 +5,19 @@ onmessage = (
     count: number
     matrices: THREE.InstancedBufferAttribute[]
     position: THREE.Vector3
-    far: number
   }>
 ) => {
   let meshes = []
 
   let raycaster = new THREE.Raycaster(
-    new THREE.Vector3().copy(msg.data.position),
-    new THREE.Vector3(0, -1, 0),
+    new THREE.Vector3(
+      msg.data.position.x,
+      msg.data.position.y - 1,
+      msg.data.position.z
+    ),
+    new THREE.Vector3(-1, 0, 0),
     0,
-    msg.data.far
+    0.6
   )
 
   for (let matrix of msg.data.matrices) {

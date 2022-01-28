@@ -12,6 +12,10 @@ export default class BlockHighlight {
     this.terrain = terrain
     this.raycaster = new THREE.Raycaster()
     this.raycaster.far = 8
+
+    document.body.addEventListener('mousedown', () => {
+      console.log(this.block)
+    })
   }
   camera
   scene
@@ -21,6 +25,7 @@ export default class BlockHighlight {
   normal = new THREE.Color(1, 1, 1)
 
   block: THREE.Intersection | null = null
+
   update() {
     // disable last block highlight
     if (this.block) {

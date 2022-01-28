@@ -7,7 +7,9 @@ import Highlight from './highlight'
 
 enum BlockType {
   grass = 0,
-  sand = 1
+  sand = 1,
+  dirt = 2,
+  water = 3
 }
 
 export default class Terrain {
@@ -42,12 +44,18 @@ export default class Terrain {
     const materials = new Materials()
     const geometry = new THREE.BoxGeometry(1, 1, 1)
 
-    const materialType = [MaterialType.grass, MaterialType.sand]
+    const materialType = [
+      MaterialType.grass,
+      MaterialType.sand,
+      MaterialType.dirt,
+      MaterialType.water
+    ]
+    const factor = [1, 1, 0, 0]
     for (let i = 0; i < materialType.length; i++) {
       let block = new THREE.InstancedMesh(
         geometry,
         materials.get(materialType[i]),
-        this.count
+        this.count * factor[i]
       )
       this.blocks.push(block)
       this.scene.add(block)
@@ -55,12 +63,14 @@ export default class Terrain {
   }
 
   resetBlocks = () => {
-    for (const block of this.blocks) {
-      block.instanceMatrix = new THREE.InstancedBufferAttribute(
-        new Float32Array(this.count * 16),
+    const factor = [1, 1, 0, 0]
+
+    for (let i = 0; i < this.blocks.length; i++) {
+      this.blocks[i].instanceMatrix = new THREE.InstancedBufferAttribute(
+        new Float32Array(this.count * factor[i] * 16),
         16
       )
-      block.instanceColor = null
+      this.blocks[i].instanceColor = null
     }
   }
 
@@ -75,14 +85,14 @@ export default class Terrain {
       x < 16 * this.distance + 16 + 16 * chunk.x;
       x++
     ) {
-      for (let y = 30; y < 31; y++) {
+      for (let y = 30; y > 29; y--) {
         for (
           let z = -16 * this.distance + 16 * chunk.y;
           z < 16 * this.distance + 16 + 16 * chunk.y;
           z++
         ) {
           let noise = Math.floor(
-            this.noise.noise(x / 22, z / 22, this.seed) * 8
+            this.noise.noise(x / 22, z / 22, this.seed) * 10
           )
           matrix.setPosition(x, y + noise, z)
           if (noise < -3) {

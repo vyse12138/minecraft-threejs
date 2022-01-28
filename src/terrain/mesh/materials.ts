@@ -9,13 +9,15 @@ import oak_log from '../../../textures/block/oak_log.png'
 import oak_log_top from '../../../textures/block/oak_log_top.png'
 import oak_leaves from '../../../textures/block/oak_leaves.png'
 import sand from '../../../textures/block/sand.png'
+import water from '../../../textures/block/water.png'
 
 export enum MaterialType {
   grass = 'grass',
   dirt = 'dirt',
   tree = 'tree',
   leaf = 'leaf',
-  sand = 'sand'
+  sand = 'sand',
+  water = 'water'
 }
 
 let loader = new THREE.TextureLoader()
@@ -31,6 +33,7 @@ const coalMaterial = loader.load(coal_ore)
 const ironMaterial = loader.load(iron_ore)
 const leafMaterial = loader.load(oak_leaves)
 const sandMaterial = loader.load(sand)
+const waterMaterial = loader.load(water)
 
 // pixelate texture
 grassTopMaterial.magFilter = THREE.NearestFilter
@@ -43,6 +46,7 @@ coalMaterial.magFilter = THREE.NearestFilter
 ironMaterial.magFilter = THREE.NearestFilter
 leafMaterial.magFilter = THREE.NearestFilter
 sandMaterial.magFilter = THREE.NearestFilter
+waterMaterial.magFilter = THREE.NearestFilter
 
 export default class Materials {
   materials = {
@@ -70,6 +74,11 @@ export default class Materials {
       map: leafMaterial,
       color: new THREE.Color(0, 1, 0),
       transparent: true
+    }),
+    water: new THREE.MeshStandardMaterial({
+      map: waterMaterial,
+      transparent: true,
+      opacity: 0.7
     })
   }
 
