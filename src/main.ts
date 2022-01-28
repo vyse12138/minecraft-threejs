@@ -1,4 +1,3 @@
-import * as THREE from 'three'
 import Core from './core'
 import Control from './control'
 import Player from './player'
@@ -25,11 +24,9 @@ const control = new Control(scene, camera, player, terrain)
 // an
 console.log(scene)
 ;(function animate() {
-  let p1 = performance.now()
   requestAnimationFrame(animate)
   control.update()
   terrain.update()
   ui.update()
-  // console.log(performance.now() - p1)
   renderer.render(scene, camera)
 })()

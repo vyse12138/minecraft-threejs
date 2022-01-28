@@ -266,7 +266,6 @@ export default class Control {
                   true
                 )
               )
-              console.log(this.terrain.customBlocks)
             }
           }
           break
