@@ -1,8 +1,8 @@
-# three-minecraft
+# minecraft-threejs
 
 Minecraft clone made with TypeScript and three.js
 
-Check it out: [three-minecraft](https://mc.yuleiz.com/)
+Check it out: [Minecraft - Three.js](https://mc.yuleiz.com/)
 
 ## ✔Features:
 
