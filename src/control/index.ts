@@ -193,6 +193,7 @@ export default class Control {
     document.addEventListener('mousedown', e => {
       e.preventDefault()
       let p1 = performance.now()
+
       this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
       const block = this.raycaster.intersectObjects(this.terrain.blocks)[0]
       const matrix = new THREE.Matrix4()
@@ -206,7 +207,27 @@ export default class Control {
               const position = new THREE.Vector3().setFromMatrixPosition(matrix)
 
               //remove the block
-              block.object.setMatrixAt(block.instanceId!, new THREE.Matrix4())
+              block.object.setMatrixAt(
+                block.instanceId!,
+                new THREE.Matrix4().set(
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                )
+              )
 
               // update
               block.object.instanceMatrix.needsUpdate = true
@@ -331,7 +352,7 @@ export default class Control {
   ) => {
     const matrix = new THREE.Matrix4()
 
-    //reest simulation blocks
+    //reset simulation blocks
     let index = 0
     this.tempMesh.instanceMatrix = new THREE.InstancedBufferAttribute(
       new Float32Array(100 * 16),
@@ -408,7 +429,16 @@ export default class Control {
           z / noise.treeGap,
           noise.treeSeed * noise.treeAmp
         )
-        if (treeOffset < -0.7 && y >= 27) {
+
+        let stoneOffset =
+          noise.get(x / noise.stoneGap, z / noise.stoneGap, noise.stoneSeed) *
+          noise.stoneAmp
+
+        if (
+          treeOffset < -0.7 &&
+          y >= 27 &&
+          stoneOffset < noise.stoneThreshold
+        ) {
           matrix.setPosition(x, y + i, z)
           this.tempMesh.setMatrixAt(index++, matrix)
         }

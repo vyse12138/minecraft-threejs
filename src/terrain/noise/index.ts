@@ -7,6 +7,16 @@ export default class Noise {
   gap = 22
   amp = 8
 
+  stoneSeed = Math.random()
+  stoneGap = 12
+  stoneAmp = 8
+  stoneThreshold = 3.5
+
+  coalSeed = Math.random()
+  coalGap = 2
+  coalAmp = 8
+  coalThreshold = 3.5
+
   treeSeed = Math.random()
   treeGap = 2
   treeAmp = 6

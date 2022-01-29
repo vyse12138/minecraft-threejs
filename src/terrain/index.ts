@@ -11,7 +11,9 @@ export enum BlockType {
   sand = 1,
   tree = 2,
   leaf = 3,
-  dirt = 4
+  dirt = 4,
+  stone = 5,
+  coal = 6
 }
 export default class Terrain {
   constructor(
@@ -47,10 +49,9 @@ export default class Terrain {
         )
       }
 
-      this.blocks[BlockType.grass].instanceMatrix.needsUpdate = true
-      this.blocks[BlockType.sand].instanceMatrix.needsUpdate = true
-      this.blocks[BlockType.tree].instanceMatrix.needsUpdate = true
-      this.blocks[BlockType.leaf].instanceMatrix.needsUpdate = true
+      for (const block of this.blocks) {
+        block.instanceMatrix.needsUpdate = true
+      }
     }
   }
   // core properties
@@ -66,8 +67,8 @@ export default class Terrain {
 
   // other properties
   blocks: THREE.InstancedMesh[] = []
-  blocksCount = [0, 0, 0, 0]
-  blocksFactor = [1, 1, 0.2, 1]
+  blocksCount: number[] = []
+  blocksFactor = [1, 0.5, 0.2, 1, 0.5, 0.5, 1]
 
   customBlocks: Block[] = []
   highlight: Highlight
@@ -93,8 +94,12 @@ export default class Terrain {
       MaterialType.grass,
       MaterialType.sand,
       MaterialType.tree,
-      MaterialType.leaf
+      MaterialType.leaf,
+      MaterialType.dirt,
+      MaterialType.stone,
+      MaterialType.coal
     ]
+
     for (let i = 0; i < materialType.length; i++) {
       let block = new THREE.InstancedMesh(
         geometry,
@@ -105,11 +110,12 @@ export default class Terrain {
       this.blocks.push(block)
       this.scene.add(block)
     }
+
+    this.blocksCount = new Array(materialType.length).fill(0)
   }
 
   resetBlocks = () => {
     // reest count and instance matrix
-    this.blocksCount = [0, 0, 0, 0]
     for (let i = 0; i < this.blocks.length; i++) {
       this.blocks[i].instanceMatrix = new THREE.InstancedBufferAttribute(
         new Float32Array(this.maxCount * this.blocksFactor[i] * 16),
@@ -119,14 +125,18 @@ export default class Terrain {
   }
 
   generate = () => {
+    this.blocksCount = new Array(this.blocks.length).fill(0)
     // post work to generate worker
     this.generateWorker.postMessage({
       distance: this.distance,
       chunk: this.chunk,
       noiseSeed: this.noise.seed,
       treeSeed: this.noise.treeSeed,
-      idMap: this.idMap,
+      stoneSeed: this.noise.stoneSeed,
+      coalSeed: this.noise.coalSeed,
+      idMap: new Map<string, number>(),
       blocksFactor: this.blocksFactor,
+      blocksCount: this.blocksCount,
       customBlocks: this.customBlocks
     })
   }

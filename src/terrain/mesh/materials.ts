@@ -17,7 +17,9 @@ export enum MaterialType {
   tree = 'tree',
   leaf = 'leaf',
   sand = 'sand',
-  water = 'water'
+  water = 'water',
+  stone = 'stone',
+  coal = 'coal'
 }
 
 let loader = new THREE.TextureLoader()
@@ -79,7 +81,9 @@ export default class Materials {
       map: waterMaterial,
       transparent: true,
       opacity: 0.7
-    })
+    }),
+    stone: new THREE.MeshStandardMaterial({ map: stoneMaterial }),
+    coal: new THREE.MeshStandardMaterial({ map: coalMaterial })
   }
 
   get = (

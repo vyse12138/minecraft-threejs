@@ -6,7 +6,7 @@ import UI from './ui'
 
 import './style.css'
 
-let renderDistance = 5
+let renderDistance = 7
 
 const core = new Core()
 const camera = core.camera

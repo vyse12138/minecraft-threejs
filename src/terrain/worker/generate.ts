@@ -1,13 +1,17 @@
 import * as THREE from 'three'
 import Block from '../mesh/block'
 import Noise from '../noise'
+
 enum BlockType {
   grass = 0,
   sand = 1,
   tree = 2,
   leaf = 3,
-  dirt = 4
+  dirt = 4,
+  stone = 5,
+  coal = 6
 }
+
 const matrix = new THREE.Matrix4()
 const noise = new Noise()
 const blocks: THREE.InstancedMesh[] = []
@@ -22,8 +26,11 @@ onmessage = (
     chunk: THREE.Vector2
     noiseSeed: number
     treeSeed: number
+    stoneSeed: number
+    coalSeed: number
     idMap: Map<string, number>
     blocksFactor: number[]
+    blocksCount: number[]
     customBlocks: Block[]
   }>
 ) => {
@@ -35,9 +42,11 @@ onmessage = (
     idMap,
     blocksFactor,
     treeSeed,
-    customBlocks
+    stoneSeed,
+    coalSeed,
+    customBlocks,
+    blocksCount
   } = msg.data
-  let blocksCount = [0, 0, 0, 0]
 
   if (isFirstRun) {
     for (let i = 0; i < blocksCount.length; i++) {
@@ -50,8 +59,9 @@ onmessage = (
     }
     noise.seed = noiseSeed
     noise.treeSeed = treeSeed
+    noise.stoneSeed = stoneSeed
+    noise.coalSeed = coalSeed
     isFirstRun = false
-    console.log('init')
   }
 
   for (let i = 0; i < blocks.length; i++) {
@@ -79,20 +89,47 @@ onmessage = (
       )
 
       matrix.setPosition(x, y + yOffset, z)
-      if (yOffset < -3) {
-        // sand
-        idMap.set(`${x}_${y + yOffset}_${z}`, blocksCount[BlockType.sand])
-        blocks[BlockType.sand].setMatrixAt(
-          blocksCount[BlockType.sand]++,
-          matrix
-        )
+
+      let stoneOffset =
+        noise.get(x / noise.stoneGap, z / noise.stoneGap, noise.stoneSeed) *
+        noise.stoneAmp
+
+      let coalOffset =
+        noise.get(x / noise.coalGap, z / noise.coalGap, noise.coalSeed) *
+        noise.coalAmp
+
+      if (stoneOffset > noise.stoneThreshold) {
+        if (coalOffset > noise.coalThreshold) {
+          // coal
+          idMap.set(`${x}_${y + yOffset}_${z}`, blocksCount[BlockType.coal])
+          blocks[BlockType.coal].setMatrixAt(
+            blocksCount[BlockType.coal]++,
+            matrix
+          )
+        } else {
+          // stone
+          idMap.set(`${x}_${y + yOffset}_${z}`, blocksCount[BlockType.stone])
+          blocks[BlockType.stone].setMatrixAt(
+            blocksCount[BlockType.stone]++,
+            matrix
+          )
+        }
       } else {
-        // grass
-        idMap.set(`${x}_${y + yOffset}_${z}`, blocksCount[BlockType.grass])
-        blocks[BlockType.grass].setMatrixAt(
-          blocksCount[BlockType.grass]++,
-          matrix
-        )
+        if (yOffset < -3) {
+          // sand
+          idMap.set(`${x}_${y + yOffset}_${z}`, blocksCount[BlockType.sand])
+          blocks[BlockType.sand].setMatrixAt(
+            blocksCount[BlockType.sand]++,
+            matrix
+          )
+        } else {
+          // grass
+          idMap.set(`${x}_${y + yOffset}_${z}`, blocksCount[BlockType.grass])
+          blocks[BlockType.grass].setMatrixAt(
+            blocksCount[BlockType.grass]++,
+            matrix
+          )
+        }
       }
 
       // tree
@@ -101,7 +138,11 @@ onmessage = (
         z / noise.treeGap,
         noise.treeSeed * noise.treeAmp
       )
-      if (treeOffset < -0.7 && yOffset >= -3) {
+      if (
+        treeOffset < -0.7 &&
+        yOffset >= -3 &&
+        stoneOffset < noise.stoneThreshold
+      ) {
         for (let i = 1; i <= noise.treeHeight; i++) {
           idMap.set(`${x}_${y + yOffset + i}_${z}`, blocksCount[BlockType.tree])
 
@@ -124,8 +165,11 @@ onmessage = (
               )
 
               if (leafOffset > -0.02) {
+                idMap.set(
+                  `${x + i}_${y + yOffset + 10 + j}_${z + k}`,
+                  blocksCount[BlockType.leaf]
+                )
                 matrix.setPosition(x + i, y + yOffset + 10 + j, z + k)
-
                 blocks[BlockType.leaf].setMatrixAt(
                   blocksCount[BlockType.leaf]++,
                   matrix
@@ -152,7 +196,28 @@ onmessage = (
       } else {
         // removed blocks
         const id = idMap.get(`${block.x}_${block.y}_${block.z}`)
-        blocks[block.type].setMatrixAt(id!, new THREE.Matrix4())
+
+        blocks[block.type].setMatrixAt(
+          id!,
+          new THREE.Matrix4().set(
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          )
+        )
       }
     }
   }
