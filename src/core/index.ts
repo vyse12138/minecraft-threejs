@@ -20,7 +20,7 @@ export default class Core {
     this.camera.near = 0.1
     this.camera.far = 500
     this.camera.updateProjectionMatrix()
-    this.camera.position.set(8, 35, 8)
+    this.camera.position.set(8, 40, 8)
 
     this.camera.lookAt(100, 30, 100)
 
@@ -29,6 +29,7 @@ export default class Core {
       this.camera.updateProjectionMatrix()
     })
   }
+
   initScene = () => {
     this.scene = new THREE.Scene()
     const backgroundColor = 0x87ceeb
@@ -50,11 +51,12 @@ export default class Core {
     const sunGeometry = new THREE.SphereGeometry(5, 32, 32)
     const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 })
     const sun = new THREE.Mesh(sunGeometry, sunMaterial)
-    sun.position.y = 40
+    sun.position.y = 100
     sun.position.x = 100
     sun.position.z = 8
     this.scene.add(sun)
   }
+
   initRenderer = () => {
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     document.body.appendChild(this.renderer.domElement)

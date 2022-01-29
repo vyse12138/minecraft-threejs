@@ -2,8 +2,9 @@ import * as THREE from 'three'
 import Materials, { MaterialType } from './mesh/materials'
 import Block from './mesh/block'
 import Highlight from './highlight'
-
 import Noise from './noise'
+
+import Generate from './worker/generate?worker'
 
 export enum BlockType {
   grass = 0,
@@ -21,41 +22,49 @@ export default class Terrain {
     this.scene = scene
     this.camera = camera
     this.distance = distance
-    this.maxCount = (distance * 16 * 2 + 16) ** 2 + this.customBlocks.length
+    this.maxCount = (distance * 16 * 2 + 16) ** 2 + 500
+    this.highlight = new Highlight(scene, camera, this)
+
     this.initBlocks()
     this.generate(new THREE.Vector2(0, 0))
-    this.highlight = new Highlight(scene, camera, this)
+
+    this.generateWorker.onmessage = (msg: MessageEvent<any>) => {
+      console.log(msg.data)
+    }
   }
   // core properties
   scene: THREE.Scene
   camera: THREE.PerspectiveCamera
+  distance: number
 
   // terrain properties
-  distance: number
   maxCount: number
   chunk = new THREE.Vector2(0, 0)
   previousChunk = new THREE.Vector2(0, 0)
-  blocksCount = [0, 0, 0, 0]
-  blocksFactor = [1, 1, 0.2, 2]
-  // noise properties
-
   noise = new Noise()
 
   // other properties
   blocks: THREE.InstancedMesh[] = []
+  blocksCount = [0, 0, 0, 0]
+  blocksFactor = [1, 1, 0.2, 2]
+
   customBlocks: Block[] = []
   highlight: Highlight
 
   idMap = new Map<string, number>()
 
+  generateWorker = new Generate()
+
   getCount = (type: BlockType) => {
     return this.blocksCount[type]
   }
+
   setCount = (type: BlockType) => {
     this.blocksCount[type] = this.blocksCount[type] + 1
   }
 
   initBlocks = () => {
+    // create instance meshes
     const materials = new Materials()
     const geometry = new THREE.BoxGeometry(1, 1, 1)
 
@@ -78,6 +87,7 @@ export default class Terrain {
   }
 
   resetBlocks = () => {
+    // reest count and instance matrix
     this.blocksCount = [0, 0, 0, 0]
     for (let i = 0; i < this.blocks.length; i++) {
       this.blocks[i].instanceMatrix = new THREE.InstancedBufferAttribute(
@@ -92,91 +102,104 @@ export default class Terrain {
 
     const matrix = new THREE.Matrix4()
 
+    //random
+
+    this.generateWorker.postMessage(1)
+    let p1 = performance.now()
+
+    // generate terrain
     for (
       let x = -16 * this.distance + 16 * chunk.x;
       x < 16 * this.distance + 16 + 16 * chunk.x;
       x++
     ) {
-      for (let y = 30; y > 29; y--) {
-        for (
-          let z = -16 * this.distance + 16 * chunk.y;
-          z < 16 * this.distance + 16 + 16 * chunk.y;
-          z++
-        ) {
-          let yOffset = Math.floor(
-            this.noise.get(
-              x / this.noise.gap,
-              z / this.noise.gap,
-              this.noise.seed
-            ) * this.noise.amp
+      for (
+        let z = -16 * this.distance + 16 * chunk.y;
+        z < 16 * this.distance + 16 + 16 * chunk.y;
+        z++
+      ) {
+        let y = 30
+        let yOffset = Math.floor(
+          this.noise.get(
+            x / this.noise.gap,
+            z / this.noise.gap,
+            this.noise.seed
+          ) * this.noise.amp
+        )
+
+        matrix.setPosition(x, y + yOffset, z)
+        if (yOffset < -3) {
+          // sand
+          this.idMap.set(
+            `${x}_${y + yOffset}_${z}`,
+            this.blocksCount[BlockType.sand]
           )
 
-          // terrain
-          matrix.setPosition(x, y + yOffset, z)
-          if (yOffset < -3) {
-            // sand
+          this.blocks[BlockType.sand].setMatrixAt(
+            this.blocksCount[BlockType.sand]++,
+            matrix
+          )
+        } else {
+          // grass
+          this.idMap.set(
+            `${x}_${y + yOffset}_${z}`,
+            this.blocksCount[BlockType.grass]
+          )
+
+          this.blocks[BlockType.grass].setMatrixAt(
+            this.blocksCount[BlockType.grass]++,
+            matrix
+          )
+        }
+
+        // tree
+        let treeOffset = this.noise.get(
+          x / this.noise.treeGap,
+          z / this.noise.treeGap,
+          this.noise.treeSeed * this.noise.treeAmp
+        )
+        if (treeOffset < -0.7 && yOffset >= -3) {
+          for (let i = 1; i <= this.noise.treeHeight; i++) {
             this.idMap.set(
-              `${x}_${y + yOffset}_${z}`,
-              this.blocksCount[BlockType.sand]
+              `${x}_${y + yOffset + i}_${z}`,
+              this.blocksCount[BlockType.tree]
             )
 
-            this.blocks[BlockType.sand].setMatrixAt(
-              this.blocksCount[BlockType.sand]++,
-              matrix
-            )
-          } else {
-            // grass
-            this.idMap.set(
-              `${x}_${y + yOffset}_${z}`,
-              this.blocksCount[BlockType.grass]
-            )
+            matrix.setPosition(x, y + yOffset + i, z)
 
-            this.blocks[BlockType.grass].setMatrixAt(
-              this.blocksCount[BlockType.grass]++,
+            this.blocks[BlockType.tree].setMatrixAt(
+              this.blocksCount[BlockType.tree]++,
               matrix
             )
           }
 
-          // tree
-          let treeOffset = this.noise.get(
-            x / this.noise.treeGap,
-            z / this.noise.treeGap,
-            this.noise.treeSeed * this.noise.treeAmp
-          )
-          if (treeOffset < -0.7 && yOffset >= -3) {
-            for (let i = 1; i <= this.noise.treeHeight; i++) {
-              this.idMap.set(
-                `${x}_${y + yOffset + i}_${z}`,
-                this.blocksCount[BlockType.tree]
-              )
+          // leaf
+          for (let i = -3; i < 3; i++) {
+            for (let j = -3; j < 3; j++) {
+              for (let k = -3; k < 3; k++) {
+                let leafOffset = this.noise.get(
+                  (x + i) / this.noise.leafGap,
+                  (y + yOffset + 10 + j) / this.noise.leafGap,
+                  (z + k) / this.noise.leafGap
+                )
 
-              matrix.setPosition(x, y + yOffset + i, z)
+                if (leafOffset > -0.02) {
+                  matrix.setPosition(x + i, y + yOffset + 10 + j, z + k)
 
-              this.blocks[BlockType.tree].setMatrixAt(
-                this.blocksCount[BlockType.tree]++,
-                matrix
-              )
-            }
-            for (let i = -3; i < 3; i++) {
-              for (let j = -3; j < 3; j++) {
-                for (let k = -3; k < 3; k++) {
-                  if (Math.random() > 0.6) {
-                    matrix.setPosition(x + i, y + yOffset + 10 + j, z + k)
-
-                    this.blocks[BlockType.leaf].setMatrixAt(
-                      this.blocksCount[BlockType.leaf]++,
-                      matrix
-                    )
-                  }
+                  this.blocks[BlockType.leaf].setMatrixAt(
+                    this.blocksCount[BlockType.leaf]++,
+                    matrix
+                  )
                 }
               }
             }
-
-            // leaf
           }
         }
       }
     }
+
+    console.log(performance.now() - p1)
+
     // custom blocks
     for (const block of this.customBlocks) {
       if (
@@ -186,18 +209,21 @@ export default class Terrain {
         block.z < 16 * this.distance + 16 + 16 * chunk.y
       ) {
         if (block.placed) {
+          // placed blocks
           matrix.setPosition(block.position)
-
           this.blocks[block.type].setMatrixAt(
             this.blocksCount[block.type]++,
             matrix
           )
         } else {
+          // removed blocks
           const id = this.idMap.get(`${block.x}_${block.y}_${block.z}`)
           this.blocks[block.type].setMatrixAt(id!, new THREE.Matrix4())
         }
       }
     }
+
+    // update
     this.blocks[BlockType.grass].instanceMatrix.needsUpdate = true
     this.blocks[BlockType.sand].instanceMatrix.needsUpdate = true
     this.blocks[BlockType.tree].instanceMatrix.needsUpdate = true
@@ -209,6 +235,8 @@ export default class Terrain {
       Math.floor(this.camera.position.x / 16),
       Math.floor(this.camera.position.z / 16)
     )
+
+    //generate terrain when getting into new chunk
     if (
       this.chunk.x !== this.previousChunk.x ||
       this.chunk.y !== this.previousChunk.y
@@ -217,6 +245,7 @@ export default class Terrain {
     }
 
     this.previousChunk.copy(this.chunk)
+
     this.highlight.update()
   }
 }

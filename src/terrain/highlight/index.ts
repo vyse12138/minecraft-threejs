@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 import Terrain from '..'
 
+/**
+ * Highlight block on crosshair
+ */
 export default class BlockHighlight {
   constructor(
     scene: THREE.Scene,
@@ -13,12 +16,14 @@ export default class BlockHighlight {
     this.raycaster = new THREE.Raycaster()
     this.raycaster.far = 8
   }
+
   scene: THREE.Scene
   camera: THREE.PerspectiveCamera
   terrain: Terrain
   raycaster: THREE.Raycaster
   block: THREE.Intersection | null = null
 
+  // highlight block mesh
   geometry = new THREE.BoxGeometry(1.01, 1.01, 1.01)
   material = new THREE.MeshStandardMaterial({
     transparent: true,
@@ -26,28 +31,33 @@ export default class BlockHighlight {
   })
   mesh = new THREE.Mesh(new THREE.BoxGeometry(), this.material)
 
+  // block simulation
+  index = 0
   instanceMesh = new THREE.InstancedMesh(
     new THREE.BoxGeometry(),
     new THREE.MeshBasicMaterial(),
     1000
   )
+
   update() {
-    // remove last highlight
+    // remove last highlight and reset block simulation
     this.scene.remove(this.mesh)
+    this.index = 0
     this.instanceMesh.instanceMatrix = new THREE.InstancedBufferAttribute(
       new Float32Array(1000 * 16),
       16
     )
-    this.index = 0
 
-    const matrix = new THREE.Matrix4()
     const position = this.camera.position
+    const matrix = new THREE.Matrix4()
     const idMap = new Map<string, number>()
+
     let x = Math.round(position.x)
     let z = Math.round(position.z)
 
     for (let i = -8; i < 8; i++) {
       for (let j = -8; j < 8; j++) {
+        // check terrain
         let xPos = x + i
         let zPos = z + j
         let yPos =
@@ -58,10 +68,12 @@ export default class BlockHighlight {
               this.terrain.noise.seed
             ) * this.terrain.noise.amp
           ) + 30
+
         idMap.set(`${xPos}_${yPos}_${zPos}`, this.index)
         matrix.setPosition(xPos, yPos, zPos)
         this.instanceMesh.setMatrixAt(this.index++, matrix)
 
+        // check tree
         let treeOffset = this.terrain.noise.get(
           xPos / this.terrain.noise.treeGap,
           zPos / this.terrain.noise.treeGap,
@@ -77,7 +89,8 @@ export default class BlockHighlight {
         }
       }
     }
-    // custom blocks
+
+    // check custom blocks
     for (const block of this.terrain.customBlocks) {
       if (block.placed) {
         matrix.setPosition(block.position)
@@ -107,6 +120,4 @@ export default class BlockHighlight {
       this.scene.add(this.mesh)
     }
   }
-
-  index = 0
 }

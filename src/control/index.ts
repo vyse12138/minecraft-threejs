@@ -6,6 +6,14 @@ import Terrain, { BlockType } from '../terrain'
 import Block from '../terrain/mesh/block'
 import Noise from '../terrain/noise'
 
+enum Side {
+  front,
+  back,
+  left,
+  right,
+  down
+}
+
 export default class Control {
   constructor(
     scene: THREE.Scene,
@@ -25,6 +33,7 @@ export default class Control {
     this.initEventListeners()
     this.initRayCaster()
   }
+
   // core properties
   scene: THREE.Scene
   camera: THREE.PerspectiveCamera
@@ -66,13 +75,12 @@ export default class Control {
 
   initRayCaster = () => {
     this.raycasterDown.ray.direction = new THREE.Vector3(0, -1, 0)
-    this.raycasterDown.far = 1.8
-
     this.raycasterFront.ray.direction = new THREE.Vector3(1, 0, 0)
     this.raycasterBack.ray.direction = new THREE.Vector3(-1, 0, 0)
     this.raycasterLeft.ray.direction = new THREE.Vector3(0, 0, -1)
     this.raycasterRight.ray.direction = new THREE.Vector3(0, 0, 1)
 
+    this.raycasterDown.far = 1.8
     this.raycasterFront.far = 0.6
     this.raycasterBack.far = 0.6
     this.raycasterLeft.far = 0.6
@@ -83,6 +91,8 @@ export default class Control {
     document.body.addEventListener('click', () => {
       this.control.lock()
     })
+
+    // TODO: remove this after testing
     document.addEventListener('mousewheel', () => {
       this.control.unlock()
     })
@@ -90,10 +100,11 @@ export default class Control {
       if (e.repeat) {
         return
       }
+
       switch (e.key) {
         case 'q':
           if (this.player.mode === Mode.walking) {
-            this.player.setMode(Mode.sprintFlying)
+            this.player.setMode(Mode.flying)
             this.velocity.y = 0
           } else {
             this.player.setMode(Mode.walking)
@@ -117,6 +128,7 @@ export default class Control {
           break
         case ' ':
           if (this.player.mode === Mode.walking) {
+            // jump
             if (!this.isJumping) {
               this.velocity.y = 8
               this.isJumping = true
@@ -124,7 +136,7 @@ export default class Control {
               this.far = 0
               setTimeout(() => {
                 this.far = 1.8
-              }, 180)
+              }, 250)
             }
           } else {
             this.velocity.y += this.player.speed
@@ -148,31 +160,31 @@ export default class Control {
       switch (e.key) {
         case 'w':
         case 'W':
-          this.velocity.x -= this.player.speed
+          this.velocity.x = 0
           break
         case 's':
         case 'S':
-          this.velocity.x += this.player.speed
+          this.velocity.x = 0
           break
         case 'a':
         case 'A':
-          this.velocity.z += this.player.speed
+          this.velocity.z = 0
           break
         case 'd':
         case 'D':
-          this.velocity.z -= this.player.speed
+          this.velocity.z = 0
           break
         case ' ':
           if (this.player.mode === Mode.walking) {
             return
           }
-          this.velocity.y -= this.player.speed
+          this.velocity.y = 0
           break
         case 'Shift':
           if (this.player.mode === Mode.walking) {
             return
           }
-          this.velocity.y += this.player.speed
+          this.velocity.y = 0
           break
         default:
           break
@@ -180,16 +192,16 @@ export default class Control {
     })
     document.addEventListener('mousedown', e => {
       e.preventDefault()
+
+      this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
+      const block = this.raycaster.intersectObjects(this.terrain.blocks)[0]
+      const matrix = new THREE.Matrix4()
+
       switch (e.button) {
         case 0:
           {
-            this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
-            const block = this.raycaster.intersectObjects(
-              this.terrain.blocks
-            )[0]
             if (block && block.object instanceof THREE.InstancedMesh) {
-              // calculation position
-              let matrix = new THREE.Matrix4()
+              // calculate position
               block.object.getMatrixAt(block.instanceId!, matrix)
               const position = new THREE.Vector3().setFromMatrixPosition(matrix)
 
@@ -199,6 +211,7 @@ export default class Control {
               // update
               block.object.instanceMatrix.needsUpdate = true
 
+              // check existence
               let existed = false
               for (const customBlock of this.terrain.customBlocks) {
                 if (
@@ -210,6 +223,8 @@ export default class Control {
                   customBlock.placed = false
                 }
               }
+
+              // add to custom blocks when it's not existed
               if (!existed) {
                 this.terrain.customBlocks.push(
                   new Block(
@@ -224,17 +239,12 @@ export default class Control {
             }
           }
           break
+
         case 2:
           {
-            this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
-            const block = this.raycaster.intersectObjects(
-              this.terrain.blocks
-            )[0]
-
             if (block && block.object instanceof THREE.InstancedMesh) {
-              // calculation normal and position
+              // calculate normal and position
               const normal = block.face!.normal
-              const matrix = new THREE.Matrix4()
               block.object.getMatrixAt(block.instanceId!, matrix)
               const position = new THREE.Vector3().setFromMatrixPosition(matrix)
 
@@ -266,6 +276,7 @@ export default class Control {
                 this.holdingBlock
               ].instanceMatrix.needsUpdate = true
 
+              // add to custom blocks
               this.terrain.customBlocks.push(
                 new Block(
                   normal.x + position.x,
@@ -284,66 +295,95 @@ export default class Control {
     })
   }
 
-  // move forward with direction factor
+  // move along X with direction factor
   moveX(distance: number, delta: number) {
     this.camera.position.x +=
       distance * (this.player.speed / Math.PI) * 2 * delta
   }
 
-  // move right with direction factor
+  // move along Z with direction factor
   moveZ = (distance: number, delta: number) => {
     this.camera.position.z +=
       distance * (this.player.speed / Math.PI) * 2 * delta
   }
 
   // collide checking
-  collideCheck = (
+  collideCheckAll = (
     position: THREE.Vector3,
     noise: Noise,
     customBlocks: Block[],
     far: number
   ) => {
-    this.collideDownCheck(position, noise, customBlocks, far)
-    this.collideFrontCheck(position, noise, customBlocks)
-    this.collideBackCheck(position, noise, customBlocks)
-    this.collideLeftCheck(position, noise, customBlocks)
-    this.collideRightCheck(position, noise, customBlocks)
+    this.collideCheck(Side.down, position, noise, customBlocks, far)
+    this.collideCheck(Side.front, position, noise, customBlocks)
+    this.collideCheck(Side.back, position, noise, customBlocks)
+    this.collideCheck(Side.left, position, noise, customBlocks)
+    this.collideCheck(Side.right, position, noise, customBlocks)
   }
 
-  collideDownCheck = (
+  collideCheck = (
+    side: Side,
     position: THREE.Vector3,
     noise: Noise,
     customBlocks: Block[],
-    far: number
+    far: number = 0.6
   ) => {
-    this.raycasterDown.ray.origin = position
-    this.raycasterDown.far = far
-    let index = 0
-
     const matrix = new THREE.Matrix4()
+
+    //reest simulation blocks
+    let index = 0
     this.tempMesh.instanceMatrix = new THREE.InstancedBufferAttribute(
       new Float32Array(100 * 16),
       16
     )
 
+    // block to remove
     let removed = false
     let treeRemoved = new Array<boolean>(
       this.terrain.noise.treeHeight + 1
     ).fill(false)
 
+    // get block position
     let x = Math.round(position.x)
     let z = Math.round(position.z)
+
+    switch (side) {
+      case Side.front:
+        x++
+        this.raycasterFront.ray.origin = position
+        break
+      case Side.back:
+        x--
+        this.raycasterBack.ray.origin = position
+        break
+      case Side.left:
+        z--
+        this.raycasterLeft.ray.origin = position
+        break
+      case Side.right:
+        z++
+        this.raycasterRight.ray.origin = position
+        break
+      case Side.down:
+        this.raycasterDown.ray.origin = position
+        this.raycasterDown.far = far
+        break
+    }
+
     let y =
       Math.floor(
         noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
       ) + 30
 
+    // check custom blocks
     for (const block of customBlocks) {
       if (block.x === x && block.z === z) {
         if (block.placed) {
+          // placed blocks
           matrix.setPosition(block.position)
           this.tempMesh.setMatrixAt(index++, matrix)
         } else if (block.y === y) {
+          // removed blocks
           removed = true
         } else {
           for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
@@ -354,75 +394,12 @@ export default class Control {
         }
       }
     }
-    for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
-      if (!treeRemoved[i]) {
-        let treeOffset = noise.get(
-          x / noise.treeGap,
-          z / noise.treeGap,
-          noise.treeSeed * noise.treeAmp
-        )
-        if (treeOffset < -0.7 && y >= 27) {
-          matrix.setPosition(x, y + i, z)
-          this.tempMesh.setMatrixAt(index++, matrix)
-        }
-      }
-    }
 
+    // update simulation blocks (ignore removed blocks)
     if (!removed) {
       matrix.setPosition(x, y, z)
       this.tempMesh.setMatrixAt(index++, matrix)
     }
-    this.tempMesh.instanceMatrix.needsUpdate = true
-    if (this.raycasterDown.intersectObject(this.tempMesh).length) {
-      this.downCollide = true
-    } else {
-      this.downCollide = false
-    }
-  }
-
-  collideFrontCheck = (
-    position: THREE.Vector3,
-    noise: Noise,
-    customBlocks: Block[]
-  ) => {
-    const matrix = new THREE.Matrix4()
-
-    this.tempMesh.instanceMatrix = new THREE.InstancedBufferAttribute(
-      new Float32Array(100 * 16),
-      16
-    )
-    let index = 0
-
-    let removed = false
-    let treeRemoved = new Array<boolean>(
-      this.terrain.noise.treeHeight + 1
-    ).fill(false)
-
-    let x = Math.round(position.x) + 1
-    let z = Math.round(position.z)
-    let y =
-      Math.floor(
-        noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
-      ) + 30
-
-    // custom blocks
-    for (const block of customBlocks) {
-      if (block.x === x && block.z === z) {
-        if (block.placed) {
-          matrix.setPosition(block.position)
-          this.tempMesh.setMatrixAt(index++, matrix)
-        } else if (block.y === y) {
-          removed = true
-        } else {
-          for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
-            if (block.y === y + i) {
-              treeRemoved[i] = true
-            }
-          }
-        }
-      }
-    }
-
     for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
       if (!treeRemoved[i]) {
         let treeOffset = noise.get(
@@ -437,275 +414,44 @@ export default class Control {
       }
     }
 
-    if (!removed) {
-      matrix.setPosition(new THREE.Vector3(x, y, z))
-      this.tempMesh.setMatrixAt(index++, matrix)
-    }
-
     this.tempMesh.instanceMatrix.needsUpdate = true
 
-    this.raycasterFront.ray.origin = new THREE.Vector3(
-      position.x,
-      position.y,
-      position.z
-    )
-    const c1 = this.raycasterFront.intersectObject(this.tempMesh).length
-    this.raycasterFront.ray.origin = new THREE.Vector3(
-      position.x,
-      position.y - 1,
-      position.z
-    )
-    const c2 = this.raycasterFront.intersectObject(this.tempMesh).length
-    if (c1 || c2) {
-      this.frontCollide = true
-    } else {
-      this.frontCollide = false
-    }
-  }
+    // update collide
+    const origin = new THREE.Vector3(position.x, position.y - 1, position.z)
+    switch (side) {
+      case Side.front: {
+        const c1 = this.raycasterFront.intersectObject(this.tempMesh).length
+        this.raycasterFront.ray.origin = origin
+        const c2 = this.raycasterFront.intersectObject(this.tempMesh).length
+        c1 || c2 ? (this.frontCollide = true) : (this.frontCollide = false)
 
-  collideBackCheck = (
-    position: THREE.Vector3,
-    noise: Noise,
-    customBlocks: Block[]
-  ) => {
-    const matrix = new THREE.Matrix4()
-
-    this.tempMesh.instanceMatrix = new THREE.InstancedBufferAttribute(
-      new Float32Array(100 * 16),
-      16
-    )
-    let index = 0
-
-    let removed = false
-    let treeRemoved = new Array<boolean>(
-      this.terrain.noise.treeHeight + 1
-    ).fill(false)
-
-    let x = Math.round(position.x) - 1
-    let z = Math.round(position.z)
-    let y =
-      Math.floor(
-        noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
-      ) + 30
-
-    // custom blocks
-    for (const block of customBlocks) {
-      if (block.x === x && block.z === z) {
-        if (block.placed) {
-          matrix.setPosition(block.position)
-          this.tempMesh.setMatrixAt(index++, matrix)
-        } else if (block.y === y) {
-          removed = true
-        } else {
-          for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
-            if (block.y === y + i) {
-              treeRemoved[i] = true
-            }
-          }
-        }
+        break
       }
-    }
-
-    for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
-      if (!treeRemoved[i]) {
-        let treeOffset = noise.get(
-          x / noise.treeGap,
-          z / noise.treeGap,
-          noise.treeSeed * noise.treeAmp
-        )
-        if (treeOffset < -0.7 && y >= 27) {
-          matrix.setPosition(x, y + i, z)
-          this.tempMesh.setMatrixAt(index++, matrix)
-        }
+      case Side.back: {
+        const c1 = this.raycasterBack.intersectObject(this.tempMesh).length
+        this.raycasterBack.ray.origin = origin
+        const c2 = this.raycasterBack.intersectObject(this.tempMesh).length
+        c1 || c2 ? (this.backCollide = true) : (this.backCollide = false)
+        break
       }
-    }
-
-    if (!removed) {
-      matrix.setPosition(new THREE.Vector3(x, y, z))
-      this.tempMesh.setMatrixAt(index++, matrix)
-    }
-
-    this.tempMesh.instanceMatrix.needsUpdate = true
-
-    this.raycasterBack.ray.origin = new THREE.Vector3(
-      position.x,
-      position.y,
-      position.z
-    )
-    const c1 = this.raycasterBack.intersectObject(this.tempMesh).length
-    this.raycasterBack.ray.origin = new THREE.Vector3(
-      position.x,
-      position.y - 1,
-      position.z
-    )
-    const c2 = this.raycasterBack.intersectObject(this.tempMesh).length
-    if (c1 || c2) {
-      this.backCollide = true
-    } else {
-      this.backCollide = false
-    }
-  }
-
-  collideLeftCheck = (
-    position: THREE.Vector3,
-    noise: Noise,
-    customBlocks: Block[]
-  ) => {
-    const matrix = new THREE.Matrix4()
-
-    this.tempMesh.instanceMatrix = new THREE.InstancedBufferAttribute(
-      new Float32Array(100 * 16),
-      16
-    )
-    let index = 0
-
-    let removed = false
-    let treeRemoved = new Array<boolean>(
-      this.terrain.noise.treeHeight + 1
-    ).fill(false)
-
-    let x = Math.round(position.x)
-    let z = Math.round(position.z) - 1
-    let y =
-      Math.floor(
-        noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
-      ) + 30
-
-    // custom blocks
-    for (const block of customBlocks) {
-      if (block.x === x && block.z === z) {
-        if (block.placed) {
-          matrix.setPosition(block.position)
-          this.tempMesh.setMatrixAt(index++, matrix)
-        } else if (block.y === y) {
-          removed = true
-        } else {
-          for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
-            if (block.y === y + i) {
-              treeRemoved[i] = true
-            }
-          }
-        }
+      case Side.left: {
+        const c1 = this.raycasterLeft.intersectObject(this.tempMesh).length
+        this.raycasterLeft.ray.origin = origin
+        const c2 = this.raycasterLeft.intersectObject(this.tempMesh).length
+        c1 || c2 ? (this.leftCollide = true) : (this.leftCollide = false)
+        break
       }
-    }
-
-    for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
-      if (!treeRemoved[i]) {
-        let treeOffset = noise.get(
-          x / noise.treeGap,
-          z / noise.treeGap,
-          noise.treeSeed * noise.treeAmp
-        )
-        if (treeOffset < -0.7 && y >= 27) {
-          matrix.setPosition(x, y + i, z)
-          this.tempMesh.setMatrixAt(index++, matrix)
-        }
+      case Side.right: {
+        const c1 = this.raycasterRight.intersectObject(this.tempMesh).length
+        this.raycasterRight.ray.origin = origin
+        const c2 = this.raycasterRight.intersectObject(this.tempMesh).length
+        c1 || c2 ? (this.rightCollide = true) : (this.rightCollide = false)
+        break
       }
-    }
-
-    if (!removed) {
-      matrix.setPosition(new THREE.Vector3(x, y, z))
-      this.tempMesh.setMatrixAt(index++, matrix)
-    }
-
-    this.tempMesh.instanceMatrix.needsUpdate = true
-
-    this.raycasterLeft.ray.origin = new THREE.Vector3(
-      position.x,
-      position.y,
-      position.z
-    )
-    const c1 = this.raycasterLeft.intersectObject(this.tempMesh).length
-    this.raycasterLeft.ray.origin = new THREE.Vector3(
-      position.x,
-      position.y - 1,
-      position.z
-    )
-    const c2 = this.raycasterLeft.intersectObject(this.tempMesh).length
-    if (c1 || c2) {
-      this.leftCollide = true
-    } else {
-      this.leftCollide = false
-    }
-  }
-
-  collideRightCheck = (
-    position: THREE.Vector3,
-    noise: Noise,
-    customBlocks: Block[]
-  ) => {
-    const matrix = new THREE.Matrix4()
-
-    this.tempMesh.instanceMatrix = this.tempMeshMatrix
-    let index = 0
-
-    let removed = false
-    let treeRemoved = new Array<boolean>(
-      this.terrain.noise.treeHeight + 1
-    ).fill(false)
-
-    let x = Math.round(position.x)
-    let z = Math.round(position.z) + 1
-    let y =
-      Math.floor(
-        noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
-      ) + 30
-
-    // custom blocks
-    for (const block of customBlocks) {
-      if (block.x === x && block.z === z) {
-        if (block.placed) {
-          matrix.setPosition(block.position)
-          this.tempMesh.setMatrixAt(index++, matrix)
-        } else if (block.y === y) {
-          removed = true
-        } else {
-          for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
-            if (block.y === y + i) {
-              treeRemoved[i] = true
-            }
-          }
-        }
-      }
-    }
-
-    for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
-      if (!treeRemoved[i]) {
-        let treeOffset = noise.get(
-          x / noise.treeGap,
-          z / noise.treeGap,
-          noise.treeSeed * noise.treeAmp
-        )
-        if (treeOffset < -0.7 && y >= 27) {
-          matrix.setPosition(x, y + i, z)
-          this.tempMesh.setMatrixAt(index++, matrix)
-        }
-      }
-    }
-
-    if (!removed) {
-      matrix.setPosition(new THREE.Vector3(x, y, z))
-      this.tempMesh.setMatrixAt(index++, matrix)
-    }
-
-    this.tempMesh.instanceMatrix.needsUpdate = true
-
-    this.raycasterRight.ray.origin = new THREE.Vector3(
-      position.x,
-      position.y,
-      position.z
-    )
-    const c1 = this.raycasterRight.intersectObject(this.tempMesh).length
-    this.raycasterRight.ray.origin = new THREE.Vector3(
-      position.x,
-      position.y - 1,
-      position.z
-    )
-    const c2 = this.raycasterRight.intersectObject(this.tempMesh).length
-    if (c1 || c2) {
-      this.rightCollide = true
-    } else {
-      this.rightCollide = false
+      case Side.down:
+        const c1 = this.raycasterDown.intersectObject(this.tempMesh).length
+        c1 ? (this.downCollide = true) : (this.downCollide = false)
+        break
     }
   }
 
@@ -714,8 +460,7 @@ export default class Control {
     const delta = (this.p1 - this.p2) / 1000
     if (
       // flying mode
-      this.player.mode === Mode.flying ||
-      this.player.mode === Mode.sprintFlying
+      this.player.mode === Mode.flying
     ) {
       this.control.moveForward(this.velocity.x * delta)
       this.control.moveRight(this.velocity.z * delta)
@@ -728,21 +473,21 @@ export default class Control {
         this.velocity.y -= 25 * delta
       }
 
-      this.collideCheck(
+      this.collideCheckAll(
         this.camera.position,
         this.terrain.noise,
         this.terrain.customBlocks,
         this.far
       )
 
-      // down collide and jump
+      // down collide and jump handler
       if (this.downCollide && !this.isJumping) {
         this.velocity.y = 0
       } else if (this.downCollide && this.isJumping) {
         this.isJumping = false
       }
 
-      // side collide
+      // side collide handler
       let vector = new THREE.Vector3(0, 0, -1).applyQuaternion(
         this.camera.quaternion
       )
@@ -1169,8 +914,8 @@ export default class Control {
       this.camera.position.y += this.velocity.y * delta
 
       // catching net
-      if (this.camera.position.y < -100) {
-        this.camera.position.y = 100
+      if (this.camera.position.y < -50) {
+        this.camera.position.y = 60
       }
     }
     this.p2 = this.p1

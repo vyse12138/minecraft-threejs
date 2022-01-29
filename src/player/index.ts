@@ -10,7 +10,8 @@ export enum Speed {
   // walking = 4.317,
   walking = 5.612,
   sprinting = 5.612,
-  flying = 10.89,
+  // flying = 10.89,
+  flying = 21.78,
   sprintFlying = 21.78,
   sneaking = 1.95
 }

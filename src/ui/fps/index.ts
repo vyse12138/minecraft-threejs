@@ -1,3 +1,6 @@
+/**
+ * Display current FPS
+ */
 export default class FPS {
   constructor() {
     this.box.className = 'fps'
@@ -16,9 +19,9 @@ export default class FPS {
 
     if (performance.now() - this.gap > 1000) {
       const delta = 1000 / (this.p1 - this.p2)
+
       this.box.firstChild && this.box.removeChild(this.box.firstChild)
-      this.fps = document.createTextNode(`FPS: ${Math.round(delta)}`)
-      this.box.appendChild(this.fps)
+      this.box.appendChild(document.createTextNode(`FPS: ${Math.round(delta)}`))
 
       this.gap = performance.now()
     }
