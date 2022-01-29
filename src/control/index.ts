@@ -192,7 +192,7 @@ export default class Control {
     })
     document.addEventListener('mousedown', e => {
       e.preventDefault()
-
+      let p1 = performance.now()
       this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
       const block = this.raycaster.intersectObjects(this.terrain.blocks)[0]
       const matrix = new THREE.Matrix4()
@@ -292,6 +292,7 @@ export default class Control {
         default:
           break
       }
+      console.log(performance.now() - p1)
     })
   }
 
