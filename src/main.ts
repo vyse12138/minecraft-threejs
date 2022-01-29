@@ -8,7 +8,7 @@ import UI from './ui'
 
 import './style.css'
 
-const renderDistance = 3
+let renderDistance = 6
 
 const core = new Core()
 const camera = core.camera
@@ -24,11 +24,11 @@ const control = new Control(scene, camera, player, terrain)
 // an
 console.log(scene)
 ;(function animate() {
+  let p1 = performance.now()
   requestAnimationFrame(animate)
-  // let p1 = performance.now()
   control.update()
-  // console.log(performance.now() - p1)
   terrain.update()
   ui.update()
   renderer.render(scene, camera)
+  console.log(performance.now() - p1)
 })()

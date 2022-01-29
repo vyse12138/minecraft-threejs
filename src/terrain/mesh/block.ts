@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { BlockType } from '../index'
 export default class Block {
+  object: any
   constructor(
     x: number,
     y: number,

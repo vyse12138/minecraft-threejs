@@ -7,6 +7,10 @@ export default class Noise {
   gap = 22
   amp = 8
 
+  treeSeed = Math.random()
+  treeGap = 2
+  treeAmp = 6
+  treeHeight = 10
   get = (x: number, y: number, z: number) => {
     return this.noise.noise(x, y, z)
   }
