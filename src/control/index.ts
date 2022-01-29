@@ -292,7 +292,6 @@ export default class Control {
       if (Math.abs(this.velocity.y) < this.player.falling) {
         this.velocity.y -= 25 * delta
       }
-      let p1 = performance.now()
       this.collideDownCheck(
         this.camera.position,
         this.terrain.noise,
@@ -319,7 +318,6 @@ export default class Control {
         this.terrain.noise,
         this.terrain.customBlocks
       )
-      // console.log(performance.now() - p1)
       // down collide and jump
       if (this.collideDown && !this.isJumping) {
         this.velocity.y = 0
