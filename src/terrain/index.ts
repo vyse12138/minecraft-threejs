@@ -1,9 +1,9 @@
 import * as THREE from 'three'
-import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise'
-// import { SimplexNoise } from 'three/examples/jsm/math/SimplexNoise'
 import Materials, { MaterialType } from './mesh/materials'
 import Block from './mesh/block'
 import Highlight from './highlight'
+
+import Noise from './noise'
 
 export enum BlockType {
   grass = 0,
@@ -38,10 +38,8 @@ export default class Terrain {
   counts = [0, 0, 0, 0]
 
   // noise properties
-  seed = Math.random()
-  noiseGap = 22
-  noiseAmp = 8
-  noise = new ImprovedNoise()
+
+  noise = new Noise()
 
   // other properties
   blocks: THREE.InstancedMesh[] = []
@@ -109,8 +107,11 @@ export default class Terrain {
           z++
         ) {
           let noise = Math.floor(
-            this.noise.noise(x / this.noiseGap, z / this.noiseGap, this.seed) *
-              this.noiseAmp
+            this.noise.get(
+              x / this.noise.gap,
+              z / this.noise.gap,
+              this.noise.seed
+            ) * this.noise.amp
           )
           matrix.setPosition(x, y + noise, z)
           if (noise < -3) {

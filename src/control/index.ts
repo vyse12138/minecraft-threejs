@@ -2,12 +2,9 @@ import * as THREE from 'three'
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls'
 import Player, { Mode } from '../player'
 import Terrain, { BlockType } from '../terrain'
-import DownCollideWorker from './worker/downCollide?worker'
-import FrontCollideWorker from './worker/frontCollide?worker'
-import BackCollideWorker from './worker/backCollide?worker'
-import LeftCollideWorker from './worker/leftCollide?worker'
-import RightCollideWorker from './worker/rightCollide?worker'
+
 import Block from '../terrain/mesh/block'
+import Noise from '../terrain/noise'
 
 export default class Control {
   constructor(
@@ -26,7 +23,6 @@ export default class Control {
     this.raycaster.far = 8
 
     this.initEventListeners()
-    this.initWorker()
   }
   // core properties
   scene: THREE.Scene
@@ -37,20 +33,12 @@ export default class Control {
   velocity = new THREE.Vector3(0, 0, 0)
 
   // collide and jump properties
-  downCollideWorker: Worker = new DownCollideWorker()
-  frontCollideWorker: Worker = new FrontCollideWorker()
-  backCollideWorker: Worker = new BackCollideWorker()
-  leftCollideWorker: Worker = new LeftCollideWorker()
-  rightCollideWorker: Worker = new RightCollideWorker()
-
-  downCollide = false
   frontCollide = false
   backCollide = false
   leftCollide = false
   rightCollide = false
 
   isJumping = false
-  isJumpingFrame = false
 
   // other properties
   p1 = performance.now()
@@ -59,28 +47,6 @@ export default class Control {
 
   // constants
   far = 1.8
-
-  initWorker = () => {
-    this.downCollideWorker.onmessage = (msg: MessageEvent<boolean>) => {
-      if (this.isJumpingFrame) {
-        this.isJumpingFrame = false
-        return
-      }
-      this.downCollide = msg.data
-    }
-    this.frontCollideWorker.onmessage = (msg: MessageEvent<boolean>) => {
-      this.frontCollide = msg.data
-    }
-    this.backCollideWorker.onmessage = (msg: MessageEvent<boolean>) => {
-      this.backCollide = msg.data
-    }
-    this.leftCollideWorker.onmessage = (msg: MessageEvent<boolean>) => {
-      this.leftCollide = msg.data
-    }
-    this.rightCollideWorker.onmessage = (msg: MessageEvent<boolean>) => {
-      this.rightCollide = msg.data
-    }
-  }
 
   initEventListeners = () => {
     document.body.addEventListener('click', () => {
@@ -123,12 +89,11 @@ export default class Control {
             if (!this.isJumping) {
               this.velocity.y = 8
               this.isJumping = true
-              this.isJumpingFrame = true
-              this.downCollide = false
+              this.collideDown = false
               this.far = 0
               setTimeout(() => {
                 this.far = 1.8
-              }, 300)
+              }, 150)
             }
           } else {
             this.velocity.y += this.player.speed
@@ -319,51 +284,46 @@ export default class Control {
     } else {
       // non-flying mode
 
-      // post calculation to worker
-
-      this.downCollideWorker.postMessage({
-        position: this.camera.position,
-        far: this.far - this.velocity.y * delta,
-        blocks: this.terrain.customBlocks,
-        seed: this.terrain.seed,
-        noiseAmp: this.terrain.noiseAmp,
-        noiseGap: this.terrain.noiseGap
-      })
-
       if (this.i++ === 60) {
         this.i = 0
       }
-
-      this.frontCollideWorker.postMessage({
-        position: this.camera.position,
-        matrices: this.terrain.blocks.map(block => block.instanceMatrix),
-        count: this.terrain.maxCount
-      })
-      this.backCollideWorker.postMessage({
-        position: this.camera.position,
-        matrices: this.terrain.blocks.map(block => block.instanceMatrix),
-        count: this.terrain.maxCount
-      })
-      this.leftCollideWorker.postMessage({
-        position: this.camera.position,
-        matrices: this.terrain.blocks.map(block => block.instanceMatrix),
-        count: this.terrain.maxCount
-      })
-      this.rightCollideWorker.postMessage({
-        position: this.camera.position,
-        matrices: this.terrain.blocks.map(block => block.instanceMatrix),
-        count: this.terrain.maxCount
-      })
 
       // gravity
       if (Math.abs(this.velocity.y) < this.player.falling) {
         this.velocity.y -= 25 * delta
       }
-
+      let p1 = performance.now()
+      this.collideDownCheck(
+        this.camera.position,
+        this.terrain.noise,
+        this.terrain.customBlocks,
+        this.far
+      )
+      this.collideFrontCheck(
+        this.camera.position,
+        this.terrain.noise,
+        this.terrain.customBlocks
+      )
+      this.collideBackCheck(
+        this.camera.position,
+        this.terrain.noise,
+        this.terrain.customBlocks
+      )
+      this.collideLeftCheck(
+        this.camera.position,
+        this.terrain.noise,
+        this.terrain.customBlocks
+      )
+      this.collideRightCheck(
+        this.camera.position,
+        this.terrain.noise,
+        this.terrain.customBlocks
+      )
+      // console.log(performance.now() - p1)
       // down collide and jump
-      if (this.downCollide && !this.isJumping) {
+      if (this.collideDown && !this.isJumping) {
         this.velocity.y = 0
-      } else if (this.downCollide && this.isJumping) {
+      } else if (this.collideDown && this.isJumping) {
         this.isJumping = false
       }
 
@@ -372,14 +332,16 @@ export default class Control {
         this.camera.quaternion
       )
       let direction = Math.atan2(vector.x, vector.z)
+      console.log(direction)
       if (
         this.frontCollide ||
         this.backCollide ||
         this.leftCollide ||
         this.rightCollide
       ) {
-        // collide front
+        // collide front (positive x)
         if (this.frontCollide) {
+          // camera front
           if (direction < Math.PI && direction > 0 && this.velocity.x > 0) {
             if (
               (!this.leftCollide && direction > Math.PI / 2) ||
@@ -394,6 +356,8 @@ export default class Control {
           ) {
             this.control.moveForward(this.velocity.x * delta)
           }
+
+          // camera back
           if (direction < 0 && direction > -Math.PI && this.velocity.x < 0) {
             if (
               (!this.leftCollide && direction > -Math.PI / 2) ||
@@ -408,6 +372,8 @@ export default class Control {
           ) {
             this.control.moveForward(this.velocity.x * delta)
           }
+
+          // camera left
           if (
             direction < Math.PI / 2 &&
             direction > -Math.PI / 2 &&
@@ -419,10 +385,15 @@ export default class Control {
             ) {
               this.moveZ(-direction, delta)
             }
-          } else if (!this.backCollide && this.velocity.z < 0) {
+          } else if (
+            !this.leftCollide &&
+            !this.rightCollide &&
+            this.velocity.z < 0
+          ) {
             this.control.moveRight(this.velocity.z * delta)
           }
 
+          // camera right
           if (
             (direction < -Math.PI / 2 || direction > Math.PI / 2) &&
             this.velocity.z > 0
@@ -433,13 +404,18 @@ export default class Control {
             if (!this.leftCollide && direction < 0) {
               this.moveZ(-Math.PI - direction, delta)
             }
-          } else if (!this.backCollide && this.velocity.z > 0) {
+          } else if (
+            !this.leftCollide &&
+            !this.rightCollide &&
+            this.velocity.z > 0
+          ) {
             this.control.moveRight(this.velocity.z * delta)
           }
         }
 
-        // collide back
+        // collide back (negative x)
         if (this.backCollide) {
+          // camera front
           if (direction < 0 && direction > -Math.PI && this.velocity.x > 0) {
             if (
               (!this.leftCollide && direction < -Math.PI / 2) ||
@@ -454,6 +430,8 @@ export default class Control {
           ) {
             this.control.moveForward(this.velocity.x * delta)
           }
+
+          // camera back
           if (direction < Math.PI && direction > 0 && this.velocity.x < 0) {
             if (
               (!this.leftCollide && direction < Math.PI / 2) ||
@@ -468,6 +446,8 @@ export default class Control {
           ) {
             this.control.moveForward(this.velocity.x * delta)
           }
+
+          // camera left
           if (
             (direction < -Math.PI / 2 || direction > Math.PI / 2) &&
             this.velocity.z < 0
@@ -478,9 +458,15 @@ export default class Control {
             if (!this.rightCollide && direction < 0) {
               this.moveZ(Math.PI + direction, delta)
             }
-          } else if (!this.frontCollide && this.velocity.z < 0) {
+          } else if (
+            !this.leftCollide &&
+            !this.rightCollide &&
+            this.velocity.z < 0
+          ) {
             this.control.moveRight(this.velocity.z * delta)
           }
+
+          // camera right
           if (
             direction < Math.PI / 2 &&
             direction > -Math.PI / 2 &&
@@ -492,16 +478,21 @@ export default class Control {
             ) {
               this.moveZ(direction, delta)
             }
-          } else if (!this.frontCollide && this.velocity.z > 0) {
+          } else if (
+            !this.leftCollide &&
+            !this.rightCollide &&
+            this.velocity.z > 0
+          ) {
             this.control.moveRight(this.velocity.z * delta)
           }
         }
 
-        // collide left
+        // collide left (negative z)
         if (this.leftCollide) {
+          // camera front
           if (
-            direction < -Math.PI / 2 ||
-            (direction > Math.PI / 2 && this.velocity.x > 0)
+            (direction < -Math.PI / 2 || direction > Math.PI / 2) &&
+            this.velocity.x > 0
           ) {
             if (!this.frontCollide && direction > 0) {
               this.moveX(Math.PI - direction, delta)
@@ -509,9 +500,29 @@ export default class Control {
             if (!this.backCollide && direction < 0) {
               this.moveX(-Math.PI - direction, delta)
             }
-          } else if (!this.rightCollide && this.velocity.x > 0) {
+          } else if (
+            !this.frontCollide &&
+            !this.backCollide &&
+            this.velocity.x > 0
+          ) {
+            this.control.moveForward(this.velocity.x * delta)
+          } else if (
+            this.frontCollide &&
+            direction < 0 &&
+            direction > -Math.PI / 2 &&
+            this.velocity.x > 0
+          ) {
+            this.control.moveForward(this.velocity.x * delta)
+          } else if (
+            this.backCollide &&
+            direction < Math.PI / 2 &&
+            direction > 0 &&
+            this.velocity.x > 0
+          ) {
             this.control.moveForward(this.velocity.x * delta)
           }
+
+          // camera back
           if (
             direction < Math.PI / 2 &&
             direction > -Math.PI / 2 &&
@@ -523,9 +534,29 @@ export default class Control {
             ) {
               this.moveX(-direction, delta)
             }
-          } else if (!this.rightCollide && this.velocity.x < 0) {
+          } else if (
+            !this.frontCollide &&
+            !this.backCollide &&
+            this.velocity.x < 0
+          ) {
+            this.control.moveForward(this.velocity.x * delta)
+          } else if (
+            this.frontCollide &&
+            direction < Math.PI &&
+            direction > Math.PI / 2 &&
+            this.velocity.x < 0
+          ) {
+            this.control.moveForward(this.velocity.x * delta)
+          } else if (
+            this.backCollide &&
+            direction > -Math.PI &&
+            direction < -Math.PI / 2 &&
+            this.velocity.x < 0
+          ) {
             this.control.moveForward(this.velocity.x * delta)
           }
+
+          // camera left
           if (direction > 0 && direction < Math.PI && this.velocity.z < 0) {
             if (
               (!this.backCollide && direction > Math.PI / 2) ||
@@ -539,7 +570,23 @@ export default class Control {
             this.velocity.z < 0
           ) {
             this.control.moveRight(this.velocity.z * delta)
+          } else if (
+            this.frontCollide &&
+            direction > -Math.PI &&
+            direction < -Math.PI / 2 &&
+            this.velocity.z < 0
+          ) {
+            this.control.moveRight(this.velocity.z * delta)
+          } else if (
+            this.backCollide &&
+            direction > -Math.PI / 2 &&
+            direction < 0 &&
+            this.velocity.z < 0
+          ) {
+            this.control.moveRight(this.velocity.z * delta)
           }
+
+          // camera right
           if (direction < 0 && direction > -Math.PI && this.velocity.z > 0) {
             if (
               (!this.backCollide && direction > -Math.PI / 2) ||
@@ -553,11 +600,26 @@ export default class Control {
             this.velocity.z > 0
           ) {
             this.control.moveRight(this.velocity.z * delta)
+          } else if (
+            this.frontCollide &&
+            direction < Math.PI / 2 &&
+            direction > 0 &&
+            this.velocity.z > 0
+          ) {
+            this.control.moveRight(this.velocity.z * delta)
+          } else if (
+            this.backCollide &&
+            direction < Math.PI &&
+            direction > Math.PI / 2 &&
+            this.velocity.z > 0
+          ) {
+            this.control.moveRight(this.velocity.z * delta)
           }
         }
 
-        // collide right
+        // collide right (positive z)
         if (this.rightCollide) {
+          // camera front
           if (
             direction < Math.PI / 2 &&
             direction > -Math.PI / 2 &&
@@ -569,9 +631,29 @@ export default class Control {
             ) {
               this.moveX(direction, delta)
             }
-          } else if (!this.leftCollide && this.velocity.x > 0) {
+          } else if (
+            !this.frontCollide &&
+            !this.backCollide &&
+            this.velocity.x > 0
+          ) {
+            this.control.moveForward(this.velocity.x * delta)
+          } else if (
+            this.frontCollide &&
+            direction < -Math.PI / 2 &&
+            direction > -Math.PI &&
+            this.velocity.x > 0
+          ) {
+            this.control.moveForward(this.velocity.x * delta)
+          } else if (
+            this.backCollide &&
+            direction < Math.PI &&
+            direction > Math.PI / 2 &&
+            this.velocity.x > 0
+          ) {
             this.control.moveForward(this.velocity.x * delta)
           }
+
+          // camera back
           if (
             (direction < -Math.PI / 2 || direction > Math.PI / 2) &&
             this.velocity.x < 0
@@ -582,9 +664,29 @@ export default class Control {
             if (!this.frontCollide && direction < 0) {
               this.moveX(Math.PI + direction, delta)
             }
-          } else if (!this.leftCollide && this.velocity.x < 0) {
+          } else if (
+            !this.frontCollide &&
+            !this.backCollide &&
+            this.velocity.x < 0
+          ) {
+            this.control.moveForward(this.velocity.x * delta)
+          } else if (
+            this.frontCollide &&
+            direction < Math.PI / 2 &&
+            direction > 0 &&
+            this.velocity.x < 0
+          ) {
+            this.control.moveForward(this.velocity.x * delta)
+          } else if (
+            this.backCollide &&
+            direction < 0 &&
+            direction > -Math.PI / 2 &&
+            this.velocity.x < 0
+          ) {
             this.control.moveForward(this.velocity.x * delta)
           }
+
+          // camera left
           if (direction < 0 && direction > -Math.PI && this.velocity.z < 0) {
             if (
               (!this.frontCollide && direction > -Math.PI / 2) ||
@@ -598,7 +700,23 @@ export default class Control {
             this.velocity.z < 0
           ) {
             this.control.moveRight(this.velocity.z * delta)
+          } else if (
+            this.frontCollide &&
+            direction > Math.PI / 2 &&
+            direction < Math.PI &&
+            this.velocity.z < 0
+          ) {
+            this.control.moveRight(this.velocity.z * delta)
+          } else if (
+            this.backCollide &&
+            direction > 0 &&
+            direction < Math.PI / 2 &&
+            this.velocity.z < 0
+          ) {
+            this.control.moveRight(this.velocity.z * delta)
           }
+
+          // camera right
           if (direction > 0 && direction < Math.PI && this.velocity.z > 0) {
             if (
               (!this.frontCollide && direction > Math.PI / 2) ||
@@ -609,6 +727,20 @@ export default class Control {
           } else if (
             !this.frontCollide &&
             !this.backCollide &&
+            this.velocity.z > 0
+          ) {
+            this.control.moveRight(this.velocity.z * delta)
+          } else if (
+            this.frontCollide &&
+            direction > -Math.PI / 2 &&
+            direction < 0 &&
+            this.velocity.z > 0
+          ) {
+            this.control.moveRight(this.velocity.z * delta)
+          } else if (
+            this.backCollide &&
+            direction > -Math.PI &&
+            direction < -Math.PI / 2 &&
             this.velocity.z > 0
           ) {
             this.control.moveRight(this.velocity.z * delta)
@@ -638,4 +770,290 @@ export default class Control {
     this.camera.position.x +=
       distance * (this.player.speed / Math.PI) * 2 * delta
   }
+
+  collideDownCheck = (
+    position: THREE.Vector3,
+    noise: Noise,
+    customBlocks: Block[],
+    far: number
+  ) => {
+    this.raycasterDown.ray.origin = position
+    this.raycasterDown.far = far
+    let index = 0
+
+    const matrix = new THREE.Matrix4()
+    this.tempMesh.instanceMatrix = new THREE.InstancedBufferAttribute(
+      new Float32Array(100 * 16),
+      16
+    )
+    let removed = false
+
+    let x = Math.round(position.x)
+    let z = Math.round(position.z)
+    let y =
+      Math.floor(
+        noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
+      ) + 30
+
+    for (const block of customBlocks) {
+      if (block.x === x && block.z === z) {
+        if (block.placed) {
+          matrix.setPosition(block.position)
+          this.tempMesh.setMatrixAt(index++, matrix)
+        } else if (block.y === y) {
+          removed = true
+        }
+      }
+    }
+
+    if (!removed) {
+      matrix.setPosition(new THREE.Vector3(x, y, z))
+      this.tempMesh.setMatrixAt(index++, matrix)
+    }
+    this.tempMesh.instanceMatrix.needsUpdate = true
+    if (this.raycasterDown.intersectObject(this.tempMesh).length) {
+      this.collideDown = true
+    } else {
+      this.collideDown = false
+    }
+  }
+
+  collideFrontCheck = (
+    position: THREE.Vector3,
+    noise: Noise,
+    customBlocks: Block[]
+  ) => {
+    this.raycasterFront.ray.origin = new THREE.Vector3(
+      position.x,
+      position.y - 1,
+      position.z
+    )
+    const matrix = new THREE.Matrix4()
+
+    this.tempMesh.instanceMatrix = this.tempMeshMatrix
+    let index = 0
+
+    let removed = false
+
+    let x = Math.round(position.x) + 1
+    let z = Math.round(position.z)
+    let y =
+      Math.floor(
+        noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
+      ) + 30
+
+    for (const block of customBlocks) {
+      if (block.x === x && block.z === z) {
+        if (block.placed) {
+          matrix.setPosition(block.position)
+          this.tempMesh.setMatrixAt(index++, matrix)
+        } else if (block.y === y) {
+          removed = true
+        }
+      }
+    }
+
+    if (!removed) {
+      matrix.setPosition(new THREE.Vector3(x, y, z))
+      this.tempMesh.setMatrixAt(index++, matrix)
+    }
+
+    this.tempMesh.instanceMatrix.needsUpdate = true
+
+    if (this.raycasterFront.intersectObject(this.tempMesh).length) {
+      this.frontCollide = true
+    } else {
+      this.frontCollide = false
+    }
+  }
+
+  collideBackCheck = (
+    position: THREE.Vector3,
+    noise: Noise,
+    customBlocks: Block[]
+  ) => {
+    this.raycasterBack.ray.origin = new THREE.Vector3(
+      position.x,
+      position.y - 1,
+      position.z
+    )
+    const matrix = new THREE.Matrix4()
+
+    this.tempMesh.instanceMatrix = this.tempMeshMatrix
+    let index = 0
+
+    let removed = false
+
+    let x = Math.round(position.x) - 1
+    let z = Math.round(position.z)
+    let y =
+      Math.floor(
+        noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
+      ) + 30
+
+    for (const block of customBlocks) {
+      if (block.x === x && block.z === z) {
+        if (block.placed) {
+          matrix.setPosition(block.position)
+          this.tempMesh.setMatrixAt(index++, matrix)
+        } else if (block.y === y) {
+          removed = true
+        }
+      }
+    }
+
+    if (!removed) {
+      matrix.setPosition(new THREE.Vector3(x, y, z))
+      this.tempMesh.setMatrixAt(index++, matrix)
+    }
+
+    this.tempMesh.instanceMatrix.needsUpdate = true
+
+    if (this.raycasterBack.intersectObject(this.tempMesh).length) {
+      this.backCollide = true
+    } else {
+      this.backCollide = false
+    }
+  }
+
+  collideLeftCheck = (
+    position: THREE.Vector3,
+    noise: Noise,
+    customBlocks: Block[]
+  ) => {
+    this.raycasterLeft.ray.origin = new THREE.Vector3(
+      position.x,
+      position.y - 1,
+      position.z
+    )
+    const matrix = new THREE.Matrix4()
+
+    this.tempMesh.instanceMatrix = this.tempMeshMatrix
+    let index = 0
+
+    let removed = false
+
+    let x = Math.round(position.x)
+    let z = Math.round(position.z) - 1
+    let y =
+      Math.floor(
+        noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
+      ) + 30
+
+    for (const block of customBlocks) {
+      if (block.x === x && block.z === z) {
+        if (block.placed) {
+          matrix.setPosition(block.position)
+          this.tempMesh.setMatrixAt(index++, matrix)
+        } else if (block.y === y) {
+          removed = true
+        }
+      }
+    }
+
+    if (!removed) {
+      matrix.setPosition(new THREE.Vector3(x, y, z))
+      this.tempMesh.setMatrixAt(index++, matrix)
+    }
+
+    this.tempMesh.instanceMatrix.needsUpdate = true
+
+    if (this.raycasterLeft.intersectObject(this.tempMesh).length) {
+      this.leftCollide = true
+    } else {
+      this.leftCollide = false
+    }
+  }
+
+  collideRightCheck = (
+    position: THREE.Vector3,
+    noise: Noise,
+    customBlocks: Block[]
+  ) => {
+    this.raycasterRight.ray.origin = new THREE.Vector3(
+      position.x,
+      position.y - 1,
+      position.z
+    )
+    const matrix = new THREE.Matrix4()
+
+    this.tempMesh.instanceMatrix = this.tempMeshMatrix
+    let index = 0
+
+    let removed = false
+
+    let x = Math.round(position.x)
+    let z = Math.round(position.z) + 1
+    let y =
+      Math.floor(
+        noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
+      ) + 30
+
+    for (const block of customBlocks) {
+      if (block.x === x && block.z === z) {
+        if (block.placed) {
+          matrix.setPosition(block.position)
+          this.tempMesh.setMatrixAt(index++, matrix)
+        } else if (block.y === y) {
+          removed = true
+        }
+      }
+    }
+
+    if (!removed) {
+      matrix.setPosition(new THREE.Vector3(x, y, z))
+      this.tempMesh.setMatrixAt(index++, matrix)
+    }
+
+    this.tempMesh.instanceMatrix.needsUpdate = true
+
+    if (this.raycasterRight.intersectObject(this.tempMesh).length) {
+      this.rightCollide = true
+    } else {
+      this.rightCollide = false
+    }
+  }
+
+  collideDown = true
+
+  raycasterDown = new THREE.Raycaster(
+    new THREE.Vector3(),
+    new THREE.Vector3(0, -1, 0),
+    0,
+    1.8
+  )
+  raycasterFront = new THREE.Raycaster(
+    new THREE.Vector3(),
+    new THREE.Vector3(1, 0, 0),
+    0,
+    0.6
+  )
+  raycasterBack = new THREE.Raycaster(
+    new THREE.Vector3(),
+    new THREE.Vector3(-1, 0, 0),
+    0,
+    0.6
+  )
+  raycasterRight = new THREE.Raycaster(
+    new THREE.Vector3(),
+    new THREE.Vector3(0, 0, 1),
+    0,
+    0.6
+  )
+  raycasterLeft = new THREE.Raycaster(
+    new THREE.Vector3(),
+    new THREE.Vector3(0, 0, -1),
+    0,
+    0.6
+  )
+  tempMesh = new THREE.InstancedMesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial(),
+    100
+  )
+
+  tempMeshMatrix = new THREE.InstancedBufferAttribute(
+    new Float32Array(100 * 16),
+    16
+  )
 }

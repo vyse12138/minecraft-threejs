@@ -1,3 +1,5 @@
+//legacy
+
 import * as THREE from 'three'
 
 onmessage = (

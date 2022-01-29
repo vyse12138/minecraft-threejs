@@ -1,3 +1,5 @@
+//legacy
+
 import * as THREE from 'three'
 import Block from '../../terrain/mesh/block'
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise'
