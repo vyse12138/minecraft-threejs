@@ -11,9 +11,11 @@ Check it out: [Minecraft - Three.js](https://mc.yuleiz.com/)
 - Smooth collision check
 - WASD to move
 - Q to switch between normal / dev mode
+- F to toggle full screen
 - Random terrain and trees generation
 - Highlight the block at crosshair
 - Infinite world
+- BGM
 - Great performance (heavy tasks are moved into web worker)
 
 ## ⚠Todos:
@@ -21,4 +23,4 @@ Check it out: [Minecraft - Three.js](https://mc.yuleiz.com/)
 - Generates water
 - Menu and staring page
 - Sprint
-- Audio and sound
+- Sound effect

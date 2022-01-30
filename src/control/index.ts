@@ -31,7 +31,6 @@ export default class Control {
     this.raycaster = new THREE.Raycaster()
     this.raycaster.far = 8
 
-    this.initEventListeners()
     this.initRayCaster()
   }
 
@@ -365,6 +364,26 @@ export default class Control {
       }
     })
 
+    document.body.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key !== 'f') {
+        return
+      }
+      if (document.fullscreenElement) {
+        document.exitFullscreen()
+      } else {
+        document.body.requestFullscreen()
+      }
+    })
+
+    document.body.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key !== 'e') {
+        return
+      }
+      if (this.isLocked) {
+        this.control.unlock()
+      }
+    })
+
     document.addEventListener('pointerlockchange', () => {
       if (!this.isLocked) {
         document.body.addEventListener(
@@ -386,7 +405,6 @@ export default class Control {
         document.body.removeEventListener('mousedown', this.clickHandler)
         this.velocity = new THREE.Vector3(0, 0, 0)
       }
-
       this.isLocked = !this.isLocked
     })
   }

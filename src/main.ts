@@ -3,6 +3,7 @@ import Control from './control'
 import Player from './player'
 import Terrain from './terrain'
 import UI from './ui'
+import Audio from './audio'
 
 import './style.css'
 
@@ -13,12 +14,14 @@ const core = new Core()
 const camera = core.camera
 const scene = core.scene
 const renderer = core.renderer
+const ui = new UI()
 
 const player = new Player()
-const ui = new UI()
 
 const terrain = new Terrain(scene, camera, renderDistance, chunkSize)
 const control = new Control(scene, camera, player, terrain)
+
+const audio = new Audio(camera, ui, control)
 
 // animation
 ;(function animate() {
@@ -28,7 +31,7 @@ const control = new Control(scene, camera, player, terrain)
   control.update()
   terrain.update()
   ui.update()
-
+  audio.update()
   renderer.render(scene, camera)
   // console.log(performance.now() - p1)
 })()

@@ -62,3 +62,23 @@ body {
 .hidden {
   display: none;
 }
+
+.loading {
+  position: fixed;
+  left: 50%;
+  top: 0%;
+  transform: translate(-50%);
+
+  width: 100vw;
+  height: 100vh;
+
+  color: white;
+  text-align: center;
+  background-color: hsla(0, 0%, 11%, 0.7);
+}
+
+.loading-text {
+  padding-top: 100px;
+  font-size: 3rem;
+  font-weight: normal;
+}
