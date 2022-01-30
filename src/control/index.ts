@@ -79,9 +79,17 @@ export default class Control {
     BlockType.grass,
     BlockType.stone,
     BlockType.tree,
-    BlockType.wood
+    BlockType.wood,
+    BlockType.diamond,
+    BlockType.quartz,
+    BlockType.glass,
+    BlockType.grass,
+    BlockType.grass,
+    BlockType.grass
   ]
+  holdingIndex = 0
   isLocked = false
+  wheelGap = false
 
   initRayCaster = () => {
     this.raycasterUp.ray.direction = new THREE.Vector3(0, 1, 0)
@@ -97,14 +105,6 @@ export default class Control {
     this.raycasterBack.far = 0.4
     this.raycasterLeft.far = 0.4
     this.raycasterRight.far = 0.4
-  }
-
-  changeHoldingBlockHandler = (e: KeyboardEvent) => {
-    if (isNaN(parseInt(e.key)) || e.key === '0') {
-      return
-    }
-    this.holdingBlock =
-      this.holdingBlocks[parseInt(e.key) - 1] ?? BlockType.grass
   }
 
   setMovementHandler = (e: KeyboardEvent) => {
@@ -329,16 +329,40 @@ export default class Control {
     }
   }
 
+  changeHoldingBlockHandler = (e: KeyboardEvent) => {
+    if (isNaN(parseInt(e.key)) || e.key === '0') {
+      return
+    }
+    this.holdingIndex = parseInt(e.key) - 1
+
+    this.holdingBlock = this.holdingBlocks[this.holdingIndex] ?? BlockType.grass
+  }
+
+  wheelHandler = (e: Event) => {
+    if (!this.wheelGap) {
+      this.wheelGap = true
+      setTimeout(() => {
+        this.wheelGap = false
+      }, 150)
+      if (e instanceof WheelEvent) {
+        if (e.deltaY > 0) {
+          this.holdingIndex++
+          this.holdingIndex > 9 && (this.holdingIndex = 0)
+        } else if (e.deltaY < 0) {
+          this.holdingIndex--
+          this.holdingIndex < 0 && (this.holdingIndex = 9)
+        }
+        this.holdingBlock =
+          this.holdingBlocks[this.holdingIndex] ?? BlockType.grass
+      }
+    }
+  }
+
   initEventListeners = () => {
     document.body.addEventListener('click', () => {
       if (!this.isLocked) {
         this.control.lock()
       }
-    })
-
-    // TODO: remove this after testing
-    document.addEventListener('mousewheel', () => {
-      this.control.unlock()
     })
 
     document.addEventListener('pointerlockchange', () => {
@@ -347,6 +371,7 @@ export default class Control {
           'keydown',
           this.changeHoldingBlockHandler
         )
+        document.body.addEventListener('mousewheel', this.wheelHandler)
         document.body.addEventListener('keydown', this.setMovementHandler)
         document.body.addEventListener('keyup', this.resetMovementHandler)
         document.body.addEventListener('mousedown', this.clickHandler)
@@ -355,6 +380,7 @@ export default class Control {
           'keydown',
           this.changeHoldingBlockHandler
         )
+        document.body.removeEventListener('mousewheel', this.wheelHandler)
         document.body.removeEventListener('keydown', this.setMovementHandler)
         document.body.removeEventListener('keyup', this.resetMovementHandler)
         document.body.removeEventListener('mousedown', this.clickHandler)

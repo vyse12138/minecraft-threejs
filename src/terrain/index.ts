@@ -14,7 +14,10 @@ export enum BlockType {
   dirt = 4,
   stone = 5,
   coal = 6,
-  wood = 7
+  wood = 7,
+  diamond = 8,
+  quartz = 9,
+  glass = 10
 }
 export default class Terrain {
   constructor(
@@ -71,7 +74,7 @@ export default class Terrain {
   // other properties
   blocks: THREE.InstancedMesh[] = []
   blocksCount: number[] = []
-  blocksFactor = [1, 0.2, 0.1, 0.7, 0.1, 0.2, 0.1, 0.1]
+  blocksFactor = [1, 0.2, 0.1, 0.7, 0.1, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1]
 
   customBlocks: Block[] = []
   highlight: Highlight
@@ -100,7 +103,10 @@ export default class Terrain {
       MaterialType.dirt,
       MaterialType.stone,
       MaterialType.coal,
-      MaterialType.wood
+      MaterialType.wood,
+      MaterialType.diamond,
+      MaterialType.quartz,
+      MaterialType.glass
     ]
 
     for (let i = 0; i < materialType.length; i++) {

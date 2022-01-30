@@ -11,6 +11,9 @@ import oak_leaves from '../../../textures/block/oak_leaves.png'
 import sand from '../../../textures/block/sand.png'
 import water from '../../../textures/block/water.png'
 import oak_wood from '../../../textures/block/oak_planks.png'
+import diamond from '../../../textures/block/diamond_block.png'
+import quartz from '../../../textures/block/quartz_block_side.png'
+import glass from '../../../textures/block/glass.png'
 
 export enum MaterialType {
   grass = 'grass',
@@ -21,7 +24,10 @@ export enum MaterialType {
   water = 'water',
   stone = 'stone',
   coal = 'coal',
-  wood = 'wood'
+  wood = 'wood',
+  diamond = 'diamond',
+  quartz = 'quartz',
+  glass = 'glass'
 }
 
 let loader = new THREE.TextureLoader()
@@ -39,6 +45,9 @@ const leafMaterial = loader.load(oak_leaves)
 const sandMaterial = loader.load(sand)
 const waterMaterial = loader.load(water)
 const woodMaterial = loader.load(oak_wood)
+const diamondMaterial = loader.load(diamond)
+const quartzMaterial = loader.load(quartz)
+const glassMaterial = loader.load(glass)
 
 // pixelate texture
 grassTopMaterial.magFilter = THREE.NearestFilter
@@ -53,6 +62,9 @@ leafMaterial.magFilter = THREE.NearestFilter
 sandMaterial.magFilter = THREE.NearestFilter
 waterMaterial.magFilter = THREE.NearestFilter
 woodMaterial.magFilter = THREE.NearestFilter
+diamondMaterial.magFilter = THREE.NearestFilter
+quartzMaterial.magFilter = THREE.NearestFilter
+glassMaterial.magFilter = THREE.NearestFilter
 
 export default class Materials {
   materials = {
@@ -88,7 +100,13 @@ export default class Materials {
     }),
     stone: new THREE.MeshStandardMaterial({ map: stoneMaterial }),
     coal: new THREE.MeshStandardMaterial({ map: coalMaterial }),
-    wood: new THREE.MeshStandardMaterial({ map: woodMaterial })
+    wood: new THREE.MeshStandardMaterial({ map: woodMaterial }),
+    diamond: new THREE.MeshStandardMaterial({ map: diamondMaterial }),
+    quartz: new THREE.MeshStandardMaterial({ map: quartzMaterial }),
+    glass: new THREE.MeshStandardMaterial({
+      map: glassMaterial,
+      transparent: true
+    })
   }
 
   get = (

@@ -8,9 +8,13 @@ body {
 
 .fps {
   position: fixed;
+  color: white;
   left: 0%;
   top: 0%;
-  padding: 10px;
+  padding: 5px;
+  margin: 1px;
+  border: 2px solid rgb(141, 139, 139);
+  background-color: hsla(0, 0%, 11%, 0.5);
 }
 
 .bag {

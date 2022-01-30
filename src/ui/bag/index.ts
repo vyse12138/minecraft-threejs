@@ -2,6 +2,9 @@ import grass from '../icon/grass.png'
 import stone from '../icon/stone.png'
 import tree from '../icon/tree.png'
 import wood from '../icon/wood.png'
+import diamond from '../icon/diamond.png'
+import quartz from '../icon/quartz.png'
+import glass from '../icon/glass.png'
 
 export default class Bag {
   constructor() {
@@ -22,12 +25,37 @@ export default class Bag {
         this.items[i].classList.remove('selected')
       }
 
-      this.items[parseInt(e.key) - 1].classList.add('selected')
+      this.current = parseInt(e.key) - 1
+      this.items[this.current].classList.add('selected')
+    })
+
+    document.body.addEventListener('mousewheel', (e: Event) => {
+      if (!this.wheelGap) {
+        this.wheelGap = true
+        setTimeout(() => {
+          this.wheelGap = false
+        }, 150)
+        if (e instanceof WheelEvent) {
+          if (e.deltaY > 0) {
+            this.current++
+            this.current > 9 && (this.current = 0)
+          } else if (e.deltaY < 0) {
+            this.current--
+            this.current < 0 && (this.current = 9)
+          }
+          for (let i = 0; i < this.items.length; i++) {
+            this.items[i].classList.remove('selected')
+          }
+          this.items[this.current].classList.add('selected')
+        }
+      }
     })
   }
-
-  icon = [grass, stone, tree, wood]
+  wheelGap = false
+  current = 0
+  icon = [grass, stone, tree, wood, diamond, quartz, glass]
   iconIndex = 0
+  y = 0
 
   bag = document.createElement('div')
 

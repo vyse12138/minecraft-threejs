@@ -7,8 +7,8 @@ Check it out: [Minecraft - Three.js](https://mc.yuleiz.com/)
 ## ✔Features:
 
 - Left click to remove block
-- Right click to put different types of block
-- Smooth Collision check
+- Right click to put block (with different block types)
+- Smooth collision check
 - WASD to move
 - Q to switch between normal / dev mode
 - Random terrain and trees generation
@@ -21,5 +21,4 @@ Check it out: [Minecraft - Three.js](https://mc.yuleiz.com/)
 - Generates water
 - Menu and staring page
 - Sprint
-- vertical generation
 - Audio and sound
