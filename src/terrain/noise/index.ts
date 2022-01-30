@@ -23,7 +23,9 @@ export default class Noise {
   treeHeight = 10
 
   leafSeed = Math.random()
-  leafGap = 2
+  leafGap = 5
+  leafThreshold = -0.15
+
   get = (x: number, y: number, z: number) => {
     return this.noise.noise(x, y, z)
   }

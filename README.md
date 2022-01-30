@@ -7,21 +7,19 @@ Check it out: [Minecraft - Three.js](https://mc.yuleiz.com/)
 ## ✔Features:
 
 - Left click to remove block
-- Right click to put block
-- WASD to move
+- Right click to put different types of block
 - Smooth Collision check
-- Press Q to toggle between normal / flying mode
-- Random terrain generation
+- WASD to move
+- Q to switch between normal / dev mode
+- Random terrain and trees generation
 - Highlight the block at crosshair
-- Generates trees
 - Infinite world
+- Great performance (heavy tasks are moved into web worker)
 
 ## ⚠Todos:
 
-- More block types to place
 - Generates water
-- Some basic UIs
+- Menu and staring page
 - Sprint
 - vertical generation
 - Audio and sound
-- Move generation into web worker

@@ -108,7 +108,7 @@ export default class BlockHighlight {
                   (zPos + k) / this.terrain.noise.leafGap
                 )
 
-                if (leafOffset > -0.02) {
+                if (leafOffset > this.terrain.noise.leafThreshold) {
                   idMap.set(
                     `${xPos + i}_${yPos + 10 + j}_${zPos + k}`,
                     this.index

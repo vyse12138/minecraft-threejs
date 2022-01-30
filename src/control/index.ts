@@ -72,6 +72,13 @@ export default class Control {
   raycaster: THREE.Raycaster
   far = 1.8
   holdingBlock = BlockType.grass
+  holdingBlocks = [
+    BlockType.grass,
+    BlockType.stone,
+    BlockType.tree,
+    BlockType.wood
+  ]
+  isLocked = false
 
   initRayCaster = () => {
     this.raycasterDown.ray.direction = new THREE.Vector3(0, -1, 0)
@@ -87,233 +94,268 @@ export default class Control {
     this.raycasterRight.far = 0.6
   }
 
+  changeHoldingBlockHandler = (e: KeyboardEvent) => {
+    if (isNaN(parseInt(e.key)) || e.key === '0') {
+      return
+    }
+    this.holdingBlock =
+      this.holdingBlocks[parseInt(e.key) - 1] ?? BlockType.grass
+  }
+
+  setMovementHandler = (e: KeyboardEvent) => {
+    if (e.repeat) {
+      return
+    }
+
+    switch (e.key) {
+      case 'q':
+        if (this.player.mode === Mode.walking) {
+          this.player.setMode(Mode.flying)
+          this.velocity.y = 0
+        } else {
+          this.player.setMode(Mode.walking)
+        }
+        break
+      case 'w':
+      case 'W':
+        this.velocity.x += this.player.speed
+        break
+      case 's':
+      case 'S':
+        this.velocity.x -= this.player.speed
+        break
+      case 'a':
+      case 'A':
+        this.velocity.z -= this.player.speed
+        break
+      case 'd':
+      case 'D':
+        this.velocity.z += this.player.speed
+        break
+      case ' ':
+        if (this.player.mode === Mode.walking) {
+          // jump
+          if (!this.isJumping) {
+            this.velocity.y = 8
+            this.isJumping = true
+            this.downCollide = false
+            this.far = 0
+            setTimeout(() => {
+              this.far = 1.8
+            }, 250)
+          }
+        } else {
+          this.velocity.y += this.player.speed
+        }
+        break
+      case 'Shift':
+        if (this.player.mode === Mode.walking) {
+        } else {
+          this.velocity.y -= this.player.speed
+        }
+        break
+      default:
+        break
+    }
+  }
+
+  resetMovementHandler = (e: KeyboardEvent) => {
+    if (e.repeat) {
+      return
+    }
+
+    switch (e.key) {
+      case 'w':
+      case 'W':
+        this.velocity.x = 0
+        break
+      case 's':
+      case 'S':
+        this.velocity.x = 0
+        break
+      case 'a':
+      case 'A':
+        this.velocity.z = 0
+        break
+      case 'd':
+      case 'D':
+        this.velocity.z = 0
+        break
+      case ' ':
+        if (this.player.mode === Mode.walking) {
+          return
+        }
+        this.velocity.y = 0
+        break
+      case 'Shift':
+        if (this.player.mode === Mode.walking) {
+          return
+        }
+        this.velocity.y = 0
+        break
+      default:
+        break
+    }
+  }
+
+  clickHandler = (e: MouseEvent) => {
+    e.preventDefault()
+
+    this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
+    const block = this.raycaster.intersectObjects(this.terrain.blocks)[0]
+    const matrix = new THREE.Matrix4()
+
+    switch (e.button) {
+      case 0:
+        {
+          if (block && block.object instanceof THREE.InstancedMesh) {
+            // calculate position
+            block.object.getMatrixAt(block.instanceId!, matrix)
+            const position = new THREE.Vector3().setFromMatrixPosition(matrix)
+
+            //remove the block
+            block.object.setMatrixAt(
+              block.instanceId!,
+              new THREE.Matrix4().set(
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              )
+            )
+
+            // update
+            block.object.instanceMatrix.needsUpdate = true
+
+            // check existence
+            let existed = false
+            for (const customBlock of this.terrain.customBlocks) {
+              if (
+                customBlock.x === position.x &&
+                customBlock.y === position.y &&
+                customBlock.z === position.z
+              ) {
+                existed = true
+                customBlock.placed = false
+              }
+            }
+
+            // add to custom blocks when it's not existed
+            if (!existed) {
+              this.terrain.customBlocks.push(
+                new Block(
+                  position.x,
+                  position.y,
+                  position.z,
+                  BlockType[block.object.name as any] as unknown as BlockType,
+                  false
+                )
+              )
+            }
+          }
+        }
+        break
+
+      case 2:
+        {
+          if (block && block.object instanceof THREE.InstancedMesh) {
+            // calculate normal and position
+            const normal = block.face!.normal
+            block.object.getMatrixAt(block.instanceId!, matrix)
+            const position = new THREE.Vector3().setFromMatrixPosition(matrix)
+
+            // return when block overlaps with player
+            if (
+              position.x + normal.x === Math.round(this.camera.position.x) &&
+              position.z + normal.z === Math.round(this.camera.position.z) &&
+              (position.y + normal.y === Math.round(this.camera.position.y) ||
+                position.y + normal.y ===
+                  Math.round(this.camera.position.y - 1))
+            ) {
+              return
+            }
+
+            // put the block
+            matrix.setPosition(
+              normal.x + position.x,
+              normal.y + position.y,
+              normal.z + position.z
+            )
+            this.terrain.blocks[this.holdingBlock].setMatrixAt(
+              this.terrain.getCount(this.holdingBlock),
+              matrix
+            )
+            this.terrain.setCount(this.holdingBlock)
+
+            // update
+            this.terrain.blocks[this.holdingBlock].instanceMatrix.needsUpdate =
+              true
+
+            // add to custom blocks
+            this.terrain.customBlocks.push(
+              new Block(
+                normal.x + position.x,
+                normal.y + position.y,
+                normal.z + position.z,
+                this.holdingBlock,
+                true
+              )
+            )
+          }
+        }
+        break
+      default:
+        break
+    }
+  }
+
   initEventListeners = () => {
     document.body.addEventListener('click', () => {
-      this.control.lock()
+      if (!this.isLocked) {
+        this.control.lock()
+      }
     })
 
     // TODO: remove this after testing
     document.addEventListener('mousewheel', () => {
       this.control.unlock()
     })
-    document.body.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.repeat) {
-        return
+
+    document.addEventListener('pointerlockchange', () => {
+      console.log(this.isLocked)
+      if (!this.isLocked) {
+        document.body.addEventListener(
+          'keydown',
+          this.changeHoldingBlockHandler
+        )
+        document.body.addEventListener('keydown', this.setMovementHandler)
+        document.body.addEventListener('keyup', this.resetMovementHandler)
+        document.body.addEventListener('mousedown', this.clickHandler)
+      } else {
+        document.body.removeEventListener(
+          'keydown',
+          this.changeHoldingBlockHandler
+        )
+        document.body.removeEventListener('keydown', this.setMovementHandler)
+        document.body.removeEventListener('keyup', this.resetMovementHandler)
+        document.body.removeEventListener('mousedown', this.clickHandler)
+        this.velocity.x = 0
+        this.velocity.z = 0
       }
 
-      switch (e.key) {
-        case 'q':
-          if (this.player.mode === Mode.walking) {
-            this.player.setMode(Mode.flying)
-            this.velocity.y = 0
-          } else {
-            this.player.setMode(Mode.walking)
-          }
-          break
-        case 'w':
-        case 'W':
-          this.velocity.x += this.player.speed
-          break
-        case 's':
-        case 'S':
-          this.velocity.x -= this.player.speed
-          break
-        case 'a':
-        case 'A':
-          this.velocity.z -= this.player.speed
-          break
-        case 'd':
-        case 'D':
-          this.velocity.z += this.player.speed
-          break
-        case ' ':
-          if (this.player.mode === Mode.walking) {
-            // jump
-            if (!this.isJumping) {
-              this.velocity.y = 8
-              this.isJumping = true
-              this.downCollide = false
-              this.far = 0
-              setTimeout(() => {
-                this.far = 1.8
-              }, 250)
-            }
-          } else {
-            this.velocity.y += this.player.speed
-          }
-          break
-        case 'Shift':
-          if (this.player.mode === Mode.walking) {
-          } else {
-            this.velocity.y -= this.player.speed
-          }
-          break
-        default:
-          break
-      }
-    })
-    document.body.addEventListener('keyup', (e: KeyboardEvent) => {
-      if (e.repeat) {
-        return
-      }
-
-      switch (e.key) {
-        case 'w':
-        case 'W':
-          this.velocity.x = 0
-          break
-        case 's':
-        case 'S':
-          this.velocity.x = 0
-          break
-        case 'a':
-        case 'A':
-          this.velocity.z = 0
-          break
-        case 'd':
-        case 'D':
-          this.velocity.z = 0
-          break
-        case ' ':
-          if (this.player.mode === Mode.walking) {
-            return
-          }
-          this.velocity.y = 0
-          break
-        case 'Shift':
-          if (this.player.mode === Mode.walking) {
-            return
-          }
-          this.velocity.y = 0
-          break
-        default:
-          break
-      }
-    })
-    document.addEventListener('mousedown', e => {
-      e.preventDefault()
-      let p1 = performance.now()
-
-      this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
-      const block = this.raycaster.intersectObjects(this.terrain.blocks)[0]
-      const matrix = new THREE.Matrix4()
-
-      switch (e.button) {
-        case 0:
-          {
-            if (block && block.object instanceof THREE.InstancedMesh) {
-              // calculate position
-              block.object.getMatrixAt(block.instanceId!, matrix)
-              const position = new THREE.Vector3().setFromMatrixPosition(matrix)
-
-              //remove the block
-              block.object.setMatrixAt(
-                block.instanceId!,
-                new THREE.Matrix4().set(
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0
-                )
-              )
-
-              // update
-              block.object.instanceMatrix.needsUpdate = true
-
-              // check existence
-              let existed = false
-              for (const customBlock of this.terrain.customBlocks) {
-                if (
-                  customBlock.x === position.x &&
-                  customBlock.y === position.y &&
-                  customBlock.z === position.z
-                ) {
-                  existed = true
-                  customBlock.placed = false
-                }
-              }
-
-              // add to custom blocks when it's not existed
-              if (!existed) {
-                this.terrain.customBlocks.push(
-                  new Block(
-                    position.x,
-                    position.y,
-                    position.z,
-                    BlockType[block.object.name as any] as unknown as BlockType,
-                    false
-                  )
-                )
-              }
-            }
-          }
-          break
-
-        case 2:
-          {
-            if (block && block.object instanceof THREE.InstancedMesh) {
-              // calculate normal and position
-              const normal = block.face!.normal
-              block.object.getMatrixAt(block.instanceId!, matrix)
-              const position = new THREE.Vector3().setFromMatrixPosition(matrix)
-
-              // return when block overlaps with player
-              if (
-                position.x + normal.x === Math.round(this.camera.position.x) &&
-                position.z + normal.z === Math.round(this.camera.position.z) &&
-                (position.y + normal.y === Math.round(this.camera.position.y) ||
-                  position.y + normal.y ===
-                    Math.round(this.camera.position.y - 1))
-              ) {
-                return
-              }
-
-              // put the block
-              matrix.setPosition(
-                normal.x + position.x,
-                normal.y + position.y,
-                normal.z + position.z
-              )
-              this.terrain.blocks[this.holdingBlock].setMatrixAt(
-                this.terrain.getCount(this.holdingBlock),
-                matrix
-              )
-              this.terrain.setCount(this.holdingBlock)
-
-              // update
-              this.terrain.blocks[
-                this.holdingBlock
-              ].instanceMatrix.needsUpdate = true
-
-              // add to custom blocks
-              this.terrain.customBlocks.push(
-                new Block(
-                  normal.x + position.x,
-                  normal.y + position.y,
-                  normal.z + position.z,
-                  this.holdingBlock,
-                  true
-                )
-              )
-            }
-          }
-          break
-        default:
-          break
-      }
-      console.log(performance.now() - p1)
+      this.isLocked = !this.isLocked
     })
   }
 

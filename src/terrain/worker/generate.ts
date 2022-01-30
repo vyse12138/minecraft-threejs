@@ -9,7 +9,8 @@ enum BlockType {
   leaf = 3,
   dirt = 4,
   stone = 5,
-  coal = 6
+  coal = 6,
+  wood = 7
 }
 
 const matrix = new THREE.Matrix4()
@@ -163,8 +164,7 @@ onmessage = (
                 (y + yOffset + 10 + j) / noise.leafGap,
                 (z + k) / noise.leafGap
               )
-
-              if (leafOffset > -0.02) {
+              if (leafOffset > noise.leafThreshold) {
                 idMap.set(
                   `${x + i}_${y + yOffset + 10 + j}_${z + k}`,
                   blocksCount[BlockType.leaf]
