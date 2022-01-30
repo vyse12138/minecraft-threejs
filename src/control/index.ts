@@ -11,7 +11,8 @@ enum Side {
   back,
   left,
   right,
-  down
+  down,
+  up
 }
 
 export default class Control {
@@ -48,9 +49,11 @@ export default class Control {
   leftCollide = false
   rightCollide = false
   downCollide = true
+  upCollide = false
   isJumping = false
 
   raycasterDown = new THREE.Raycaster()
+  raycasterUp = new THREE.Raycaster()
   raycasterFront = new THREE.Raycaster()
   raycasterBack = new THREE.Raycaster()
   raycasterRight = new THREE.Raycaster()
@@ -81,12 +84,14 @@ export default class Control {
   isLocked = false
 
   initRayCaster = () => {
+    this.raycasterUp.ray.direction = new THREE.Vector3(0, 1, 0)
     this.raycasterDown.ray.direction = new THREE.Vector3(0, -1, 0)
     this.raycasterFront.ray.direction = new THREE.Vector3(1, 0, 0)
     this.raycasterBack.ray.direction = new THREE.Vector3(-1, 0, 0)
     this.raycasterLeft.ray.direction = new THREE.Vector3(0, 0, -1)
     this.raycasterRight.ray.direction = new THREE.Vector3(0, 0, 1)
 
+    this.raycasterUp.far = 1.2
     this.raycasterDown.far = 1.8
     this.raycasterFront.far = 0.6
     this.raycasterBack.far = 0.6
@@ -142,7 +147,7 @@ export default class Control {
             this.far = 0
             setTimeout(() => {
               this.far = 1.8
-            }, 250)
+            }, 100)
           }
         } else {
           this.velocity.y += this.player.speed
@@ -384,6 +389,7 @@ export default class Control {
     this.collideCheck(Side.back, position, noise, customBlocks)
     this.collideCheck(Side.left, position, noise, customBlocks)
     this.collideCheck(Side.right, position, noise, customBlocks)
+    this.collideCheck(Side.up, position, noise, customBlocks)
   }
 
   collideCheck = (
@@ -432,6 +438,10 @@ export default class Control {
       case Side.down:
         this.raycasterDown.ray.origin = position
         this.raycasterDown.far = far
+        break
+      case Side.up:
+        this.raycasterUp.ray.origin = new THREE.Vector3().copy(position)
+        this.raycasterUp.ray.origin.y--
         break
     }
 
@@ -520,10 +530,16 @@ export default class Control {
         c1 || c2 ? (this.rightCollide = true) : (this.rightCollide = false)
         break
       }
-      case Side.down:
+      case Side.down: {
         const c1 = this.raycasterDown.intersectObject(this.tempMesh).length
         c1 ? (this.downCollide = true) : (this.downCollide = false)
         break
+      }
+      case Side.up: {
+        const c1 = this.raycasterUp.intersectObject(this.tempMesh).length
+        c1 ? (this.upCollide = true) : (this.upCollide = false)
+        break
+      }
     }
   }
 
@@ -541,10 +557,14 @@ export default class Control {
       // non-flying mode
 
       // gravity
+
       if (Math.abs(this.velocity.y) < this.player.falling) {
         this.velocity.y -= 25 * delta
       }
 
+      if (this.upCollide) {
+        this.velocity.y = -225 * delta
+      }
       this.collideCheckAll(
         this.camera.position,
         this.terrain.noise,

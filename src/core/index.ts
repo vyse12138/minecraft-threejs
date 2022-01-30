@@ -17,7 +17,7 @@ export default class Core {
   initCamera = () => {
     this.camera.fov = 50
     this.camera.aspect = window.innerWidth / window.innerHeight
-    this.camera.near = 0.1
+    this.camera.near = 0.01
     this.camera.far = 500
     this.camera.updateProjectionMatrix()
     this.camera.position.set(8, 50, 8)
