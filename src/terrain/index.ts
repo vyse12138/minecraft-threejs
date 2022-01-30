@@ -20,14 +20,15 @@ export default class Terrain {
   constructor(
     scene: THREE.Scene,
     camera: THREE.PerspectiveCamera,
-    distance: number
+    distance: number,
+    chunkSize: number
   ) {
     this.scene = scene
     this.camera = camera
     this.distance = distance
-    this.maxCount = (distance * 16 * 2 + 16) ** 2 + 500
+    this.chunkSize = chunkSize
+    this.maxCount = (distance * chunkSize * 2 + chunkSize) ** 2 + 500
     this.highlight = new Highlight(scene, camera, this)
-
     this.initBlocks()
     this.generate()
 
@@ -59,6 +60,7 @@ export default class Terrain {
   scene: THREE.Scene
   camera: THREE.PerspectiveCamera
   distance: number
+  chunkSize = 32
 
   // terrain properties
   maxCount: number
@@ -75,7 +77,6 @@ export default class Terrain {
   highlight: Highlight
 
   idMap = new Map<string, number>()
-
   generateWorker = new Generate()
 
   getCount = (type: BlockType) => {
@@ -139,7 +140,8 @@ export default class Terrain {
       idMap: new Map<string, number>(),
       blocksFactor: this.blocksFactor,
       blocksCount: this.blocksCount,
-      customBlocks: this.customBlocks
+      customBlocks: this.customBlocks,
+      chunkSize: this.chunkSize
     })
   }
 
@@ -177,6 +179,8 @@ export default class Terrain {
     this.buildBlock(new THREE.Vector3(x + 1, y, z), type)
     this.buildBlock(new THREE.Vector3(x, y, z - 1), type)
     this.buildBlock(new THREE.Vector3(x, y, z + 1), type)
+
+    this.blocks[type].instanceMatrix.needsUpdate = true
   }
 
   buildBlock = (position: THREE.Vector3, type: BlockType) => {
@@ -211,13 +215,12 @@ export default class Terrain {
     matrix.setPosition(position)
     this.blocks[type].setMatrixAt(this.getCount(type), matrix)
     this.setCount(type)
-    this.blocks[type].instanceMatrix.needsUpdate = true
   }
 
   update = () => {
     this.chunk.set(
-      Math.floor(this.camera.position.x / 16),
-      Math.floor(this.camera.position.z / 16)
+      Math.floor(this.camera.position.x / this.chunkSize),
+      Math.floor(this.camera.position.z / this.chunkSize)
     )
 
     //generate terrain when getting into new chunk

@@ -29,6 +29,6 @@ export default class Player {
 
   body = {
     height: 1.8,
-    width: 0.6
+    width: 0.4
   }
 }

@@ -33,6 +33,7 @@ onmessage = (
     blocksFactor: number[]
     blocksCount: number[]
     customBlocks: Block[]
+    chunkSize: number
   }>
 ) => {
   // let p1 = performance.now()
@@ -46,10 +47,11 @@ onmessage = (
     stoneSeed,
     coalSeed,
     customBlocks,
-    blocksCount
+    blocksCount,
+    chunkSize
   } = msg.data
 
-  const maxCount = (distance * 16 * 2 + 16) ** 2 + 500
+  const maxCount = (distance * chunkSize * 2 + chunkSize) ** 2 + 500
 
   if (isFirstRun) {
     for (let i = 0; i < blocksCount.length; i++) {
@@ -75,13 +77,13 @@ onmessage = (
   }
 
   for (
-    let x = -16 * distance + 16 * chunk.x;
-    x < 16 * distance + 16 + 16 * chunk.x;
+    let x = -chunkSize * distance + chunkSize * chunk.x;
+    x < chunkSize * distance + chunkSize + chunkSize * chunk.x;
     x++
   ) {
     for (
-      let z = -16 * distance + 16 * chunk.y;
-      z < 16 * distance + 16 + 16 * chunk.y;
+      let z = -chunkSize * distance + chunkSize * chunk.y;
+      z < chunkSize * distance + chunkSize + chunkSize * chunk.y;
       z++
     ) {
       const y = 30
@@ -191,10 +193,10 @@ onmessage = (
 
   for (const block of customBlocks) {
     if (
-      block.x > -16 * distance + 16 * chunk.x &&
-      block.x < 16 * distance + 16 + 16 * chunk.x &&
-      block.z > -16 * distance + 16 * chunk.y &&
-      block.z < 16 * distance + 16 + 16 * chunk.y
+      block.x > -chunkSize * distance + chunkSize * chunk.x &&
+      block.x < chunkSize * distance + chunkSize + chunkSize * chunk.x &&
+      block.z > -chunkSize * distance + chunkSize * chunk.y &&
+      block.z < chunkSize * distance + chunkSize + chunkSize * chunk.y
     ) {
       if (block.placed) {
         // placed blocks

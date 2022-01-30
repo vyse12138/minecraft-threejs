@@ -93,10 +93,10 @@ export default class Control {
 
     this.raycasterUp.far = 1.2
     this.raycasterDown.far = 1.8
-    this.raycasterFront.far = 0.6
-    this.raycasterBack.far = 0.6
-    this.raycasterLeft.far = 0.6
-    this.raycasterRight.far = 0.6
+    this.raycasterFront.far = 0.4
+    this.raycasterBack.far = 0.4
+    this.raycasterLeft.far = 0.4
+    this.raycasterRight.far = 0.4
   }
 
   changeHoldingBlockHandler = (e: KeyboardEvent) => {
@@ -147,7 +147,7 @@ export default class Control {
             this.far = 0
             setTimeout(() => {
               this.far = 1.8
-            }, 100)
+            }, 300)
           }
         } else {
           this.velocity.y += this.player.speed
@@ -397,7 +397,7 @@ export default class Control {
     position: THREE.Vector3,
     noise: Noise,
     customBlocks: Block[],
-    far: number = 0.6
+    far: number = 0.4
   ) => {
     const matrix = new THREE.Matrix4()
 
@@ -555,22 +555,23 @@ export default class Control {
       this.camera.position.y += this.velocity.y * delta
     } else {
       // non-flying mode
-
-      // gravity
-
-      if (Math.abs(this.velocity.y) < this.player.falling) {
-        this.velocity.y -= 25 * delta
-      }
-
-      if (this.upCollide) {
-        this.velocity.y = -225 * delta
-      }
       this.collideCheckAll(
         this.camera.position,
         this.terrain.noise,
         this.terrain.customBlocks,
         this.far
       )
+
+      // gravity
+      if (Math.abs(this.velocity.y) < this.player.falling) {
+        this.velocity.y -= 25 * delta
+      }
+
+      // up collide handler
+      if (this.upCollide) {
+        this.velocity.y = -225 * delta
+        this.far = 1.8
+      }
 
       // down collide and jump handler
       if (this.downCollide && !this.isJumping) {
