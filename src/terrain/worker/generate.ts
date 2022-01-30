@@ -49,12 +49,14 @@ onmessage = (
     blocksCount
   } = msg.data
 
+  const maxCount = (distance * 16 * 2 + 16) ** 2 + 500
+
   if (isFirstRun) {
     for (let i = 0; i < blocksCount.length; i++) {
       let block = new THREE.InstancedMesh(
         geometry,
         new THREE.MeshBasicMaterial(),
-        ((distance * 16 * 2 + 16) ** 2 + 500) * blocksFactor[i]
+        maxCount * blocksFactor[i]
       )
       blocks.push(block)
     }
@@ -67,9 +69,7 @@ onmessage = (
 
   for (let i = 0; i < blocks.length; i++) {
     blocks[i].instanceMatrix = new THREE.InstancedBufferAttribute(
-      new Float32Array(
-        ((distance * 16 * 2 + 16) ** 2 + 500) * blocksFactor[i] * 16
-      ),
+      new Float32Array(maxCount * blocksFactor[i] * 16),
       16
     )
   }
@@ -134,13 +134,12 @@ onmessage = (
       }
 
       // tree
-      let treeOffset = noise.get(
-        x / noise.treeGap,
-        z / noise.treeGap,
-        noise.treeSeed * noise.treeAmp
-      )
+      let treeOffset =
+        noise.get(x / noise.treeGap, z / noise.treeGap, noise.treeSeed) *
+        noise.treeAmp
+
       if (
-        treeOffset < -0.7 &&
+        treeOffset > noise.treeThreshold &&
         yOffset >= -3 &&
         stoneOffset < noise.stoneThreshold
       ) {
@@ -159,17 +158,25 @@ onmessage = (
         for (let i = -3; i < 3; i++) {
           for (let j = -3; j < 3; j++) {
             for (let k = -3; k < 3; k++) {
-              let leafOffset = noise.get(
-                (x + i) / noise.leafGap,
-                (y + yOffset + 10 + j) / noise.leafGap,
-                (z + k) / noise.leafGap
-              )
+              if (i === 0 && k === 0) {
+                continue
+              }
+              let leafOffset =
+                noise.get(
+                  (x + i + j) / noise.leafGap,
+                  (z + k) / noise.leafGap,
+                  noise.leafSeed
+                ) * noise.leafAmp
               if (leafOffset > noise.leafThreshold) {
                 idMap.set(
-                  `${x + i}_${y + yOffset + 10 + j}_${z + k}`,
+                  `${x + i}_${y + yOffset + noise.treeHeight + j}_${z + k}`,
                   blocksCount[BlockType.leaf]
                 )
-                matrix.setPosition(x + i, y + yOffset + 10 + j, z + k)
+                matrix.setPosition(
+                  x + i,
+                  y + yOffset + noise.treeHeight + j,
+                  z + k
+                )
                 blocks[BlockType.leaf].setMatrixAt(
                   blocksCount[BlockType.leaf]++,
                   matrix

@@ -28,6 +28,7 @@ export default class BlockHighlight {
   material = new THREE.MeshStandardMaterial({
     transparent: true,
     opacity: 0.25
+    // depthWrite: false
   })
   mesh = new THREE.Mesh(new THREE.BoxGeometry(), this.material)
 
@@ -51,74 +52,70 @@ export default class BlockHighlight {
     const position = this.camera.position
     const matrix = new THREE.Matrix4()
     const idMap = new Map<string, number>()
+    const noise = this.terrain.noise
 
-    let x = Math.round(position.x)
-    let z = Math.round(position.z)
+    let xPos = Math.round(position.x)
+    let zPos = Math.round(position.z)
 
     for (let i = -8; i < 8; i++) {
       for (let j = -8; j < 8; j++) {
         // check terrain
-        let xPos = x + i
-        let zPos = z + j
-        let yPos =
+        let x = xPos + i
+        let z = zPos + j
+        let y =
           Math.floor(
-            this.terrain.noise.get(
-              xPos / this.terrain.noise.gap,
-              zPos / this.terrain.noise.gap,
-              this.terrain.noise.seed
-            ) * this.terrain.noise.amp
+            noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
           ) + 30
 
-        idMap.set(`${xPos}_${yPos}_${zPos}`, this.index)
-        matrix.setPosition(xPos, yPos, zPos)
+        idMap.set(`${x}_${y}_${z}`, this.index)
+        matrix.setPosition(x, y, z)
         this.instanceMesh.setMatrixAt(this.index++, matrix)
 
         let stoneOffset =
-          this.terrain.noise.get(
-            xPos / this.terrain.noise.stoneGap,
-            zPos / this.terrain.noise.stoneGap,
-            this.terrain.noise.stoneSeed
-          ) * this.terrain.noise.stoneAmp
+          noise.get(x / noise.stoneGap, z / noise.stoneGap, noise.stoneSeed) *
+          noise.stoneAmp
+
+        let treeOffset =
+          noise.get(x / noise.treeGap, z / noise.treeGap, noise.treeSeed) *
+          noise.treeAmp
 
         // check tree
-        let treeOffset = this.terrain.noise.get(
-          xPos / this.terrain.noise.treeGap,
-          zPos / this.terrain.noise.treeGap,
-          this.terrain.noise.treeSeed * this.terrain.noise.treeAmp
-        )
-
         if (
-          treeOffset < -0.7 &&
-          yPos >= 27 &&
-          stoneOffset < this.terrain.noise.stoneThreshold
+          treeOffset > noise.treeThreshold &&
+          y - 30 >= -3 &&
+          stoneOffset < noise.stoneThreshold
         ) {
-          for (let t = 1; t <= this.terrain.noise.treeHeight; t++) {
-            idMap.set(`${xPos}_${yPos + t}_${zPos}`, this.index)
-            matrix.setPosition(xPos, yPos + t, zPos)
+          for (let t = 1; t <= noise.treeHeight; t++) {
+            idMap.set(`${x}_${y + t}_${z}`, this.index)
+            matrix.setPosition(x, y + t, z)
             this.instanceMesh.setMatrixAt(this.index++, matrix)
           }
 
           // leaf
-          for (let i = -3; i < 3; i++) {
-            for (let j = -3; j < 3; j++) {
-              for (let k = -3; k < 3; k++) {
-                let leafOffset = this.terrain.noise.get(
-                  (xPos + i) / this.terrain.noise.leafGap,
-                  (yPos + 10 + j) / this.terrain.noise.leafGap,
-                  (zPos + k) / this.terrain.noise.leafGap
-                )
+          // for (let i = -3; i < 3; i++) {
+          //   for (let j = -3; j < 3; j++) {
+          //     for (let k = -3; k < 3; k++) {
+          //       if (i === 0 && k === 0) {
+          //         continue
+          //       }
+          //     let leafOffset =
+          //       noise.get(
+          //         (x + i + j) / noise.leafGap,
+          //         (z + k) / noise.leafGap,
+          //         noise.leafSeed
+          //       ) * noise.leafAmp
 
-                if (leafOffset > this.terrain.noise.leafThreshold) {
-                  idMap.set(
-                    `${xPos + i}_${yPos + 10 + j}_${zPos + k}`,
-                    this.index
-                  )
-                  matrix.setPosition(xPos + i, yPos + 10 + j, zPos + k)
-                  this.instanceMesh.setMatrixAt(this.index++, matrix)
-                }
-              }
-            }
-          }
+          //       if (leafOffset > noise.leafThreshold) {
+          //         idMap.set(
+          //           `${x + i}_${y + noise.treeHeight + j}_${z + k}`,
+          //           this.index
+          //         )
+          //         matrix.setPosition(x + i, y + noise.treeHeight + j, z + k)
+          //         this.instanceMesh.setMatrixAt(this.index++, matrix)
+          //       }
+          //     }
+          //   }
+          // }
         }
       }
     }

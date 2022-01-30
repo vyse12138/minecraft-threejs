@@ -13,18 +13,20 @@ export default class Noise {
   stoneThreshold = 3.5
 
   coalSeed = Math.random()
-  coalGap = 2
+  coalGap = 3
   coalAmp = 8
-  coalThreshold = 3.5
+  coalThreshold = 4
 
   treeSeed = Math.random()
   treeGap = 2
   treeAmp = 6
   treeHeight = 10
+  treeThreshold = 4
 
   leafSeed = Math.random()
-  leafGap = 5
-  leafThreshold = -0.15
+  leafGap = 2
+  leafAmp = 5
+  leafThreshold = -0.03
 
   get = (x: number, y: number, z: number) => {
     return this.noise.noise(x, y, z)

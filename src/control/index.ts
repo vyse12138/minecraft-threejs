@@ -334,7 +334,6 @@ export default class Control {
     })
 
     document.addEventListener('pointerlockchange', () => {
-      console.log(this.isLocked)
       if (!this.isLocked) {
         document.body.addEventListener(
           'keydown',
@@ -351,8 +350,7 @@ export default class Control {
         document.body.removeEventListener('keydown', this.setMovementHandler)
         document.body.removeEventListener('keyup', this.resetMovementHandler)
         document.body.removeEventListener('mousedown', this.clickHandler)
-        this.velocity.x = 0
-        this.velocity.z = 0
+        this.velocity = new THREE.Vector3(0, 0, 0)
       }
 
       this.isLocked = !this.isLocked
@@ -466,18 +464,16 @@ export default class Control {
     }
     for (let i = 1; i <= this.terrain.noise.treeHeight; i++) {
       if (!treeRemoved[i]) {
-        let treeOffset = noise.get(
-          x / noise.treeGap,
-          z / noise.treeGap,
-          noise.treeSeed * noise.treeAmp
-        )
+        let treeOffset =
+          noise.get(x / noise.treeGap, z / noise.treeGap, noise.treeSeed) *
+          noise.treeAmp
 
         let stoneOffset =
           noise.get(x / noise.stoneGap, z / noise.stoneGap, noise.stoneSeed) *
           noise.stoneAmp
 
         if (
-          treeOffset < -0.7 &&
+          treeOffset > noise.treeThreshold &&
           y >= 27 &&
           stoneOffset < noise.stoneThreshold
         ) {

@@ -69,7 +69,7 @@ export default class Terrain {
   // other properties
   blocks: THREE.InstancedMesh[] = []
   blocksCount: number[] = []
-  blocksFactor = [1, 0.5, 0.2, 1, 0.5, 0.5, 0.1, 0.5]
+  blocksFactor = [1, 0.2, 0.1, 0.7, 0.1, 0.2, 0.1, 0.1]
 
   customBlocks: Block[] = []
   highlight: Highlight
