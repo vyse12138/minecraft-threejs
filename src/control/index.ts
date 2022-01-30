@@ -264,6 +264,9 @@ export default class Control {
                 )
               )
             }
+
+            // generate adjacent blocks
+            this.terrain.generateAdjacentBlocks(position)
           }
         }
         break

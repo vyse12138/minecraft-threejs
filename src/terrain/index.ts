@@ -143,6 +143,77 @@ export default class Terrain {
     })
   }
 
+  // generate adjacent blocks after removing a block (vertical infinity world)
+  generateAdjacentBlocks = (position: THREE.Vector3) => {
+    const { x, y, z } = position
+    const noise = this.noise
+    const yOffset = Math.floor(
+      noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
+    )
+
+    if (y > 30 + yOffset) {
+      return
+    }
+
+    const stoneOffset =
+      noise.get(x / noise.stoneGap, z / noise.stoneGap, noise.stoneSeed) *
+      noise.stoneAmp
+
+    let type: BlockType
+
+    if (stoneOffset > noise.stoneThreshold || y < 23) {
+      type = BlockType.stone
+    } else {
+      if (yOffset < -3) {
+        type = BlockType.sand
+      } else {
+        type = BlockType.dirt
+      }
+    }
+
+    this.buildBlock(new THREE.Vector3(x, y - 1, z), type)
+    this.buildBlock(new THREE.Vector3(x, y + 1, z), type)
+    this.buildBlock(new THREE.Vector3(x - 1, y, z), type)
+    this.buildBlock(new THREE.Vector3(x + 1, y, z), type)
+    this.buildBlock(new THREE.Vector3(x, y, z - 1), type)
+    this.buildBlock(new THREE.Vector3(x, y, z + 1), type)
+  }
+
+  buildBlock = (position: THREE.Vector3, type: BlockType) => {
+    const noise = this.noise
+
+    // check if it's natural terrain
+    const yOffset = Math.floor(
+      noise.get(position.x / noise.gap, position.z / noise.gap, noise.seed) *
+        noise.amp
+    )
+    if (position.y >= 30 + yOffset) {
+      return
+    }
+
+    // check custom blocks
+    for (const block of this.customBlocks) {
+      if (
+        block.position.x === position.x &&
+        block.position.y === position.y &&
+        block.position.z === position.z
+      ) {
+        return
+      }
+    }
+
+    // build block
+    this.customBlocks.push(
+      new Block(position.x, position.y, position.z, type, true)
+    )
+
+    const matrix = new THREE.Matrix4()
+    matrix.setPosition(position)
+    this.blocks[type].setMatrixAt(this.getCount(type), matrix)
+    this.setCount(type)
+    this.blocks[type].instanceMatrix.needsUpdate = true
+  }
+
   update = () => {
     this.chunk.set(
       Math.floor(this.camera.position.x / 16),

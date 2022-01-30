@@ -84,18 +84,18 @@ onmessage = (
       z < 16 * distance + 16 + 16 * chunk.y;
       z++
     ) {
-      let y = 30
-      let yOffset = Math.floor(
+      const y = 30
+      const yOffset = Math.floor(
         noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
       )
 
       matrix.setPosition(x, y + yOffset, z)
 
-      let stoneOffset =
+      const stoneOffset =
         noise.get(x / noise.stoneGap, z / noise.stoneGap, noise.stoneSeed) *
         noise.stoneAmp
 
-      let coalOffset =
+      const coalOffset =
         noise.get(x / noise.coalGap, z / noise.coalGap, noise.coalSeed) *
         noise.coalAmp
 
@@ -134,7 +134,7 @@ onmessage = (
       }
 
       // tree
-      let treeOffset =
+      const treeOffset =
         noise.get(x / noise.treeGap, z / noise.treeGap, noise.treeSeed) *
         noise.treeAmp
 
@@ -161,7 +161,7 @@ onmessage = (
               if (i === 0 && k === 0) {
                 continue
               }
-              let leafOffset =
+              const leafOffset =
                 noise.get(
                   (x + i + j) / noise.leafGap,
                   (z + k) / noise.leafGap,
