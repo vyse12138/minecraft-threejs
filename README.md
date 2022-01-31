@@ -6,7 +6,7 @@ Check it out on your laptop / desktop: [Minecraft - Three.js](https://mc.yuleiz.
 
 Note: please use Chrome to get the best experience
 
-## ✔Features:
+## Features:
 
 - Destroy block and place block
 - Mouse wheel (number key) to select different block types
@@ -17,11 +17,11 @@ Note: please use Chrome to get the best experience
 - Random terrain / blocks / tree generations
 - Highlight the block at crosshair
 - Infinite world
-- Relaxing BGM
+- Sound effect and BGM
+- Game save / load
 
-## ⚠Todos:
+## Working on:
 
 - Generates water
 - Sprint
-- Sound effect
-- Game save / load
+- Animals / villagers

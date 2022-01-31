@@ -204,9 +204,9 @@ export default class Terrain {
     // check custom blocks
     for (const block of this.customBlocks) {
       if (
-        block.position.x === position.x &&
-        block.position.y === position.y &&
-        block.position.z === position.z
+        block.x === position.x &&
+        block.y === position.y &&
+        block.z === position.z
       ) {
         return
       }

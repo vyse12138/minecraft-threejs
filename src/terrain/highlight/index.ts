@@ -123,7 +123,7 @@ export default class BlockHighlight {
     // check custom blocks
     for (const block of this.terrain.customBlocks) {
       if (block.placed) {
-        matrix.setPosition(block.position)
+        matrix.setPosition(block.x, block.y, block.z)
         this.instanceMesh.setMatrixAt(this.index++, matrix)
       } else {
         if (idMap.has(`${block.x}_${block.y}_${block.z}`)) {

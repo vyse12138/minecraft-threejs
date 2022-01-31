@@ -5,7 +5,7 @@ import Terrain, { BlockType } from '../terrain'
 
 import Block from '../terrain/mesh/block'
 import Noise from '../terrain/noise'
-
+import Audio from '../audio'
 enum Side {
   front,
   back,
@@ -20,13 +20,15 @@ export default class Control {
     scene: THREE.Scene,
     camera: THREE.PerspectiveCamera,
     player: Player,
-    terrain: Terrain
+    terrain: Terrain,
+    audio: Audio
   ) {
     this.scene = scene
     this.camera = camera
     this.player = player
     this.terrain = terrain
     this.control = new PointerLockControls(camera, document.body)
+    this.audio = audio
 
     this.raycaster = new THREE.Raycaster()
     this.raycaster.far = 8
@@ -41,6 +43,7 @@ export default class Control {
   player: Player
   terrain: Terrain
   control: PointerLockControls
+  audio: Audio
   velocity = new THREE.Vector3(0, 0, 0)
 
   // collide and jump properties
@@ -204,7 +207,7 @@ export default class Control {
 
   clickHandler = (e: MouseEvent) => {
     e.preventDefault()
-    let pi = performance.now()
+    // let pi = performance.now()
     this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
     const block = this.raycaster.intersectObjects(this.terrain.blocks)[0]
     const matrix = new THREE.Matrix4()
@@ -238,6 +241,11 @@ export default class Control {
                 0,
                 0
               )
+            )
+
+            //sound effect
+            this.audio.playSound(
+              BlockType[block.object.name as any] as unknown as BlockType
             )
 
             // update
@@ -306,6 +314,9 @@ export default class Control {
             )
             this.terrain.setCount(this.holdingBlock)
 
+            //sound effect
+            this.audio.playSound(this.holdingBlock)
+
             // update
             this.terrain.blocks[this.holdingBlock].instanceMatrix.needsUpdate =
               true
@@ -326,7 +337,6 @@ export default class Control {
       default:
         break
     }
-    console.log(performance.now() - pi)
   }
 
   changeHoldingBlockHandler = (e: KeyboardEvent) => {
@@ -361,6 +371,14 @@ export default class Control {
   initEventListeners = () => {
     document.querySelector('#play')?.addEventListener('click', () => {
       this.control.lock()
+    })
+    document.querySelector('#save')?.addEventListener('click', (e: Event) => {
+      if (
+        e.target instanceof HTMLElement &&
+        e.target?.innerHTML === 'Load Game'
+      ) {
+        this.control.lock()
+      }
     })
 
     document.querySelector('canvas')?.addEventListener('click', (e: Event) => {
@@ -502,7 +520,7 @@ export default class Control {
       if (block.x === x && block.z === z) {
         if (block.placed) {
           // placed blocks
-          matrix.setPosition(block.position)
+          matrix.setPosition(block.x, block.y, block.z)
           this.tempMesh.setMatrixAt(index++, matrix)
         } else if (block.y === y) {
           // removed blocks
@@ -1054,7 +1072,7 @@ export default class Control {
       this.camera.position.y += this.velocity.y * delta
 
       // catching net
-      if (this.camera.position.y < -50) {
+      if (this.camera.position.y < -100) {
         this.camera.position.y = 60
       }
     }

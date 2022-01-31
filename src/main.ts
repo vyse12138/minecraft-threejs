@@ -14,14 +14,14 @@ const core = new Core()
 const camera = core.camera
 const scene = core.scene
 const renderer = core.renderer
-const ui = new UI()
 
 const player = new Player()
+const audio = new Audio(camera)
 
 const terrain = new Terrain(scene, camera, renderDistance, chunkSize)
-const control = new Control(scene, camera, player, terrain)
+const control = new Control(scene, camera, player, terrain, audio)
 
-const audio = new Audio(camera)
+const ui = new UI(terrain)
 
 // animation
 ;(function animate() {
@@ -33,5 +33,5 @@ const audio = new Audio(camera)
   ui.update()
   audio.update()
   renderer.render(scene, camera)
-  // console.log(performance.now() - p1)
+  // console.log(performance.now()-p1)
 })()

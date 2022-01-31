@@ -52,13 +52,7 @@ onmessage = (
       block.z === Math.round(msg.data.position.z)
     ) {
       if (block.placed) {
-        matrix.setPosition(
-          new THREE.Vector3(
-            block.position.x,
-            block.position.y,
-            block.position.z
-          )
-        )
+        matrix.setPosition(new THREE.Vector3(block.x, block.y, block.z))
         mesh.setMatrixAt(index++, matrix)
       } else if (block.y === y) {
         removed = true

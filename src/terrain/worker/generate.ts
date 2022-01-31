@@ -65,12 +65,14 @@ onmessage = (
       )
       blocks.push(block)
     }
-    noise.seed = noiseSeed
-    noise.treeSeed = treeSeed
-    noise.stoneSeed = stoneSeed
-    noise.coalSeed = coalSeed
+
     isFirstRun = false
   }
+
+  noise.seed = noiseSeed
+  noise.treeSeed = treeSeed
+  noise.stoneSeed = stoneSeed
+  noise.coalSeed = coalSeed
 
   for (let i = 0; i < blocks.length; i++) {
     blocks[i].instanceMatrix = new THREE.InstancedBufferAttribute(
@@ -203,7 +205,7 @@ onmessage = (
     ) {
       if (block.placed) {
         // placed blocks
-        matrix.setPosition(block.position.x, block.position.y, block.position.z)
+        matrix.setPosition(block.x, block.y, block.z)
         blocks[block.type].setMatrixAt(blocksCount[block.type]++, matrix)
       } else {
         // removed blocks

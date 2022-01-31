@@ -49,7 +49,7 @@ body {
   font-size: 1.2rem;
   padding: 10px;
   cursor: pointer;
-  margin-bottom: 3vh;
+  margin-bottom: 15px;
 }
 
 .footer {
@@ -146,7 +146,39 @@ body {
   text-align: center;
   user-select: none;
 }
+
 .features-text {
   text-align: left;
   line-height: 1.8rem;
+}
+
+.save-modal {
+  z-index: 2;
+  position: fixed;
+  left: 50%;
+  transform: translate(-50%, 0%);
+
+  margin-top: 25vh;
+
+  width: 300px;
+  color: white;
+  background-color: #727272;
+  border-left: 2px solid #a4a4a4;
+  border-top: 2px solid #a4a4a4;
+  border-bottom: 2px solid #545655;
+  border-right: 2px solid #545655;
+  box-shadow: 0 0 0 2px black;
+
+  padding: 42px 0px;
+  opacity: 0%;
+
+  transition: opacity 0.5s ease-in-out;
+
+  text-align: center;
+  user-select: none;
+}
+
+.show {
+  transition: opacity 0.5s ease-in-out;
+  opacity: 100%;
 }
