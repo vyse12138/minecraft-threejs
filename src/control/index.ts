@@ -32,6 +32,7 @@ export default class Control {
     this.raycaster.far = 8
 
     this.initRayCaster()
+    this.initEventListeners()
   }
 
   // core properties
@@ -87,7 +88,6 @@ export default class Control {
     BlockType.grass
   ]
   holdingIndex = 0
-  isLocked = false
   wheelGap = false
 
   initRayCaster = () => {
@@ -204,7 +204,7 @@ export default class Control {
 
   clickHandler = (e: MouseEvent) => {
     e.preventDefault()
-
+    let pi = performance.now()
     this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
     const block = this.raycaster.intersectObjects(this.terrain.blocks)[0]
     const matrix = new THREE.Matrix4()
@@ -326,6 +326,7 @@ export default class Control {
       default:
         break
     }
+    console.log(performance.now() - pi)
   }
 
   changeHoldingBlockHandler = (e: KeyboardEvent) => {
@@ -342,7 +343,7 @@ export default class Control {
       this.wheelGap = true
       setTimeout(() => {
         this.wheelGap = false
-      }, 150)
+      }, 100)
       if (e instanceof WheelEvent) {
         if (e.deltaY > 0) {
           this.holdingIndex++
@@ -358,10 +359,13 @@ export default class Control {
   }
 
   initEventListeners = () => {
-    document.body.addEventListener('click', () => {
-      if (!this.isLocked) {
-        this.control.lock()
-      }
+    document.querySelector('#play')?.addEventListener('click', () => {
+      this.control.lock()
+    })
+
+    document.querySelector('canvas')?.addEventListener('click', (e: Event) => {
+      e.preventDefault()
+      this.control.lock()
     })
 
     document.body.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -379,13 +383,13 @@ export default class Control {
       if (e.key !== 'e') {
         return
       }
-      if (this.isLocked) {
+      if (document.pointerLockElement) {
         this.control.unlock()
       }
     })
 
     document.addEventListener('pointerlockchange', () => {
-      if (!this.isLocked) {
+      if (document.pointerLockElement) {
         document.body.addEventListener(
           'keydown',
           this.changeHoldingBlockHandler
@@ -405,7 +409,6 @@ export default class Control {
         document.body.removeEventListener('mousedown', this.clickHandler)
         this.velocity = new THREE.Vector3(0, 0, 0)
       }
-      this.isLocked = !this.isLocked
     })
   }
 

@@ -2,25 +2,26 @@
 
 Minecraft clone made with Three.js and TypeScript
 
-Check it out: [Minecraft - Three.js](https://mc.yuleiz.com/)
+Check it out on your laptop / desktop: [Minecraft - Three.js](https://mc.yuleiz.com/)
+
+Note: please use Chrome to get the best experience
 
 ## ✔Features:
 
-- Left click to remove block
-- Right click to put block (with different block types)
-- Smooth collision check
-- WASD to move
+- Destroy block and place block
+- Mouse wheel (number key) to select different block types
+- Movement with smooth collision detection
 - Q to switch between normal / dev mode
 - F to toggle full screen
-- Random terrain and trees generation
+- E to bring up menu
+- Random terrain / blocks / tree generations
 - Highlight the block at crosshair
 - Infinite world
-- BGM
-- Great performance (heavy tasks are moved into web worker)
+- Relaxing BGM
 
 ## ⚠Todos:
 
 - Generates water
-- Menu and staring page
 - Sprint
 - Sound effect
+- Game save / load

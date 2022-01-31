@@ -34,7 +34,7 @@ export default class Bag {
         this.wheelGap = true
         setTimeout(() => {
           this.wheelGap = false
-        }, 150)
+        }, 100)
         if (e instanceof WheelEvent) {
           if (e.deltaY > 0) {
             this.current++

@@ -1,9 +1,65 @@
 body {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: Minercraftory, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   overflow: hidden;
+}
+
+@font-face {
+  font-family: Minercraftory;
+  src: url(/mc-font.otf);
+}
+
+.start {
+  background-image: url(/menu.jpeg);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.start #exit {
+  display: none;
+}
+.menu {
+  z-index: 1;
+  position: fixed;
+  left: 0%;
+  top: 0%;
+
+  width: 100vw;
+  height: 100vh;
+
+  text-align: center;
+  user-select: none;
+  background-color: hsla(0, 0%, 11%, 0.7);
+}
+.buttons {
+  margin-top: 25vh;
+}
+.button {
+  font-family: Minercraftory, Avenir, Helvetica, Arial, sans-serif;
+  color: white;
+  background-color: #727272;
+  border-left: 2px solid #a4a4a4;
+  border-top: 2px solid #a4a4a4;
+  border-bottom: 2px solid #545655;
+  border-right: 2px solid #545655;
+  box-shadow: 0 0 0 2px black;
+  width: 300px;
+  font-size: 1.2rem;
+  padding: 10px;
+  cursor: pointer;
+  margin-bottom: 3vh;
+}
+
+.footer {
+  position: fixed;
+  color: white;
+  left: 50%;
+  top: 100%;
+  opacity: 75%;
+  transform: translate(-50%, -100%);
+  font-family: sans-serif;
 }
 
 .fps {
@@ -63,22 +119,34 @@ body {
   display: none;
 }
 
-.loading {
+.button:active {
+  border-left: 2px solid #545655;
+  border-top: 2px solid #545655;
+  border-bottom: 2px solid #a4a4a4;
+  border-right: 2px solid #a4a4a4;
+}
+.features {
+  z-index: 2;
   position: fixed;
   left: 50%;
-  top: 0%;
-  transform: translate(-50%);
+  top: 20%;
+  transform: translate(-50%, 0%);
 
-  width: 100vw;
-  height: 100vh;
-
+  width: 300px;
   color: white;
-  text-align: center;
-  background-color: hsla(0, 0%, 11%, 0.7);
-}
+  background-color: #727272;
+  border-left: 2px solid #a4a4a4;
+  border-top: 2px solid #a4a4a4;
+  border-bottom: 2px solid #545655;
+  border-right: 2px solid #545655;
+  box-shadow: 0 0 0 2px black;
 
-.loading-text {
-  padding-top: 100px;
-  font-size: 3rem;
-  font-weight: normal;
+  padding: 0px 30px 0px 30px;
+
+  text-align: center;
+  user-select: none;
+}
+.features-text {
+  text-align: left;
+  line-height: 1.8rem;
 }

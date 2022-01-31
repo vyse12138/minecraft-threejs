@@ -8,7 +8,7 @@ import Audio from './audio'
 import './style.css'
 
 const renderDistance = 3
-const chunkSize = 32
+const chunkSize = 24
 
 const core = new Core()
 const camera = core.camera
@@ -21,7 +21,7 @@ const player = new Player()
 const terrain = new Terrain(scene, camera, renderDistance, chunkSize)
 const control = new Control(scene, camera, player, terrain)
 
-const audio = new Audio(camera, ui, control)
+const audio = new Audio(camera)
 
 // animation
 ;(function animate() {

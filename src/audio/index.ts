@@ -1,22 +1,22 @@
 import * as THREE from 'three'
-import Control from '../control'
-import UI from '../ui'
 import bgm from './musics/hal3.ogg'
 
 export default class Audio {
-  constructor(camera: THREE.PerspectiveCamera, ui: UI, control: Control) {
+  constructor(camera: THREE.PerspectiveCamera) {
     this.listener = new THREE.AudioListener()
     this.audioLoader = new THREE.AudioLoader()
     camera.add(this.listener)
 
     this.bgm = new THREE.Audio(this.listener)
+    this.bgm.autoplay = false
     this.audioLoader.load(bgm, buffer => {
       this.bgm.setBuffer(buffer)
-      this.bgm.setVolume(0.05)
+      this.bgm.setVolume(0.1)
       this.bgm.setLoop(true)
-
-      ui.onLoad()
-      control.initEventListeners()
+      if (this.bgm.isPlaying) {
+        this.bgm.pause()
+        this.bgm.play()
+      }
     })
 
     document.addEventListener('pointerlockchange', () => {

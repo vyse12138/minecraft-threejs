@@ -2,16 +2,41 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="mc.png" />
+    <link rel="icon" href="/mc.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Minecraft clone made with Three.js + TypeScript"
+      content="Minecraft clone made with Three.js + TypeScript, play minecraft in your own browser!"
     />
     <title>Minecraft - Three.js</title>
   </head>
   <body>
-    <div class="cross-hair">+</div>
     <script type="module" src="./src/main.ts"></script>
+    <div class="menu start">
+      <div class="buttons"></div>
+      <button id="play" class="button">Play</button>
+      <br />
+      <button id="feature" class="button">Guide</button>
+      <br />
+      <button id="source" class="button">Source on GitHub</button>
+      <br />
+      <button id="exit" class="button">Exit</button>
+      <footer class="footer">© 2022 Yulei Zhu</footer>
+    </div>
+    <div class="features hidden">
+      <p class="features-text">
+        <b> Left-Click: </b> destroy block <br />
+        <b> Right-Click:</b> place block <br />
+        <b> Wheel / Number Key: </b>change block <br />
+        <b> WASD: </b>move <br />
+        <b> Space: </b>jump <br />
+        <b> Q:</b> normal / dev mode <br />
+        <b> Shift:</b> fly up (in dev mode) <br />
+        <b> F: </b>full screen <br />
+        <b> E: </b>menu <br />
+      </p>
+      <button id="back" class="button">Back</button>
+    </div>
   </body>
+  <style></style>
 </html>

@@ -15,7 +15,7 @@ export default class Noise {
   coalSeed = Math.random()
   coalGap = 3
   coalAmp = 8
-  coalThreshold = 4
+  coalThreshold = 3
 
   treeSeed = Math.random()
   treeGap = 2
