@@ -2,7 +2,7 @@
 
 Minecraft clone made with Three.js and TypeScript
 
-Check it out on your laptop / desktop: [Minecraft - Three.js](https://mc.yuleiz.com/)
+Check it out: [Minecraft - Three.js](https://mc.yuleiz.com/)
 
 Note: please use Chrome to get the best experience
 
