@@ -82,6 +82,19 @@ export default class Terrain {
   idMap = new Map<string, number>()
   generateWorker = new Generate()
 
+  // cloud
+  cloud = new THREE.InstancedMesh(
+    new THREE.BoxGeometry(20, 5, 14),
+    new THREE.MeshStandardMaterial({
+      transparent: true,
+      color: 0xffffff,
+      opacity: 0.4
+    }),
+    1000
+  )
+  cloudCount = 0
+  cloudGap = 5
+
   getCount = (type: BlockType) => {
     return this.blocksCount[type]
   }
@@ -120,6 +133,7 @@ export default class Terrain {
       this.scene.add(block)
     }
 
+    this.scene.add(this.cloud)
     this.blocksCount = new Array(materialType.length).fill(0)
   }
 
@@ -149,6 +163,44 @@ export default class Terrain {
       customBlocks: this.customBlocks,
       chunkSize: this.chunkSize
     })
+
+    // cloud
+
+    if (this.cloudGap++ > 5) {
+      this.cloudGap = 0
+      this.cloud.instanceMatrix = new THREE.InstancedBufferAttribute(
+        new Float32Array(1000 * 16),
+        16
+      )
+      this.cloudCount = 0
+      for (
+        let x =
+          -this.chunkSize * this.distance * 3 + this.chunkSize * this.chunk.x;
+        x <
+        this.chunkSize * this.distance * 3 +
+          this.chunkSize +
+          this.chunkSize * this.chunk.x;
+        x += 20
+      ) {
+        for (
+          let z =
+            -this.chunkSize * this.distance * 3 + this.chunkSize * this.chunk.y;
+          z <
+          this.chunkSize * this.distance * 3 +
+            this.chunkSize +
+            this.chunkSize * this.chunk.y;
+          z += 20
+        ) {
+          const matrix = new THREE.Matrix4()
+          matrix.setPosition(x, 80 + (Math.random() - 0.5) * 30, z)
+
+          if (Math.random() > 0.8) {
+            this.cloud.setMatrixAt(this.cloudCount++, matrix)
+          }
+        }
+      }
+      this.cloud.instanceMatrix.needsUpdate = true
+    }
   }
 
   // generate adjacent blocks after removing a block (vertical infinity world)
