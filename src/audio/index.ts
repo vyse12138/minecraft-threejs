@@ -101,6 +101,4 @@ export default class Audio {
 
     this.soundSet[type][this.index].play()
   }
-
-  update() {}
 }

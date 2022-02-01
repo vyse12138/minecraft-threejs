@@ -1,5 +1,5 @@
 body {
-  font-family: Minercraftory, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Minecraft, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -7,12 +7,12 @@ body {
 }
 
 @font-face {
-  font-family: Minercraftory;
-  src: url(/mc-font.otf);
+  font-family: Minecraft;
+  src: url(/src/static/mc-font.otf);
 }
 
 .start {
-  background-image: url(/menu.jpeg);
+  background-image: url(/src/static/menu.jpeg);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
@@ -37,7 +37,7 @@ body {
   margin-top: 25vh;
 }
 .button {
-  font-family: Minercraftory, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Minecraft, Avenir, Helvetica, Arial, sans-serif;
   color: white;
   background-color: #727272;
   border-left: 2px solid #a4a4a4;

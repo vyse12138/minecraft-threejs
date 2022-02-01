@@ -32,6 +32,7 @@ export default class Control {
 
     this.raycaster = new THREE.Raycaster()
     this.raycaster.far = 8
+    this.far = this.player.body.height
 
     this.initRayCaster()
     this.initEventListeners()
@@ -76,7 +77,8 @@ export default class Control {
   p1 = performance.now()
   p2 = performance.now()
   raycaster: THREE.Raycaster
-  far = 1.8
+  far: number
+
   holdingBlock = BlockType.grass
   holdingBlocks = [
     BlockType.grass,
@@ -102,11 +104,11 @@ export default class Control {
     this.raycasterRight.ray.direction = new THREE.Vector3(0, 0, 1)
 
     this.raycasterUp.far = 1.2
-    this.raycasterDown.far = 1.8
-    this.raycasterFront.far = 0.4
-    this.raycasterBack.far = 0.4
-    this.raycasterLeft.far = 0.4
-    this.raycasterRight.far = 0.4
+    this.raycasterDown.far = this.player.body.height
+    this.raycasterFront.far = this.player.body.width
+    this.raycasterBack.far = this.player.body.width
+    this.raycasterLeft.far = this.player.body.width
+    this.raycasterRight.far = this.player.body.width
   }
 
   setMovementHandler = (e: KeyboardEvent) => {
@@ -148,7 +150,7 @@ export default class Control {
             this.downCollide = false
             this.far = 0
             setTimeout(() => {
-              this.far = 1.8
+              this.far = this.player.body.height
             }, 300)
           }
         } else {
@@ -369,9 +371,13 @@ export default class Control {
   }
 
   initEventListeners = () => {
+    // play
     document.querySelector('#play')?.addEventListener('click', () => {
       this.control.lock()
+      this.player.setMode(Mode.walking)
     })
+
+    // load game
     document.querySelector('#save')?.addEventListener('click', (e: Event) => {
       if (
         e.target instanceof HTMLElement &&
@@ -381,31 +387,29 @@ export default class Control {
       }
     })
 
+    // fallback lock handler
     document.querySelector('canvas')?.addEventListener('click', (e: Event) => {
       e.preventDefault()
       this.control.lock()
     })
 
     document.body.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key !== 'f') {
-        return
-      }
-      if (document.fullscreenElement) {
-        document.exitFullscreen()
-      } else {
-        document.body.requestFullscreen()
-      }
-    })
-
-    document.body.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key !== 'e') {
-        return
-      }
-      if (document.pointerLockElement) {
+      // menu
+      if (e.key === 'e' && document.pointerLockElement) {
         this.control.unlock()
       }
+
+      // fullscreen
+      if (e.key === 'f') {
+        if (document.fullscreenElement) {
+          document.exitFullscreen()
+        } else {
+          document.body.requestFullscreen()
+        }
+      }
     })
 
+    // add / remove handler when pointer lock / unlock
     document.addEventListener('pointerlockchange', () => {
       if (document.pointerLockElement) {
         document.body.addEventListener(
@@ -462,7 +466,7 @@ export default class Control {
     position: THREE.Vector3,
     noise: Noise,
     customBlocks: Block[],
-    far: number = 0.4
+    far: number = this.player.body.width
   ) => {
     const matrix = new THREE.Matrix4()
 
@@ -612,14 +616,14 @@ export default class Control {
     this.p1 = performance.now()
     const delta = (this.p1 - this.p2) / 1000
     if (
-      // flying mode
+      // dev mode
       this.player.mode === Mode.flying
     ) {
       this.control.moveForward(this.velocity.x * delta)
       this.control.moveRight(this.velocity.z * delta)
       this.camera.position.y += this.velocity.y * delta
     } else {
-      // non-flying mode
+      // normal mode
       this.collideCheckAll(
         this.camera.position,
         this.terrain.noise,
@@ -635,7 +639,7 @@ export default class Control {
       // up collide handler
       if (this.upCollide) {
         this.velocity.y = -225 * delta
-        this.far = 1.8
+        this.far = this.player.body.height
       }
 
       // down collide and jump handler

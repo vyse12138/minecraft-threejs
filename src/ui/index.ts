@@ -21,9 +21,9 @@ export default class UI {
         terrain.noise.treeSeed = Math.random()
         terrain.noise.coalSeed = Math.random()
         terrain.noise.leafSeed = Math.random()
+        terrain.customBlocks = []
 
         terrain.generate()
-
         terrain.camera.position.y = 40
       }
     })

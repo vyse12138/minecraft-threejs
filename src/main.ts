@@ -31,7 +31,7 @@ const ui = new UI(terrain)
   control.update()
   terrain.update()
   ui.update()
-  audio.update()
+
   renderer.render(scene, camera)
   // console.log(performance.now()-p1)
 })()

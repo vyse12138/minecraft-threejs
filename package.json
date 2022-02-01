@@ -2,10 +2,13 @@
   "name": "minecraft-threejs",
   "version": "0.0.0",
   "license": "MIT",
+  "author": "Yulei Zhu",
+  "description": "Minecraft clone made with Three.js and TypeScript",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview --host"
+    "build": "vite build",
+    "preview": "vite preview --port 8080",
+    "lint": "tsc"
   },
   "devDependencies": {
     "@types/three": "^0.136.1",
@@ -13,7 +16,6 @@
     "vite": "^2.7.2"
   },
   "dependencies": {
-    "simplex-noise": "^3.0.1",
     "three": "^0.136.0"
   }
 }

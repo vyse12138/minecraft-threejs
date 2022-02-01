@@ -1,3 +1,5 @@
 export default {
-  build: { chunkSizeWarningLimit: 1000 }
+  build: {
+    chunkSizeWarningLimit: 2000
+  }
 }

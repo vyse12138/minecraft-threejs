@@ -1,10 +1,10 @@
-import grass from '../icon/grass.png'
-import stone from '../icon/stone.png'
-import tree from '../icon/tree.png'
-import wood from '../icon/wood.png'
-import diamond from '../icon/diamond.png'
-import quartz from '../icon/quartz.png'
-import glass from '../icon/glass.png'
+import grass from '../../static/block-icon/grass.png'
+import stone from '../../static/block-icon/stone.png'
+import tree from '../../static/block-icon/tree.png'
+import wood from '../../static/block-icon/wood.png'
+import diamond from '../../static/block-icon/diamond.png'
+import quartz from '../../static/block-icon/quartz.png'
+import glass from '../../static/block-icon/glass.png'
 
 export default class Bag {
   constructor() {
