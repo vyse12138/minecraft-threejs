@@ -29,25 +29,23 @@ export default class Bag {
       this.items[this.current].classList.add('selected')
     })
 
-    document.body.addEventListener('mousewheel', (e: Event) => {
+    document.body.addEventListener('wheel', (e: WheelEvent) => {
       if (!this.wheelGap) {
         this.wheelGap = true
         setTimeout(() => {
           this.wheelGap = false
         }, 100)
-        if (e instanceof WheelEvent) {
-          if (e.deltaY > 0) {
-            this.current++
-            this.current > 9 && (this.current = 0)
-          } else if (e.deltaY < 0) {
-            this.current--
-            this.current < 0 && (this.current = 9)
-          }
-          for (let i = 0; i < this.items.length; i++) {
-            this.items[i].classList.remove('selected')
-          }
-          this.items[this.current].classList.add('selected')
+        if (e.deltaY > 0) {
+          this.current++
+          this.current > 9 && (this.current = 0)
+        } else if (e.deltaY < 0) {
+          this.current--
+          this.current < 0 && (this.current = 9)
         }
+        for (let i = 0; i < this.items.length; i++) {
+          this.items[i].classList.remove('selected')
+        }
+        this.items[this.current].classList.add('selected')
       }
     })
   }

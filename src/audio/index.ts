@@ -99,6 +99,6 @@ export default class Audio {
   playSound(type: BlockType) {
     this.index++ === 3 && (this.index = 0)
 
-    this.soundSet[type][this.index].play()
+    this.soundSet[type]?.[this.index]?.play()
   }
 }

@@ -350,23 +350,21 @@ export default class Control {
     this.holdingBlock = this.holdingBlocks[this.holdingIndex] ?? BlockType.grass
   }
 
-  wheelHandler = (e: Event) => {
+  wheelHandler = (e: WheelEvent) => {
     if (!this.wheelGap) {
       this.wheelGap = true
       setTimeout(() => {
         this.wheelGap = false
       }, 100)
-      if (e instanceof WheelEvent) {
-        if (e.deltaY > 0) {
-          this.holdingIndex++
-          this.holdingIndex > 9 && (this.holdingIndex = 0)
-        } else if (e.deltaY < 0) {
-          this.holdingIndex--
-          this.holdingIndex < 0 && (this.holdingIndex = 9)
-        }
-        this.holdingBlock =
-          this.holdingBlocks[this.holdingIndex] ?? BlockType.grass
+      if (e.deltaY > 0) {
+        this.holdingIndex++
+        this.holdingIndex > 9 && (this.holdingIndex = 0)
+      } else if (e.deltaY < 0) {
+        this.holdingIndex--
+        this.holdingIndex < 0 && (this.holdingIndex = 9)
       }
+      this.holdingBlock =
+        this.holdingBlocks[this.holdingIndex] ?? BlockType.grass
     }
   }
 
@@ -416,7 +414,7 @@ export default class Control {
           'keydown',
           this.changeHoldingBlockHandler
         )
-        document.body.addEventListener('mousewheel', this.wheelHandler)
+        document.body.addEventListener('wheel', this.wheelHandler)
         document.body.addEventListener('keydown', this.setMovementHandler)
         document.body.addEventListener('keyup', this.resetMovementHandler)
         document.body.addEventListener('mousedown', this.clickHandler)
@@ -425,7 +423,7 @@ export default class Control {
           'keydown',
           this.changeHoldingBlockHandler
         )
-        document.body.removeEventListener('mousewheel', this.wheelHandler)
+        document.body.removeEventListener('wheel', this.wheelHandler)
         document.body.removeEventListener('keydown', this.setMovementHandler)
         document.body.removeEventListener('keyup', this.resetMovementHandler)
         document.body.removeEventListener('mousedown', this.clickHandler)
