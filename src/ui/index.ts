@@ -16,6 +16,8 @@ export default class UI {
     this.play?.addEventListener('click', () => {
       if (this.play?.innerHTML === 'Play') {
         this.onPlay()
+
+        // reset game
         terrain.noise.seed = Math.random()
         terrain.noise.stoneSeed = Math.random()
         terrain.noise.treeSeed = Math.random()
@@ -61,20 +63,10 @@ export default class UI {
             z: terrain.camera.position.z
           })
         )
-        this.menu?.classList.add('start')
-        this.play && (this.play.innerHTML = 'Play')
-        this.save && (this.save.innerHTML = 'Load Game')
-        this.saveModal?.classList.remove('hidden')
-        setTimeout(() => {
-          this.saveModal?.classList.add('show')
-        })
-        setTimeout(() => {
-          this.saveModal?.classList.remove('show')
-        }, 1000)
 
-        setTimeout(() => {
-          this.saveModal?.classList.add('hidden')
-        }, 1500)
+        // ui update
+        this.onExit()
+        this.onSave()
       } else {
         // load game
         terrain.noise.seed =
@@ -106,7 +98,10 @@ export default class UI {
         position && (terrain.camera.position.x = position.x)
         position && (terrain.camera.position.y = position.y)
         position && (terrain.camera.position.z = position.z)
+
+        // ui update
         this.onPlay()
+        this.onLoad()
       }
     })
 
@@ -125,9 +120,7 @@ export default class UI {
 
     // exit
     this.exit?.addEventListener('click', () => {
-      this.menu?.classList.add('start')
-      this.play && (this.play.innerHTML = 'Play')
-      this.save && (this.save.innerHTML = 'Load Game')
+      this.onExit()
     })
 
     document.addEventListener('pointerlockchange', () => {
@@ -158,20 +151,57 @@ export default class UI {
   save = document.querySelector('#save')
 
   saveModal = document.querySelector('.save-modal')
+  loadModal = document.querySelector('.load-modal')
   features = document.querySelector('.features')
+  github = document.querySelector('.github')
 
   onPlay = () => {
     this.menu?.classList.add('hidden')
     this.menu?.classList.remove('start')
     this.play && (this.play.innerHTML = 'Resume')
     this.crossHair.classList.remove('hidden')
-    this.save && (this.save.innerHTML = 'Load Game')
+    this.github && this.github.classList.add('hidden')
   }
 
   onPause = () => {
     this.menu?.classList.remove('hidden')
     this.crossHair.classList.add('hidden')
     this.save && (this.save.innerHTML = 'Save and Exit')
+    this.github && this.github.classList.remove('hidden')
+  }
+
+  onExit = () => {
+    this.menu?.classList.add('start')
+    this.play && (this.play.innerHTML = 'Play')
+    this.save && (this.save.innerHTML = 'Load Game')
+  }
+
+  onSave = () => {
+    this.saveModal?.classList.remove('hidden')
+    setTimeout(() => {
+      this.saveModal?.classList.add('show')
+    })
+    setTimeout(() => {
+      this.saveModal?.classList.remove('show')
+    }, 1000)
+
+    setTimeout(() => {
+      this.saveModal?.classList.add('hidden')
+    }, 1350)
+  }
+
+  onLoad = () => {
+    this.loadModal?.classList.remove('hidden')
+    setTimeout(() => {
+      this.loadModal?.classList.add('show')
+    })
+    setTimeout(() => {
+      this.loadModal?.classList.remove('show')
+    }, 1000)
+
+    setTimeout(() => {
+      this.loadModal?.classList.add('hidden')
+    }, 1350)
   }
 
   update = () => {

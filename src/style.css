@@ -20,6 +20,7 @@ body {
 .start #exit {
   display: none;
 }
+
 .menu {
   z-index: 1;
   position: fixed;
@@ -27,29 +28,39 @@ body {
   top: 0%;
 
   width: 100vw;
-  height: 100vh;
+  height: 75vh;
+  padding-top: 25vh;
 
   text-align: center;
   user-select: none;
   background-color: hsla(0, 0%, 11%, 0.7);
 }
-.buttons {
-  margin-top: 25vh;
-}
+
 .button {
+  width: 300px;
+  margin-bottom: 15px;
+  padding: 10px;
+
   font-family: Minecraft, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 1.2rem;
   color: white;
   background-color: #727272;
+  cursor: pointer;
+
   border-left: 2px solid #a4a4a4;
   border-top: 2px solid #a4a4a4;
   border-bottom: 2px solid #545655;
   border-right: 2px solid #545655;
   box-shadow: 0 0 0 2px black;
-  width: 300px;
-  font-size: 1.2rem;
-  padding: 10px;
-  cursor: pointer;
-  margin-bottom: 15px;
+}
+
+.button:hover {
+  background-color: #218306;
+  border-left: 2px solid #17cd07;
+  border-top: 2px solid #17cd07;
+  border-bottom: 2px solid #004e00;
+  border-right: 2px solid #004e00;
+  box-shadow: 0 0 0 2px white;
 }
 
 .footer {
@@ -119,12 +130,6 @@ body {
   display: none;
 }
 
-.button:active {
-  border-left: 2px solid #545655;
-  border-top: 2px solid #545655;
-  border-bottom: 2px solid #a4a4a4;
-  border-right: 2px solid #a4a4a4;
-}
 .features {
   z-index: 2;
   position: fixed;
@@ -152,33 +157,53 @@ body {
   line-height: 1.8rem;
 }
 
-.save-modal {
+.save-modal,
+.load-modal {
   z-index: 2;
   position: fixed;
   left: 50%;
   transform: translate(-50%, 0%);
 
-  margin-top: 25vh;
-
+  margin-top: calc(25vh + 62px);
+  padding: 12px 0;
   width: 300px;
+
   color: white;
+  background-color: #218306;
+  border-left: 2px solid #17cd07;
+  border-top: 2px solid #17cd07;
+  border-bottom: 2px solid #004e00;
+  border-right: 2px solid #004e00;
+  box-shadow: 0 0 0 2px white;
+
+  opacity: 0%;
+
+  transition: opacity 0.35s ease-in-out;
+
+  text-align: center;
+  user-select: none;
+}
+
+.load-modal {
   background-color: #727272;
   border-left: 2px solid #a4a4a4;
   border-top: 2px solid #a4a4a4;
   border-bottom: 2px solid #545655;
   border-right: 2px solid #545655;
   box-shadow: 0 0 0 2px black;
-
-  padding: 42px 0px;
-  opacity: 0%;
-
-  transition: opacity 0.5s ease-in-out;
-
-  text-align: center;
-  user-select: none;
 }
 
 .show {
   transition: opacity 0.5s ease-in-out;
   opacity: 100%;
+}
+
+.github svg {
+  z-index: 3;
+  fill: #727272;
+  color: #fff;
+  position: fixed;
+  left: 100%;
+  top: -1%;
+  transform: translate(-99%, 0%) rotate(-90deg) scale(1, -1);
 }
