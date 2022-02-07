@@ -268,11 +268,11 @@ body {
 }
 
 #distance-input::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
+  appearance: none;
+  width: 20px;
+  height: 30px;
 
   background-color: #727272;
-  margin: 10px 0px;
   border-left: 2px solid #a4a4a4;
   border-top: 2px solid #a4a4a4;
   border-bottom: 2px solid #545655;
