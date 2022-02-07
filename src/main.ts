@@ -7,7 +7,7 @@ import Audio from './audio'
 
 import './style.css'
 
-const renderDistance = 3
+const renderDistance = 4
 const chunkSize = 24
 
 const core = new Core()

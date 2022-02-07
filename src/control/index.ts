@@ -370,9 +370,14 @@ export default class Control {
 
   initEventListeners = () => {
     // play
-    document.querySelector('#play')?.addEventListener('click', () => {
+    document.querySelector('#play')?.addEventListener('click', e => {
       this.control.lock()
-      this.player.setMode(Mode.walking)
+      if (
+        e.target instanceof HTMLInputElement &&
+        e.target.innerHTML === 'Play'
+      ) {
+        this.player.setMode(Mode.walking)
+      }
     })
 
     // load game

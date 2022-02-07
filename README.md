@@ -21,6 +21,7 @@ Recommend to use Chrome to get the best experience
 - Infinite world
 - Sound effect and BGM
 - Game save / load
+- Adjustable rendering distance
 
 ## Working on:
 
@@ -28,7 +29,7 @@ Recommend to use Chrome to get the best experience
 - Sprint
 - Hold mouse to destroy block and place block
 - More saving slot
-- Setting page
 - Increase block place / destroy performance
+- Block place / destroy effect
 - Mobile friendly
 - Animals / villagers

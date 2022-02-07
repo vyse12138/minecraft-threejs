@@ -32,6 +32,7 @@ export default class Terrain {
     this.chunkSize = chunkSize
     this.maxCount = (distance * chunkSize * 2 + chunkSize) ** 2 + 500
     this.highlight = new Highlight(scene, camera, this)
+    this.scene.add(this.cloud)
     this.initBlocks()
     this.generate()
 
@@ -104,6 +105,12 @@ export default class Terrain {
   }
 
   initBlocks = () => {
+    // reset
+    for (const block of this.blocks) {
+      this.scene.remove(block)
+    }
+    this.blocks = []
+
     // create instance meshes
     const materials = new Materials()
     const geometry = new THREE.BoxGeometry()
@@ -133,7 +140,6 @@ export default class Terrain {
       this.scene.add(block)
     }
 
-    this.scene.add(this.cloud)
     this.blocksCount = new Array(materialType.length).fill(0)
   }
 

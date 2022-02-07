@@ -113,9 +113,32 @@ export default class UI {
       this.features?.classList.add('hidden')
     })
 
-    // source
-    this.source?.addEventListener('click', () => {
-      window.open('https://github.com/Vyse12138/minecraft-threejs', '_blank')
+    // setting
+    this.setting?.addEventListener('click', () => {
+      this.settings?.classList.remove('hidden')
+    })
+    this.settingBack?.addEventListener('click', () => {
+      this.settings?.classList.add('hidden')
+    })
+
+    // render distance
+    this.distanceInput?.addEventListener('input', (e: Event) => {
+      if (this.distance && e.target instanceof HTMLInputElement) {
+        this.distance.innerHTML = `Render Distance: ${e.target.value}`
+      }
+    })
+
+    // apply settings
+    this.settingBack?.addEventListener('click', () => {
+      if (this.distanceInput instanceof HTMLInputElement) {
+        terrain.distance = parseInt(this.distanceInput.value)
+        terrain.maxCount =
+          (terrain.distance * terrain.chunkSize * 2 + terrain.chunkSize) ** 2 +
+          500
+
+        terrain.initBlocks()
+        terrain.generate()
+      }
     })
 
     // exit
@@ -142,18 +165,26 @@ export default class UI {
   menu = document.querySelector('.menu')
   crossHair = document.createElement('div')
 
+  // buttons
   play = document.querySelector('#play')
   control = document.querySelector('#control')
-  source = document.querySelector('#source')
+  setting = document.querySelector('#setting')
   feature = document.querySelector('#feature')
   back = document.querySelector('#back')
   exit = document.querySelector('#exit')
   save = document.querySelector('#save')
 
+  // modals
   saveModal = document.querySelector('.save-modal')
   loadModal = document.querySelector('.load-modal')
+  settings = document.querySelector('.settings')
   features = document.querySelector('.features')
   github = document.querySelector('.github')
+
+  // settings
+  distance = document.querySelector('#distance')
+  distanceInput = document.querySelector('#distance-input')
+  settingBack = document.querySelector('#setting-back')
 
   onPlay = () => {
     this.menu?.classList.add('hidden')
@@ -161,6 +192,7 @@ export default class UI {
     this.play && (this.play.innerHTML = 'Resume')
     this.crossHair.classList.remove('hidden')
     this.github && this.github.classList.add('hidden')
+    this.feature?.classList.add('hidden')
   }
 
   onPause = () => {
@@ -174,6 +206,7 @@ export default class UI {
     this.menu?.classList.add('start')
     this.play && (this.play.innerHTML = 'Play')
     this.save && (this.save.innerHTML = 'Load Game')
+    this.feature?.classList.remove('hidden')
   }
 
   onSave = () => {
