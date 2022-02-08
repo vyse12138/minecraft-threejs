@@ -120,10 +120,12 @@ export default class Control {
       case 'q':
         if (this.player.mode === Mode.walking) {
           this.player.setMode(Mode.flying)
-          this.velocity.y = 0
         } else {
           this.player.setMode(Mode.walking)
         }
+        this.velocity.y = 0
+        this.velocity.x = 0
+        this.velocity.z = 0
         break
       case 'w':
       case 'W':
