@@ -394,49 +394,6 @@ export default class Control {
   }
 
   initEventListeners = () => {
-    // play
-    document.querySelector('#play')?.addEventListener('click', e => {
-      this.control.lock()
-      if (
-        e.target instanceof HTMLInputElement &&
-        e.target.innerHTML === 'Play'
-      ) {
-        this.player.setMode(Mode.walking)
-      }
-    })
-
-    // load game
-    document.querySelector('#save')?.addEventListener('click', (e: Event) => {
-      if (
-        e.target instanceof HTMLElement &&
-        e.target?.innerHTML === 'Load Game'
-      ) {
-        this.control.lock()
-      }
-    })
-
-    // fallback lock handler
-    document.querySelector('canvas')?.addEventListener('click', (e: Event) => {
-      e.preventDefault()
-      this.control.lock()
-    })
-
-    document.body.addEventListener('keydown', (e: KeyboardEvent) => {
-      // menu
-      if (e.key === 'e' && document.pointerLockElement) {
-        this.control.unlock()
-      }
-
-      // fullscreen
-      if (e.key === 'f') {
-        if (document.fullscreenElement) {
-          document.exitFullscreen()
-        } else {
-          document.body.requestFullscreen()
-        }
-      }
-    })
-
     // add / remove handler when pointer lock / unlock
     document.addEventListener('pointerlockchange', () => {
       if (document.pointerLockElement) {

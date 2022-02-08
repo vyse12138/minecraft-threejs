@@ -21,7 +21,7 @@ const audio = new Audio(camera)
 const terrain = new Terrain(scene, camera, renderDistance, chunkSize)
 const control = new Control(scene, camera, player, terrain, audio)
 
-const ui = new UI(terrain)
+const ui = new UI(terrain, control)
 
 // animation
 ;(function animate() {

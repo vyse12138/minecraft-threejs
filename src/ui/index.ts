@@ -2,9 +2,11 @@ import FPS from './fps'
 import Bag from './bag'
 import Terrain from '../terrain'
 import Block from '../terrain/mesh/block'
+import Control from '../control'
+import { Mode } from '../player'
 
 export default class UI {
-  constructor(terrain: Terrain) {
+  constructor(terrain: Terrain, control: Control) {
     this.fps = new FPS()
     this.bag = new Bag()
 
@@ -14,6 +16,7 @@ export default class UI {
 
     // play
     this.play?.addEventListener('click', () => {
+      control.control.lock()
       if (this.play?.innerHTML === 'Play') {
         this.onPlay()
 
@@ -27,6 +30,7 @@ export default class UI {
 
         terrain.generate()
         terrain.camera.position.y = 40
+        control.player.setMode(Mode.walking)
       }
     })
 
@@ -69,6 +73,8 @@ export default class UI {
         this.onSave()
       } else {
         // load game
+        control.control.lock()
+
         terrain.noise.seed =
           Number(window.localStorage.getItem('seed')) ?? Math.random()
         terrain.noise.treeSeed =
@@ -128,6 +134,15 @@ export default class UI {
       }
     })
 
+    // fov
+    this.fovInput?.addEventListener('input', (e: Event) => {
+      if (this.fov && e.target instanceof HTMLInputElement) {
+        this.fov.innerHTML = `Field of View: ${e.target.value}`
+        control.camera.fov = parseInt(e.target.value)
+        control.camera.updateProjectionMatrix()
+      }
+    })
+
     // apply settings
     this.settingBack?.addEventListener('click', () => {
       if (this.distanceInput instanceof HTMLInputElement) {
@@ -141,11 +156,29 @@ export default class UI {
       }
     })
 
+    // menu and fullscreen
+    document.body.addEventListener('keydown', (e: KeyboardEvent) => {
+      // menu
+      if (e.key === 'e' && document.pointerLockElement) {
+        control.control.unlock()
+      }
+
+      // fullscreen
+      if (e.key === 'f') {
+        if (document.fullscreenElement) {
+          document.exitFullscreen()
+        } else {
+          document.body.requestFullscreen()
+        }
+      }
+    })
+
     // exit
     this.exit?.addEventListener('click', () => {
       this.onExit()
     })
 
+    // play / pause handler
     document.addEventListener('pointerlockchange', () => {
       if (document.pointerLockElement) {
         this.onPlay()
@@ -154,8 +187,15 @@ export default class UI {
       }
     })
 
+    // disable context menu
     document.addEventListener('contextmenu', e => {
       e.preventDefault()
+    })
+
+    // fallback lock handler
+    document.querySelector('canvas')?.addEventListener('click', (e: Event) => {
+      e.preventDefault()
+      control.control.lock()
     })
   }
 
@@ -184,6 +224,10 @@ export default class UI {
   // settings
   distance = document.querySelector('#distance')
   distanceInput = document.querySelector('#distance-input')
+
+  fov = document.querySelector('#fov')
+  fovInput = document.querySelector('#fov-input')
+
   settingBack = document.querySelector('#setting-back')
 
   onPlay = () => {

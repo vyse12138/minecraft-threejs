@@ -234,16 +234,17 @@ body {
   line-height: 1.8rem;
 }
 
-#distance-input {
+#distance-input,
+#fov-input {
   appearance: none;
   width: 100%;
   height: 16px;
   background-color: #dddddd;
   box-shadow: 0 0 0 2px black;
-  margin-bottom: 200px;
 }
 
-#distance-input::-webkit-slider-thumb:hover {
+#distance-input::-webkit-slider-thumb:hover,
+#fov-input::-webkit-slider-thumb:hover {
   background-color: #218306;
   border-left: 2px solid #17cd07;
   border-top: 2px solid #17cd07;
@@ -252,7 +253,8 @@ body {
   box-shadow: 0 0 0 2px white;
 }
 
-#distance-input::-webkit-slider-thumb {
+#distance-input::-webkit-slider-thumb,
+#fov-input::-webkit-slider-thumb {
   appearance: none;
   width: 20px;
   height: 30px;
@@ -267,7 +269,8 @@ body {
   cursor: pointer;
 }
 
-#distance-input::-moz-range-thumb {
+#distance-input::-moz-range-thumb,
+#fov-input::-moz-range-thumb {
   appearance: none;
   width: 20px;
   height: 30px;
