@@ -30,6 +30,5 @@ Recommend to use Chrome to get the best experience
 - Hold mouse to destroy block and place block
 - More saving slot
 - Increase block place / destroy performance
-- Block place / destroy effect
 - Mobile friendly
 - Animals / villagers

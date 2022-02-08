@@ -72,6 +72,22 @@ export default class Terrain {
   previousChunk = new THREE.Vector2(0, 0)
   noise = new Noise()
 
+  // materials
+  materials = new Materials()
+  materialType = [
+    MaterialType.grass,
+    MaterialType.sand,
+    MaterialType.tree,
+    MaterialType.leaf,
+    MaterialType.dirt,
+    MaterialType.stone,
+    MaterialType.coal,
+    MaterialType.wood,
+    MaterialType.diamond,
+    MaterialType.quartz,
+    MaterialType.glass
+  ]
+
   // other properties
   blocks: THREE.InstancedMesh[] = []
   blocksCount: number[] = []
@@ -112,27 +128,12 @@ export default class Terrain {
     this.blocks = []
 
     // create instance meshes
-    const materials = new Materials()
     const geometry = new THREE.BoxGeometry()
 
-    const materialType = [
-      MaterialType.grass,
-      MaterialType.sand,
-      MaterialType.tree,
-      MaterialType.leaf,
-      MaterialType.dirt,
-      MaterialType.stone,
-      MaterialType.coal,
-      MaterialType.wood,
-      MaterialType.diamond,
-      MaterialType.quartz,
-      MaterialType.glass
-    ]
-
-    for (let i = 0; i < materialType.length; i++) {
+    for (let i = 0; i < this.materialType.length; i++) {
       let block = new THREE.InstancedMesh(
         geometry,
-        materials.get(materialType[i]),
+        this.materials.get(this.materialType[i]),
         this.maxCount * this.blocksFactor[i]
       )
       block.name = BlockType[i]
@@ -140,7 +141,7 @@ export default class Terrain {
       this.scene.add(block)
     }
 
-    this.blocksCount = new Array(materialType.length).fill(0)
+    this.blocksCount = new Array(this.materialType.length).fill(0)
   }
 
   resetBlocks = () => {

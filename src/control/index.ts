@@ -247,10 +247,33 @@ export default class Control {
               )
             )
 
-            //sound effect
+            // block and sound effect
             this.audio.playSound(
               BlockType[block.object.name as any] as unknown as BlockType
             )
+
+            const mesh = new THREE.Mesh(
+              new THREE.BoxGeometry(1, 1, 1),
+              this.terrain.materials.get(
+                this.terrain.materialType[
+                  parseInt(BlockType[block.object.name as any])
+                ]
+              )
+            )
+            mesh.position.set(position.x, position.y, position.z)
+            this.scene.add(mesh)
+            const time = performance.now()
+            let raf = 0
+            const animate = () => {
+              if (performance.now() - time > 250) {
+                this.scene.remove(mesh)
+                cancelAnimationFrame(raf)
+                return
+              }
+              raf = requestAnimationFrame(animate)
+              mesh.geometry.scale(0.85, 0.85, 0.85)
+            }
+            animate()
 
             // update
             block.object.instanceMatrix.needsUpdate = true
