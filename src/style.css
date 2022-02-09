@@ -1,5 +1,5 @@
 body {
-  font-family: Minecraft, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Minecraft, Minecraft2, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -10,6 +10,10 @@ body {
   font-family: Minecraft;
   src: url(/src/static/mc-font.otf);
   font-display: swap;
+}
+@font-face {
+  font-family: Minecraft2;
+  src: url(/src/static/mc-font-zh.ttf);
 }
 
 .start {
@@ -47,7 +51,7 @@ body {
   padding: 10px;
   display: inline-block;
 
-  font-family: Minecraft, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Minecraft, Minecraft2, Avenir, Helvetica, Arial, sans-serif;
   font-size: 1.2rem;
   color: white;
   background-color: #727272;
