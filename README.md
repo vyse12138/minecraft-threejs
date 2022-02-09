@@ -4,7 +4,7 @@
 
 基于 Three.js 和 TypeScript 的网页版我的世界
 
-试玩：[Minecraft - Three.js](https://mc.yuleiz.com/)
+试玩：[Minecraft - Three.js](https://mc-zh.yuleiz.com/)
 
 建议使用 Chrome 来获得最佳的体验
 
