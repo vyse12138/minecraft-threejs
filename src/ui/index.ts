@@ -28,6 +28,7 @@ export default class UI {
         terrain.noise.leafSeed = Math.random()
         terrain.customBlocks = []
 
+        terrain.initBlocks()
         terrain.generate()
         terrain.camera.position.y = 40
         control.player.setMode(Mode.walking)

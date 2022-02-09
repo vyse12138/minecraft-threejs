@@ -20,21 +20,13 @@ export enum BlockType {
   glass = 10
 }
 export default class Terrain {
-  constructor(
-    scene: THREE.Scene,
-    camera: THREE.PerspectiveCamera,
-    distance: number,
-    chunkSize: number
-  ) {
+  constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera) {
     this.scene = scene
     this.camera = camera
-    this.distance = distance
-    this.chunkSize = chunkSize
-    this.maxCount = (distance * chunkSize * 2 + chunkSize) ** 2 + 500
+    this.maxCount =
+      (this.distance * this.chunkSize * 2 + this.chunkSize) ** 2 + 500
     this.highlight = new Highlight(scene, camera, this)
     this.scene.add(this.cloud)
-    this.initBlocks()
-    this.generate()
 
     // generate worker callback handler
     this.generateWorker.onmessage = (
@@ -63,8 +55,8 @@ export default class Terrain {
   // core properties
   scene: THREE.Scene
   camera: THREE.PerspectiveCamera
-  distance: number
-  chunkSize = 32
+  distance = 4
+  chunkSize = 24
 
   // terrain properties
   maxCount: number
