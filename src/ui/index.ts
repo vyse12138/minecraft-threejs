@@ -16,7 +16,6 @@ export default class UI {
 
     // play
     this.play?.addEventListener('click', () => {
-      control.control.lock()
       if (this.play?.innerHTML === 'Play') {
         this.onPlay()
 
@@ -33,6 +32,7 @@ export default class UI {
         terrain.camera.position.y = 40
         control.player.setMode(Mode.walking)
       }
+      control.control.lock()
     })
 
     // save load
@@ -74,8 +74,6 @@ export default class UI {
         this.onSave()
       } else {
         // load game
-        control.control.lock()
-
         terrain.noise.seed =
           Number(window.localStorage.getItem('seed')) ?? Math.random()
         terrain.noise.treeSeed =
@@ -110,6 +108,7 @@ export default class UI {
         // ui update
         this.onPlay()
         this.onLoad()
+        control.control.lock()
       }
     })
 
