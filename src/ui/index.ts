@@ -93,6 +93,7 @@ export default class UI {
           ) as Block[]) ?? []
 
         terrain.customBlocks = customBlocks
+        terrain.initBlocks()
         terrain.generate()
 
         const position =
