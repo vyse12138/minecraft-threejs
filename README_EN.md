@@ -13,15 +13,12 @@ Recommend to use Chrome to get the best experience
 - Destroy block and place block
 - Mouse wheel (or number key) to select different block types
 - Movement and collision detection
-- Q to switch between normal / dev mode
-- F to toggle full screen
-- E to bring up menu
 - Random terrain / blocks / tree generations
-- Highlight the block at crosshair
 - Infinite world
-- Sound effect and BGM
 - Game save / load
-- Adjustable rendering distance
+- Sound effect and BGM
+- Highlight the block at crosshair
+- Basic UI and settings
 
 ## Working on:
 
