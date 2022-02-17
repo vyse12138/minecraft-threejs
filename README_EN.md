@@ -8,6 +8,8 @@ Check it out: [Minecraft - Three.js](https://mc.yuleiz.com/)
 
 Recommend to use Chrome to get the best experience
 
+![preview](https://user-images.githubusercontent.com/88306344/154383952-9b33bad4-eebb-4a98-a12e-f5f137422d06.gif)
+
 ## Features:
 
 - Destroy block and place block
