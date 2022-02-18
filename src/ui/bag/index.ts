@@ -64,6 +64,7 @@ export default class Bag {
     let img = document.createElement('img')
     if (this.icon[this.iconIndex]) {
       img.className = 'icon'
+      img.alt = 'block'
       img.src = this.icon[this.iconIndex++]
       item.appendChild(img)
     }
