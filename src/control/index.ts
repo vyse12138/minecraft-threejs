@@ -613,7 +613,7 @@ export default class Control {
         this.camera.position,
         this.terrain.noise,
         this.terrain.customBlocks,
-        this.far
+        this.far - this.velocity.y * delta
       )
 
       // gravity

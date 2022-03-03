@@ -53,7 +53,11 @@ export default class Audio {
 
     // play / pause bgm
     document.addEventListener('pointerlockchange', () => {
-      if (document.pointerLockElement && !this.bgm.isPlaying) {
+      if (
+        document.pointerLockElement &&
+        !this.bgm.isPlaying &&
+        !this.disabled
+      ) {
         this.bgm.play()
       } else {
         this.bgm.pause()
@@ -74,9 +78,11 @@ export default class Audio {
       this.soundSet.push(audios)
     }
   }
+
   listener: THREE.AudioListener
   bgm: THREE.Audio
   audioLoader: THREE.AudioLoader
+  disabled = false
 
   sourceSet = [
     [grass1, grass2, grass3, grass4],
@@ -97,8 +103,9 @@ export default class Audio {
   index = 0
 
   playSound(type: BlockType) {
-    this.index++ === 3 && (this.index = 0)
-
-    this.soundSet[type]?.[this.index]?.play()
+    if (!this.disabled) {
+      this.index++ === 3 && (this.index = 0)
+      this.soundSet[type]?.[this.index]?.play()
+    }
   }
 }

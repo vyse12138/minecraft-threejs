@@ -13,16 +13,21 @@ export default class FPS {
   p2 = performance.now()
   gap = performance.now()
   fps = document.createElement('div')
+  sum = 0
+  count = 0
 
   update = () => {
     this.p1 = performance.now()
 
+    const delta = 1000 / (this.p1 - this.p2)
+    this.sum += delta
+    this.count++
+
     if (performance.now() - this.gap > 1000) {
-      const delta = 1000 / (this.p1 - this.p2)
-
-      this.fps.innerHTML = `FPS: ${Math.round(delta)}`
-
+      this.fps.innerHTML = `FPS: ${Math.round(this.sum / this.count)}`
       this.gap = performance.now()
+      this.sum = 0
+      this.count = 0
     }
 
     this.p2 = this.p1
