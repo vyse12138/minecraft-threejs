@@ -1,6 +1,5 @@
 # minecraft-threejs
 
-
 [English](https://github.com/Vyse12138/minecraft-threejs/blob/main/README_EN.md) ｜ 中文
 
 基于 Three.js 和 TypeScript 的网页版我的世界
@@ -10,7 +9,6 @@
 建议使用 Chrome 来获得最佳的体验
 
 ![preview](https://user-images.githubusercontent.com/88306344/154383952-9b33bad4-eebb-4a98-a12e-f5f137422d06.gif)
-
 
 ## 已支持:
 
@@ -31,6 +29,5 @@
 - 奔跑
 - 按住鼠标来进行方块的放置 / 破坏
 - 更多的保存栏位
-- 更高效的方块的放置 / 破坏算法
+- 更高效的算法
 - 手机支持
-- 小动物 / 村民

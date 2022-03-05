@@ -28,6 +28,5 @@ Recommend to use Chrome to get the best experience
 - Sprint
 - Hold mouse to destroy block and place block
 - More saving slot
-- Increase block place / destroy performance
+- Implement with higher performance algorithm
 - Mobile friendly
-- Animals / villagers
