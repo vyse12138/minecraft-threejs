@@ -1,6 +1,11 @@
-import * as THREE from 'three'
 import Block from '../mesh/block'
 import Noise from '../noise'
+
+import { Matrix4 } from 'three/src/math/Matrix4'
+import { InstancedMesh } from 'three/src/objects/instancedMesh'
+import { BoxGeometry } from 'three/src/geometries/BoxGeometry'
+import { MeshBasicMaterial } from 'three/src/materials/MeshBasicMaterial'
+import { InstancedBufferAttribute } from 'three/src/core/InstancedBufferAttribute'
 
 enum BlockType {
   grass = 0,
@@ -16,11 +21,11 @@ enum BlockType {
   glass = 10
 }
 
-const matrix = new THREE.Matrix4()
+const matrix = new Matrix4()
 const noise = new Noise()
-const blocks: THREE.InstancedMesh[] = []
+const blocks: InstancedMesh[] = []
 
-const geometry = new THREE.BoxGeometry()
+const geometry = new BoxGeometry()
 
 let isFirstRun = true
 
@@ -58,9 +63,9 @@ onmessage = (
 
   if (isFirstRun) {
     for (let i = 0; i < blocksCount.length; i++) {
-      let block = new THREE.InstancedMesh(
+      let block = new InstancedMesh(
         geometry,
-        new THREE.MeshBasicMaterial(),
+        new MeshBasicMaterial(),
         maxCount * blocksFactor[i]
       )
       blocks.push(block)
@@ -75,7 +80,7 @@ onmessage = (
   noise.coalSeed = coalSeed
 
   for (let i = 0; i < blocks.length; i++) {
-    blocks[i].instanceMatrix = new THREE.InstancedBufferAttribute(
+    blocks[i].instanceMatrix = new InstancedBufferAttribute(
       new Float32Array(maxCount * blocksFactor[i] * 16),
       16
     )
@@ -213,24 +218,7 @@ onmessage = (
 
         blocks[block.type].setMatrixAt(
           id!,
-          new THREE.Matrix4().set(
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          )
+          new Matrix4().set(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         )
       }
     }
