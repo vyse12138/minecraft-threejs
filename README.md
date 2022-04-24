@@ -1,33 +1,32 @@
 # minecraft-threejs
 
-[English](https://github.com/Vyse12138/minecraft-threejs/blob/main/README_EN.md) ｜ 中文
+English ｜ [中文](https://github.com/Vyse12138/minecraft-threejsREADME_ZH.md)
 
-基于 Three.js 和 TypeScript 的网页版我的世界
+Minecraft clone made with Three.js and TypeScript
 
-试玩：[Minecraft - Three.js](https://mc-zh.yuleiz.com/)
+Check it out: [Minecraft - Three.js](https://mc.yuleiz.com/)
 
-建议使用 Chrome 来获得最佳的体验
+Recommend to use Chrome to get the best experience
 
 ![preview](https://user-images.githubusercontent.com/88306344/154383952-9b33bad4-eebb-4a98-a12e-f5f137422d06.gif)
 
-## 已支持:
+## Features:
 
-- 方块的放置 / 破坏
-- 鼠标滚轮（数字键）选择不同的方块类型
-- 移动和碰撞检测
-- 随机的地形和树木生成
-- 无限的世界
-- 保存 / 读取游戏
-- 音效和背景音乐
-- 可调节的渲染距离和视野范围
-- 高亮准心方块
-- 基本的 UI
+- Destroy block and place block
+- Mouse wheel (or number key) to select different block types
+- Movement and collision detection
+- Random terrain / blocks / tree generations
+- Infinite world
+- Game save / load
+- Sound effect and BGM
+- Highlight the block at crosshair
+- Basic UI and settings
 
-## 开发中:
+## Working on:
 
-- 生成水
-- 奔跑
-- 按住鼠标来进行方块的放置 / 破坏
-- 更多的保存栏位
-- 更高效的算法
-- 手机支持
+- Generates water
+- Sprint
+- Hold mouse to destroy block and place block
+- More saving slot
+- Implement with higher performance algorithm
+- Mobile friendly
