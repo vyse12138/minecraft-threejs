@@ -217,6 +217,7 @@ export default class Control {
     const matrix = new THREE.Matrix4()
 
     switch (e.button) {
+      // left click to remove block
       case 0:
         {
           if (block && block.object instanceof THREE.InstancedMesh) {
@@ -224,7 +225,16 @@ export default class Control {
             block.object.getMatrixAt(block.instanceId!, matrix)
             const position = new THREE.Vector3().setFromMatrixPosition(matrix)
 
-            //remove the block
+            // don't remove bedrock
+            if (
+              (BlockType[block.object.name as any] as unknown as BlockType) ===
+              BlockType.bedrock
+            ) {
+              this.terrain.generateAdjacentBlocks(position)
+              return
+            }
+
+            // remove the block
             block.object.setMatrixAt(
               block.instanceId!,
               new THREE.Matrix4().set(
@@ -310,6 +320,7 @@ export default class Control {
         }
         break
 
+      // right click to put block
       case 2:
         {
           if (block && block.object instanceof THREE.InstancedMesh) {

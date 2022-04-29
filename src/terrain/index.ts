@@ -17,7 +17,8 @@ export enum BlockType {
   wood = 7,
   diamond = 8,
   quartz = 9,
-  glass = 10
+  glass = 10,
+  bedrock = 11
 }
 export default class Terrain {
   constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera) {
@@ -77,13 +78,14 @@ export default class Terrain {
     MaterialType.wood,
     MaterialType.diamond,
     MaterialType.quartz,
-    MaterialType.glass
+    MaterialType.glass,
+    MaterialType.bedrock
   ]
 
   // other properties
   blocks: THREE.InstancedMesh[] = []
   blocksCount: number[] = []
-  blocksFactor = [1, 0.2, 0.1, 0.7, 0.1, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1]
+  blocksFactor = [1, 0.2, 0.1, 0.7, 0.1, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
   customBlocks: Block[] = []
   highlight: Highlight
@@ -242,15 +244,16 @@ export default class Terrain {
 
   buildBlock = (position: THREE.Vector3, type: BlockType) => {
     const noise = this.noise
-
     // check if it's natural terrain
     const yOffset = Math.floor(
       noise.get(position.x / noise.gap, position.z / noise.gap, noise.seed) *
         noise.amp
     )
-    if (position.y >= 30 + yOffset) {
+    if (position.y >= 30 + yOffset || position.y < 0) {
       return
     }
+
+    position.y === 0 && (type = BlockType.bedrock)
 
     // check custom blocks
     for (const block of this.customBlocks) {
@@ -271,6 +274,7 @@ export default class Terrain {
     const matrix = new THREE.Matrix4()
     matrix.setPosition(position)
     this.blocks[type].setMatrixAt(this.getCount(type), matrix)
+    this.blocks[type].instanceMatrix.needsUpdate = true
     this.setCount(type)
   }
 
