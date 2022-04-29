@@ -13,7 +13,8 @@ enum BlockType {
   wood = 7,
   diamond = 8,
   quartz = 9,
-  glass = 10
+  glass = 10,
+  bedrock = 11
 }
 
 const matrix = new THREE.Matrix4()

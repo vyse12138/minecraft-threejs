@@ -45,22 +45,7 @@ export default class UI {
           JSON.stringify(terrain.customBlocks)
         )
         window.localStorage.setItem('seed', JSON.stringify(terrain.noise.seed))
-        window.localStorage.setItem(
-          'treeSeed',
-          JSON.stringify(terrain.noise.treeSeed)
-        )
-        window.localStorage.setItem(
-          'stoneSeed',
-          JSON.stringify(terrain.noise.stoneSeed)
-        )
-        window.localStorage.setItem(
-          'coalSeed',
-          JSON.stringify(terrain.noise.coalSeed)
-        )
-        window.localStorage.setItem(
-          'leafSeed',
-          JSON.stringify(terrain.noise.leafSeed)
-        )
+
         window.localStorage.setItem(
           'position',
           JSON.stringify({
@@ -77,14 +62,6 @@ export default class UI {
         // load game
         terrain.noise.seed =
           Number(window.localStorage.getItem('seed')) ?? Math.random()
-        terrain.noise.treeSeed =
-          Number(window.localStorage.getItem('treeSeed')) ?? Math.random()
-        terrain.noise.stoneSeed =
-          Number(window.localStorage.getItem('stoneSeed')) ?? Math.random()
-        terrain.noise.coalSeed =
-          Number(window.localStorage.getItem('coalSeed')) ?? Math.random()
-        terrain.noise.leafSeed =
-          Number(window.localStorage.getItem('leafSeed')) ?? Math.random()
 
         const customBlocks =
           (JSON.parse(
