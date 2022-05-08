@@ -285,3 +285,12 @@ body {
 
   cursor: pointer;
 }
+
+* {
+  -webkit-touch-callout: none;
+  -moz-touch-callout: none;
+  -ms-touch-callout: none;
+  touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
