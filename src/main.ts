@@ -6,6 +6,7 @@ import UI from './ui'
 import Audio from './audio'
 
 import './style.css'
+import { setupJoy } from './joystick'
 
 const core = new Core()
 const camera = core.camera
@@ -19,6 +20,8 @@ const terrain = new Terrain(scene, camera)
 const control = new Control(scene, camera, player, terrain, audio)
 
 const ui = new UI(terrain, control)
+
+setupJoy(ui, control)
 
 // animation
 ;(function animate() {
