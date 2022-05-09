@@ -11,12 +11,10 @@ export const setupJoy = (ui: UI, control: Control) => {
     return
   }
 
-  const cancel = () => {
-    control.resetMovementHandler({ key: 'w' } as KeyboardEvent)
-  }
-
   const stop = () => {
-    control.resetMovementHandler({ key: ' ' } as KeyboardEvent)
+    control.velocity.y = 0
+    control.velocity.x = 0
+    control.velocity.z = 0
   }
 
   ui.play!.addEventListener('click', () => {
@@ -26,35 +24,77 @@ export const setupJoy = (ui: UI, control: Control) => {
       control.setMovementHandler({
         key: 'w',
       } as KeyboardEvent)
-    }).onLoosen(cancel)
+    }).onLoosen(stop)
+
+    joy.LEFT_GO.onPress(() => {
+      control.setMovementHandler({
+        key: 'w',
+      } as KeyboardEvent)
+      control.setMovementHandler({
+        key: 'a',
+      } as KeyboardEvent)
+    }).onLoosen(stop)
+
+    joy.RIGHT_GO.onPress(() => {
+      control.setMovementHandler({
+        key: 'w',
+      } as KeyboardEvent)
+      control.setMovementHandler({
+        key: 'd',
+      } as KeyboardEvent)
+    }).onLoosen(stop)
 
     joy.LEFT.onPress(() => {
       control.setMovementHandler({
         key: 'a',
       } as KeyboardEvent)
-    }).onLoosen(cancel)
+    }).onLoosen(stop)
 
     joy.RIGHT.onPress(() => {
       control.setMovementHandler({
         key: 'd',
       } as KeyboardEvent)
-    }).onLoosen(cancel)
+    }).onLoosen(stop)
 
     joy.BACK.onPress(() => {
       control.setMovementHandler({
         key: 's',
       } as KeyboardEvent)
-    }).onLoosen(cancel)
+    }).onLoosen(stop)
+
+    joy.LEFT_BACK.onPress(() => {
+      control.setMovementHandler({
+        key: 's',
+      } as KeyboardEvent)
+      control.setMovementHandler({
+        key: 'a',
+      } as KeyboardEvent)
+    }).onLoosen(stop)
+
+    joy.RIGHT_BACK.onPress(() => {
+      control.setMovementHandler({
+        key: 's',
+      } as KeyboardEvent)
+      control.setMovementHandler({
+        key: 'd',
+      } as KeyboardEvent)
+    }).onLoosen(stop)
 
     joy.JUMP.onPress(() => {
       control.setMovementHandler({
         key: ' ',
       } as KeyboardEvent)
-    }).onLoosen(stop)
+    }).onLoosen(() => {
+      control.velocity.y = 0
+    })
 
     joy.CENTER.onPress(() => {
       control.setMovementHandler({
         key: 'q',
+      } as KeyboardEvent)
+
+      control.setMovementHandler({
+        key: ' ',
       } as KeyboardEvent)
 
       if (control.player.mode === Mode.flying) {
@@ -64,7 +104,7 @@ export const setupJoy = (ui: UI, control: Control) => {
         joy.UP.toggleVisible(false)
         joy.DOWN.toggleVisible(false)
       }
-    })
+    }).onLoosen(stop)
 
     joy.UP.onPress(() => {
       control.setMovementHandler({
