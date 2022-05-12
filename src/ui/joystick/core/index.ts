@@ -26,10 +26,10 @@ const createActionInstance = (key: ActionKey) => {
     $el: getActionEl(key),
     on(type: ActionType, listener: (event: Event) => void) {
       if (type === ActionType.press) {
-        this.$el.addEventListener('pointerenter', listener)
+        this.$el.addEventListener('pointermove', listener)
       }
       if (type === ActionType.loosen) {
-        this.$el.addEventListener('pointerleave', listener)
+        this.$el.addEventListener('pointerout', listener)
       }
       return this
     },
