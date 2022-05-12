@@ -266,6 +266,5 @@ export default class UI {
 
   update = () => {
     this.fps.update()
-    this.bag.update()
   }
 }
