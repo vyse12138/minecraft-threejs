@@ -24,13 +24,24 @@ export default class Joystick {
   control: Control
   pageX = 0
   pageY = 0
+  clickX = 0
+  clickY = 0
   euler: THREE.Euler
+  clickTimeStamp = 0
 
   // emit keyboard event
   private emitKeyboardEvent = (key: string) => {
     return {
       key
     } as KeyboardEvent
+  }
+
+  // emit click event
+  private emitClickEvent = (button: number) => {
+    return {
+      button,
+      preventDefault: () => {}
+    } as MouseEvent
   }
 
   // init joystick button
@@ -44,13 +55,18 @@ export default class Joystick {
     const button = document.querySelector(
       `#action-${actionKey}`
     ) as HTMLButtonElement
-    button.addEventListener('pointerenter', () => {
+    button.addEventListener('pointerenter', e => {
       this.control.setMovementHandler(this.emitKeyboardEvent(key))
+      e.stopPropagation()
     })
-    button.addEventListener('pointerleave', () => {
+    button.addEventListener('pointerleave', e => {
       this.control.resetMovementHandler(this.emitKeyboardEvent(key))
+      e.stopPropagation()
     })
     button.addEventListener('pointermove', e => {
+      e.stopPropagation()
+    })
+    button.addEventListener('pointerup', e => {
       e.stopPropagation()
     })
     // extra config for mode switch button
@@ -77,6 +93,7 @@ export default class Joystick {
     this.initButton({ actionKey: ActionKey.UP, key: ' ' })
     this.initButton({ actionKey: ActionKey.DOWN, key: 'Shift' })
 
+    // camera control
     document.addEventListener('pointermove', e => {
       if (this.pageX !== 0 || this.pageY !== 0) {
         this.euler.setFromQuaternion(this.control.camera.quaternion)
@@ -94,6 +111,19 @@ export default class Joystick {
     document.addEventListener('pointerout', () => {
       this.pageX = 0
       this.pageY = 0
+    })
+
+    document.addEventListener('pointerdown', e => {
+      this.clickX = e.pageX
+      this.clickY = e.pageY
+      this.clickTimeStamp = performance.now()
+    })
+
+    // remove block
+    document.addEventListener('pointerup', e => {
+      if (e.pageX === this.clickX && e.pageY === this.clickY) {
+        this.control.clickHandler(this.emitClickEvent(0))
+      }
     })
   }
 }
