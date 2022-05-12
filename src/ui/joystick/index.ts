@@ -27,7 +27,9 @@ export default class Joystick {
   clickX = 0
   clickY = 0
   euler: THREE.Euler
-  clickTimeStamp = 0
+  clickTimeout: NodeJS.Timeout | undefined
+  clickInterval: NodeJS.Timer | undefined
+  hold = false
 
   // emit keyboard event
   private emitKeyboardEvent = (key: string) => {
@@ -64,6 +66,9 @@ export default class Joystick {
       e.stopPropagation()
     })
     button.addEventListener('pointermove', e => {
+      e.stopPropagation()
+    })
+    button.addEventListener('pointerdown', e => {
       e.stopPropagation()
     })
     button.addEventListener('pointerup', e => {
@@ -113,17 +118,34 @@ export default class Joystick {
       this.pageY = 0
     })
 
+    // click control
+    document.addEventListener('pointermove', () => {
+      this.clickTimeout && clearTimeout(this.clickTimeout)
+    })
+
     document.addEventListener('pointerdown', e => {
       this.clickX = e.pageX
       this.clickY = e.pageY
-      this.clickTimeStamp = performance.now()
+
+      this.clickTimeout = setTimeout(() => {
+        if (e.pageX === this.clickX && e.pageY === this.clickY) {
+          this.control.clickHandler(this.emitClickEvent(0))
+          this.clickInterval = setInterval(() => {
+            this.control.clickHandler(this.emitClickEvent(0))
+          }, 250)
+          this.hold = true
+        }
+      }, 500)
     })
 
-    // remove block
     document.addEventListener('pointerup', e => {
-      if (e.pageX === this.clickX && e.pageY === this.clickY) {
-        this.control.clickHandler(this.emitClickEvent(0))
+      this.clickTimeout && clearTimeout(this.clickTimeout)
+      this.clickInterval && clearInterval(this.clickInterval)
+
+      if (!this.hold && e.pageX === this.clickX && e.pageY === this.clickY) {
+        this.control.clickHandler(this.emitClickEvent(2))
       }
+      this.hold = false
     })
   }
 }
