@@ -5,6 +5,9 @@ body {
   margin: 0;
   overflow: hidden;
 }
+* {
+  touch-action: none;
+}
 
 @font-face {
   font-family: Minecraft;
@@ -290,7 +293,6 @@ body {
   -webkit-touch-callout: none;
   -moz-touch-callout: none;
   -ms-touch-callout: none;
-  touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
 }
