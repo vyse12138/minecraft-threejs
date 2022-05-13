@@ -4,11 +4,14 @@ import Terrain from '../terrain'
 import Block from '../terrain/mesh/block'
 import Control from '../control'
 import { Mode } from '../player'
+import Joystick from './joystick'
+import { isMobile } from '../utils'
 
 export default class UI {
   constructor(terrain: Terrain, control: Control) {
     this.fps = new FPS()
     this.bag = new Bag()
+    this.joystick = new Joystick(control)
 
     this.crossHair.className = 'cross-hair'
     this.crossHair.innerHTML = '+'
@@ -33,7 +36,7 @@ export default class UI {
         terrain.camera.position.y = 40
         control.player.setMode(Mode.walking)
       }
-      control.control.lock()
+      !isMobile && control.control.lock()
     })
 
     // save load
@@ -86,7 +89,7 @@ export default class UI {
         // ui update
         this.onPlay()
         this.onLoad()
-        control.control.lock()
+        !isMobile && control.control.lock()
       }
     })
 
@@ -139,7 +142,7 @@ export default class UI {
     document.body.addEventListener('keydown', (e: KeyboardEvent) => {
       // menu
       if (e.key === 'e' && document.pointerLockElement) {
-        control.control.unlock()
+        !isMobile && control.control.unlock()
       }
 
       // fullscreen
@@ -174,12 +177,13 @@ export default class UI {
     // fallback lock handler
     document.querySelector('canvas')?.addEventListener('click', (e: Event) => {
       e.preventDefault()
-      control.control.lock()
+      !isMobile && control.control.lock()
     })
   }
 
   fps: FPS
   bag: Bag
+  joystick: Joystick
 
   menu = document.querySelector('.menu')
   crossHair = document.createElement('div')
@@ -210,6 +214,7 @@ export default class UI {
   settingBack = document.querySelector('#setting-back')
 
   onPlay = () => {
+    isMobile && this.joystick.init()
     this.menu?.classList.add('hidden')
     this.menu?.classList.remove('start')
     this.play && (this.play.innerHTML = '继续游戏')
@@ -262,6 +267,5 @@ export default class UI {
 
   update = () => {
     this.fps.update()
-    this.bag.update()
   }
 }

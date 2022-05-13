@@ -1,0 +1,61 @@
+<div class="joystick">
+  <button id="action-front" class="joystick-button front" role="div">🔼</button>
+  <button id="action-left" class="joystick-button left" role="div">◀️</button>
+  <button id="action-right" class="joystick-button right" role="div">▶️</button>
+  <button id="action-back" class="joystick-button back" role="div">🔽</button>
+  <button id="action-mode" class="joystick-button mode" role="div">⏹️</button>
+  <button id="action-up" class="joystick-button up" role="div">🔼</button>
+  <button id="action-down" class="joystick-button down hidden" role="div">
+    🔽
+  </button>
+</div>
+
+<style>
+  .joystick {
+    position: fixed;
+    bottom: 0;
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(auto-fill, 50px);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+  .joystick-button {
+    width: 52px;
+    height: 50px;
+    font-size: 50px;
+    line-height: 50px;
+    padding: 0px;
+    border: none;
+    background-color: transparent;
+  }
+  .front {
+    grid-column: 2 / 3;
+    grid-row: 1;
+  }
+  .left {
+    grid-column: 1 / 2;
+    grid-row: 2;
+  }
+  .right {
+    grid-column: 3 / 4;
+    grid-row: 2;
+  }
+  .back {
+    grid-column: 2 / 3;
+    grid-row: 3;
+  }
+  .mode {
+    grid-column: 2 / 3;
+    grid-row: 2;
+  }
+  .up {
+    grid-column: -3 / -2;
+    grid-row: 2;
+  }
+  .down {
+    grid-column: -3 / -2;
+    grid-row: 3;
+  }
+</style>

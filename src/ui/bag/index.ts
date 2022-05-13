@@ -5,9 +5,12 @@ import wood from '../../static/block-icon/wood.png'
 import diamond from '../../static/block-icon/diamond.png'
 import quartz from '../../static/block-icon/quartz.png'
 import glass from '../../static/block-icon/glass.png'
+import { isMobile } from '../../utils'
 
 export default class Bag {
   constructor() {
+    if (isMobile) return
+
     this.bag.className = 'bag'
     this.items[0].classList.add('selected')
 
@@ -71,6 +74,4 @@ export default class Bag {
 
     return item
   })
-
-  update = () => {}
 }

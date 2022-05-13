@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import bgm from './musics/hal3.ogg'
+import hal3 from './musics/hal3.ogg'
 import { BlockType } from '../terrain'
 
 import grass1 from './blocks/grass1.ogg'
@@ -31,36 +31,35 @@ import leaf1 from './blocks/leaf1.ogg'
 import leaf2 from './blocks/leaf2.ogg'
 import leaf3 from './blocks/leaf3.ogg'
 import leaf4 from './blocks/leaf4.ogg'
+import { isMobile } from '../utils'
 
 export default class Audio {
   constructor(camera: THREE.PerspectiveCamera) {
-    this.listener = new THREE.AudioListener()
-    this.audioLoader = new THREE.AudioLoader()
-    camera.add(this.listener)
+    if (isMobile) return
+
+    const listener = new THREE.AudioListener()
+    const audioLoader = new THREE.AudioLoader()
+    camera.add(listener)
 
     // load bgm
-    this.bgm = new THREE.Audio(this.listener)
-    this.bgm.autoplay = false
-    this.audioLoader.load(bgm, buffer => {
-      this.bgm.setBuffer(buffer)
-      this.bgm.setVolume(0.1)
-      this.bgm.setLoop(true)
-      if (this.bgm.isPlaying) {
-        this.bgm.pause()
-        this.bgm.play()
+    const bgm = new THREE.Audio(listener)
+    bgm.autoplay = false
+    audioLoader.load(hal3, buffer => {
+      bgm.setBuffer(buffer)
+      bgm.setVolume(0.1)
+      bgm.setLoop(true)
+      if (bgm.isPlaying) {
+        bgm.pause()
+        bgm.play()
       }
     })
 
     // play / pause bgm
     document.addEventListener('pointerlockchange', () => {
-      if (
-        document.pointerLockElement &&
-        !this.bgm.isPlaying &&
-        !this.disabled
-      ) {
-        this.bgm.play()
+      if (document.pointerLockElement && !bgm.isPlaying && !this.disabled) {
+        bgm.play()
       } else {
-        this.bgm.pause()
+        bgm.pause()
       }
     })
 
@@ -68,8 +67,8 @@ export default class Audio {
     for (const types of this.sourceSet) {
       const audios: THREE.Audio[] = []
       for (const type of types) {
-        this.audioLoader.load(type, buffer => {
-          const audio = new THREE.Audio(this.listener)
+        audioLoader.load(type, buffer => {
+          const audio = new THREE.Audio(listener!)
           audio.setBuffer(buffer)
           audio.setVolume(0.15)
           audios.push(audio)
@@ -79,9 +78,6 @@ export default class Audio {
     }
   }
 
-  listener: THREE.AudioListener
-  bgm: THREE.Audio
-  audioLoader: THREE.AudioLoader
   disabled = false
 
   sourceSet = [
@@ -103,7 +99,7 @@ export default class Audio {
   index = 0
 
   playSound(type: BlockType) {
-    if (!this.disabled) {
+    if (!this.disabled && !isMobile) {
       this.index++ === 3 && (this.index = 0)
       this.soundSet[type]?.[this.index]?.play()
     }
