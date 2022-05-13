@@ -57,27 +57,21 @@ export default class Joystick {
     const button = document.querySelector(
       `#action-${actionKey}`
     ) as HTMLButtonElement
-    button.addEventListener('pointerenter', e => {
-      this.control.setMovementHandler(this.emitKeyboardEvent(key))
-      e.stopPropagation()
-    })
-    button.addEventListener('pointerleave', e => {
-      this.control.resetMovementHandler(this.emitKeyboardEvent(key))
-      e.stopPropagation()
-    })
     button.addEventListener('pointermove', e => {
       e.stopPropagation()
     })
     button.addEventListener('pointerdown', e => {
+      this.control.setMovementHandler(this.emitKeyboardEvent(key))
       e.stopPropagation()
     })
     button.addEventListener('pointerup', e => {
+      this.control.resetMovementHandler(this.emitKeyboardEvent(key))
       e.stopPropagation()
     })
     // extra config for mode switch button
     if (actionKey === ActionKey.MODE && key === 'q') {
       this.initButton({ actionKey: ActionKey.MODE, key: ' ' })
-      button.addEventListener('pointerenter', () => {
+      button.addEventListener('pointerdown', () => {
         if (this.control.player.mode === Mode.flying) {
           document.querySelector('#action-down')?.classList.remove('hidden')
         } else {
@@ -112,17 +106,10 @@ export default class Joystick {
       }
       this.pageX = e.pageX
       this.pageY = e.pageY
-    })
-    document.addEventListener('pointerout', () => {
-      this.pageX = 0
-      this.pageY = 0
-    })
-
-    // click control
-    document.addEventListener('pointermove', () => {
       this.clickTimeout && clearTimeout(this.clickTimeout)
     })
 
+    // click control
     document.addEventListener('pointerdown', e => {
       this.clickX = e.pageX
       this.clickY = e.pageY
@@ -146,6 +133,8 @@ export default class Joystick {
         this.control.clickHandler(this.emitClickEvent(2))
       }
       this.hold = false
+      this.pageX = 0
+      this.pageY = 0
     })
   }
 }
