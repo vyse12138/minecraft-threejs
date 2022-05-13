@@ -19,7 +19,6 @@ export default class UI {
 
     // play
     this.play?.addEventListener('click', () => {
-      control.control.lock()
       if (this.play?.innerHTML === '开始游戏') {
         this.onPlay()
 
