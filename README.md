@@ -21,12 +21,10 @@ Recommend to use Chrome to get the best experience
 - Sound effect and BGM
 - Highlight the block at crosshair
 - Basic UI and settings
+- Mobile friendly
 
 ## Working on:
 
+- Higher performance algorithm (time slicing render algorithm and block placing and destroying algorithm)
 - Generates water
-- Sprint
-- Hold mouse to destroy block and place block
 - More saving slot
-- Implement with higher performance algorithm
-- Mobile friendly
