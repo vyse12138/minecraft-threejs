@@ -119,7 +119,7 @@ export default class Joystick {
           this.control.mousedownHandler(this.emitClickEvent(0))
           this.clickInterval = setInterval(() => {
             this.control.mousedownHandler(this.emitClickEvent(0))
-          }, 250)
+          }, 333)
           this.hold = true
         }
       }, 500)
