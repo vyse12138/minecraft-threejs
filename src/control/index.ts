@@ -94,6 +94,8 @@ export default class Control {
   ]
   holdingIndex = 0
   wheelGap = false
+  clickInterval: NodeJS.Timer | undefined
+  mouseHolding = false
 
   initRayCaster = () => {
     this.raycasterUp.ray.direction = new THREE.Vector3(0, 1, 0)
@@ -209,9 +211,9 @@ export default class Control {
     }
   }
 
-  clickHandler = (e: MouseEvent) => {
+  mousedownHandler = (e: MouseEvent) => {
     e.preventDefault()
-    // let pi = performance.now()
+    // let p1 = performance.now()
     this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera)
     const block = this.raycaster.intersectObjects(this.terrain.blocks)[0]
     const matrix = new THREE.Matrix4()
@@ -375,6 +377,19 @@ export default class Control {
       default:
         break
     }
+
+    if (!this.mouseHolding) {
+      this.mouseHolding = true
+      this.clickInterval = setInterval(() => {
+        this.mousedownHandler(e)
+      }, 333)
+    }
+
+    // console.log(performance.now() - p1)
+  }
+  mouseupHandler = () => {
+    this.clickInterval && clearInterval(this.clickInterval)
+    this.mouseHolding = false
   }
 
   changeHoldingBlockHandler = (e: KeyboardEvent) => {
@@ -415,7 +430,8 @@ export default class Control {
         document.body.addEventListener('wheel', this.wheelHandler)
         document.body.addEventListener('keydown', this.setMovementHandler)
         document.body.addEventListener('keyup', this.resetMovementHandler)
-        document.body.addEventListener('mousedown', this.clickHandler)
+        document.body.addEventListener('mousedown', this.mousedownHandler)
+        document.body.addEventListener('mouseup', this.mouseupHandler)
       } else {
         document.body.removeEventListener(
           'keydown',
@@ -424,7 +440,8 @@ export default class Control {
         document.body.removeEventListener('wheel', this.wheelHandler)
         document.body.removeEventListener('keydown', this.setMovementHandler)
         document.body.removeEventListener('keyup', this.resetMovementHandler)
-        document.body.removeEventListener('mousedown', this.clickHandler)
+        document.body.removeEventListener('mousedown', this.mousedownHandler)
+        document.body.removeEventListener('mouseup', this.mouseupHandler)
         this.velocity = new THREE.Vector3(0, 0, 0)
       }
     })

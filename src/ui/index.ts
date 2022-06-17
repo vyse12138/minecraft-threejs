@@ -29,7 +29,6 @@ export default class UI {
         terrain.noise.coalSeed = Math.random()
         terrain.noise.leafSeed = Math.random()
         terrain.customBlocks = []
-
         terrain.initBlocks()
         terrain.generate()
         terrain.camera.position.y = 40
@@ -124,6 +123,15 @@ export default class UI {
       }
     })
 
+    // music
+    this.musicInput?.addEventListener('input', (e: Event) => {
+      if (this.fov && e.target instanceof HTMLInputElement) {
+        const disabled = e.target.value === '0'
+        control.audio.disabled = disabled
+        this.music!.innerHTML = `Music: ${disabled ? 'Off' : 'On'}`
+      }
+    })
+
     // apply settings
     this.settingBack?.addEventListener('click', () => {
       if (this.distanceInput instanceof HTMLInputElement) {
@@ -209,6 +217,9 @@ export default class UI {
 
   fov = document.querySelector('#fov')
   fovInput = document.querySelector('#fov-input')
+
+  music = document.querySelector('#music')
+  musicInput = document.querySelector('#music-input')
 
   settingBack = document.querySelector('#setting-back')
 
