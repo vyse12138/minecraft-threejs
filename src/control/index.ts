@@ -6,6 +6,7 @@ import Terrain, { BlockType } from '../terrain'
 import Block from '../terrain/mesh/block'
 import Noise from '../terrain/noise'
 import Audio from '../audio'
+import { isMobile } from '../utils'
 enum Side {
   front,
   back,
@@ -378,7 +379,7 @@ export default class Control {
         break
     }
 
-    if (!this.mouseHolding) {
+    if (!isMobile && !this.mouseHolding) {
       this.mouseHolding = true
       this.clickInterval = setInterval(() => {
         this.mousedownHandler(e)
