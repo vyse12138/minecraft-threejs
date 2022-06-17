@@ -128,7 +128,7 @@ export default class UI {
       if (this.fov && e.target instanceof HTMLInputElement) {
         const disabled = e.target.value === '0'
         control.audio.disabled = disabled
-        this.music!.innerHTML = `Music: ${disabled ? 'Off' : 'On'}`
+        this.music!.innerHTML = `音乐: ${disabled ? '关' : '开'}`
       }
     })
 
