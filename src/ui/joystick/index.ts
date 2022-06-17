@@ -116,9 +116,9 @@ export default class Joystick {
 
       this.clickTimeout = setTimeout(() => {
         if (e.pageX === this.clickX && e.pageY === this.clickY) {
-          this.control.clickHandler(this.emitClickEvent(0))
+          this.control.mousedownHandler(this.emitClickEvent(0))
           this.clickInterval = setInterval(() => {
-            this.control.clickHandler(this.emitClickEvent(0))
+            this.control.mousedownHandler(this.emitClickEvent(0))
           }, 250)
           this.hold = true
         }
@@ -130,7 +130,7 @@ export default class Joystick {
       this.clickInterval && clearInterval(this.clickInterval)
 
       if (!this.hold && e.pageX === this.clickX && e.pageY === this.clickY) {
-        this.control.clickHandler(this.emitClickEvent(2))
+        this.control.mousedownHandler(this.emitClickEvent(2))
       }
       this.hold = false
       this.pageX = 0
