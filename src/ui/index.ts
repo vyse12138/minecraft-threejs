@@ -6,6 +6,7 @@ import Control from '../control'
 import { Mode } from '../player'
 import Joystick from './joystick'
 import { isMobile } from '../utils'
+import * as THREE from 'three'
 
 export default class UI {
   constructor(terrain: Terrain, control: Control) {
@@ -142,6 +143,11 @@ export default class UI {
 
         terrain.initBlocks()
         terrain.generate()
+        terrain.scene.fog = new THREE.Fog(
+          0x87ceeb,
+          1,
+          terrain.distance * 24 + 24
+        )
       }
     })
 
