@@ -34,7 +34,7 @@ export default class Core {
     this.scene = new THREE.Scene()
     const backgroundColor = 0x87ceeb
 
-    this.scene.fog = new THREE.FogExp2(backgroundColor, 0.01)
+    this.scene.fog = new THREE.Fog(backgroundColor, 1, 96)
     this.scene.background = new THREE.Color(backgroundColor)
 
     const sunLight = new THREE.PointLight(0xffffff, 0.5)

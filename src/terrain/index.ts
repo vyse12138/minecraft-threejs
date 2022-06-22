@@ -56,7 +56,7 @@ export default class Terrain {
   // core properties
   scene: THREE.Scene
   camera: THREE.PerspectiveCamera
-  distance = 2
+  distance = 3
   chunkSize = 24
 
   // terrain properties
