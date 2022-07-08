@@ -96,7 +96,9 @@ export default class Control {
   holdingIndex = 0
   wheelGap = false
   clickInterval: NodeJS.Timer | undefined
+  jumpInterval: NodeJS.Timer | undefined
   mouseHolding = false
+  spaceHolding = false
 
   initRayCaster = () => {
     this.raycasterUp.ray.direction = new THREE.Vector3(0, 1, 0)
@@ -161,6 +163,12 @@ export default class Control {
         } else {
           this.velocity.y += this.player.speed
         }
+        if (this.player.mode === Mode.walking && !this.spaceHolding) {
+          this.spaceHolding = true
+          this.jumpInterval = setInterval(() => {
+            this.setMovementHandler(e)
+          }, 10)
+        }
         break
       case 'Shift':
         if (this.player.mode === Mode.walking) {
@@ -196,6 +204,8 @@ export default class Control {
         this.velocity.z = 0
         break
       case ' ':
+        this.jumpInterval && clearInterval(this.jumpInterval)
+        this.spaceHolding = false
         if (this.player.mode === Mode.walking) {
           return
         }
