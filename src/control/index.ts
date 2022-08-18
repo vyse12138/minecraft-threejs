@@ -95,8 +95,8 @@ export default class Control {
   ]
   holdingIndex = 0
   wheelGap = false
-  clickInterval: NodeJS.Timer | undefined
-  jumpInterval: NodeJS.Timer | undefined
+  clickInterval?: ReturnType<typeof setInterval>
+  jumpInterval?: ReturnType<typeof setInterval>
   mouseHolding = false
   spaceHolding = false
 
@@ -279,7 +279,7 @@ export default class Control {
               new THREE.BoxGeometry(1, 1, 1),
               this.terrain.materials.get(
                 this.terrain.materialType[
-                  parseInt(BlockType[block.object.name as any])
+                parseInt(BlockType[block.object.name as any])
                 ]
               )
             )
@@ -348,7 +348,7 @@ export default class Control {
               position.z + normal.z === Math.round(this.camera.position.z) &&
               (position.y + normal.y === Math.round(this.camera.position.y) ||
                 position.y + normal.y ===
-                  Math.round(this.camera.position.y - 1))
+                Math.round(this.camera.position.y - 1))
             ) {
               return
             }

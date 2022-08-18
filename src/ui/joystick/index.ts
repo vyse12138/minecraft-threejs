@@ -27,8 +27,8 @@ export default class Joystick {
   clickX = 0
   clickY = 0
   euler: THREE.Euler
-  clickTimeout: NodeJS.Timeout | undefined
-  clickInterval: NodeJS.Timer | undefined
+  clickTimeout?: ReturnType<typeof setTimeout>
+  clickInterval?: ReturnType<typeof setInterval>
   hold = false
 
   // emit keyboard event
@@ -42,7 +42,7 @@ export default class Joystick {
   private emitClickEvent = (button: number) => {
     return {
       button,
-      preventDefault: () => {}
+      preventDefault: () => { }
     } as MouseEvent
   }
 
