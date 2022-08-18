@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --port 8080",
-    "lint": "tsc"
+    "lint": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/three": "^0.137.0",
