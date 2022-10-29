@@ -25,6 +25,6 @@ Recommend to use Chrome to get the best experience
 
 ## Working on:
 
-- Higher performance algorithm (time slicing render algorithm and block placing and destroying algorithm)
+- Multiplayer
 - Generates water
-- More saving slot
+- Higher performance algorithm
