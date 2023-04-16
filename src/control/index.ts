@@ -116,6 +116,12 @@ export default class Control {
     this.raycasterRight.far = this.player.body.width
   }
 
+  downKeys = {
+    a: false,
+    d: false,
+    w: false,
+    s: false
+  }
   setMovementHandler = (e: KeyboardEvent) => {
     if (e.repeat) {
       return
@@ -134,21 +140,28 @@ export default class Control {
         break
       case 'w':
       case 'W':
-        this.velocity.x += this.player.speed
+        this.downKeys.w = true
+        this.velocity.x = this.player.speed
         break
       case 's':
       case 'S':
-        this.velocity.x -= this.player.speed
+        this.downKeys.s = true
+        this.velocity.x = -this.player.speed
         break
       case 'a':
       case 'A':
-        this.velocity.z -= this.player.speed
+        this.downKeys.a = true
+        this.velocity.z = -this.player.speed
         break
       case 'd':
       case 'D':
-        this.velocity.z += this.player.speed
+        this.downKeys.d = true
+        this.velocity.z = this.player.speed
         break
       case ' ':
+        if (this.player.mode === Mode.sneaking && !this.isJumping) {
+          return
+        }
         if (this.player.mode === Mode.walking) {
           // jump
           if (!this.isJumping) {
@@ -172,6 +185,22 @@ export default class Control {
         break
       case 'Shift':
         if (this.player.mode === Mode.walking) {
+          if (!this.isJumping) {
+            this.player.setMode(Mode.sneaking)
+            if (this.downKeys.w) {
+              this.velocity.x = this.player.speed
+            }
+            if (this.downKeys.s) {
+              this.velocity.x = -this.player.speed
+            }
+            if (this.downKeys.a) {
+              this.velocity.z = -this.player.speed
+            }
+            if (this.downKeys.d) {
+              this.velocity.z = this.player.speed
+            }
+            this.camera.position.setY(this.camera.position.y - 0.2)
+          }
         } else {
           this.velocity.y -= this.player.speed
         }
@@ -189,21 +218,28 @@ export default class Control {
     switch (e.key) {
       case 'w':
       case 'W':
+        this.downKeys.w = false
         this.velocity.x = 0
         break
       case 's':
       case 'S':
+        this.downKeys.s = false
         this.velocity.x = 0
         break
       case 'a':
       case 'A':
+        this.downKeys.a = false
         this.velocity.z = 0
         break
       case 'd':
       case 'D':
+        this.downKeys.d = false
         this.velocity.z = 0
         break
       case ' ':
+        if (this.player.mode === Mode.sneaking && !this.isJumping) {
+          return
+        }
         this.jumpInterval && clearInterval(this.jumpInterval)
         this.spaceHolding = false
         if (this.player.mode === Mode.walking) {
@@ -212,6 +248,24 @@ export default class Control {
         this.velocity.y = 0
         break
       case 'Shift':
+        if (this.player.mode === Mode.sneaking) {
+          if (!this.isJumping) {
+            this.player.setMode(Mode.walking)
+            if (this.downKeys.w) {
+              this.velocity.x = this.player.speed
+            }
+            if (this.downKeys.s) {
+              this.velocity.x = -this.player.speed
+            }
+            if (this.downKeys.a) {
+              this.velocity.z = -this.player.speed
+            }
+            if (this.downKeys.d) {
+              this.velocity.z = this.player.speed
+            }
+            this.camera.position.setY(this.camera.position.y + 0.2)
+          }
+        }
         if (this.player.mode === Mode.walking) {
           return
         }
@@ -279,7 +333,7 @@ export default class Control {
               new THREE.BoxGeometry(1, 1, 1),
               this.terrain.materials.get(
                 this.terrain.materialType[
-                parseInt(BlockType[block.object.name as any])
+                  parseInt(BlockType[block.object.name as any])
                 ]
               )
             )
@@ -348,7 +402,7 @@ export default class Control {
               position.z + normal.z === Math.round(this.camera.position.z) &&
               (position.y + normal.y === Math.round(this.camera.position.y) ||
                 position.y + normal.y ===
-                Math.round(this.camera.position.y - 1))
+                  Math.round(this.camera.position.y - 1))
             ) {
               return
             }
@@ -589,6 +643,16 @@ export default class Control {
       }
     }
 
+    // sneaking check
+    if (
+      this.player.mode === Mode.sneaking &&
+      y < Math.floor(this.camera.position.y - 2) &&
+      side !== Side.down &&
+      side !== Side.up
+    ) {
+      matrix.setPosition(x, Math.floor(this.camera.position.y - 1), z)
+      this.tempMesh.setMatrixAt(index++, matrix)
+    }
     this.tempMesh.instanceMatrix.needsUpdate = true
 
     // update collide
