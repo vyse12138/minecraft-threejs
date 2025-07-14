@@ -11,12 +11,12 @@ body {
 
 @font-face {
   font-family: Minecraft;
-  src: url(/src/static/mc-font.otf);
+  src: url(./static/mc-font.otf);
   font-display: swap;
 }
 
 .start {
-  background-image: url(/src/static/menu.jpeg);
+  background-image: url(./static/menu.jpeg);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
