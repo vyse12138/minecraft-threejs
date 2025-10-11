@@ -127,7 +127,7 @@ export default class Audio {
     }
   }
   index = 0
-  playSound(type: BlockType, volume = 0.15, index = -1) {
+  playSound(type: BlockType, volume: number = 0.15, pitch: number = 1, index: number = -1) {
     if (!this.disabled && !isMobile) {
       // this.index++ === 3 && (this.index = 0)
       const randomIndex = Math.floor(Math.random() * 3);
@@ -136,9 +136,13 @@ export default class Audio {
       } else {
         this.index = 3
       }
-      index < 0 && (index = this.index);
-      this.soundMap[type]?.[index]?.setVolume(volume)
-      this.soundMap[type]?.[index]?.play()
+      (index < 0 || index > 3) && (index = this.index);
+      const sound = this.soundMap[type]?.[index];
+      if(sound) {
+        sound.setPlaybackRate(pitch)
+        sound.setVolume(volume)
+        sound.play()
+      }
     }
   }
 }

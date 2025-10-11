@@ -13,6 +13,7 @@ export default class UI {
     this.fps = new FPS()
     this.bag = new Bag()
     this.joystick = new Joystick(control)
+    this.terrain = terrain
 
     this.crossHair.className = 'cross-hair'
     this.crossHair.innerHTML = '+'
@@ -197,6 +198,7 @@ export default class UI {
   fps: FPS
   bag: Bag
   joystick: Joystick
+  terrain: Terrain
 
   menu = document.querySelector('.menu')
   crossHair = document.createElement('div')
@@ -282,6 +284,8 @@ export default class UI {
   }
 
   update = () => {
+    const pos = this.terrain?.camera?.position || { x: 0, y: 0, z: 0 }
+    this.fps.setCoords(pos.x, pos.y, pos.z) 
     this.fps.update()
   }
 }
