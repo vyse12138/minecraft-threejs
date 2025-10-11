@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import hal3 from './musics/hal3.ogg'
 import { BlockType } from '../terrain'
+import { isMobile } from '../utils'
 
 import grass1 from './blocks/grass1.ogg'
 import grass2 from './blocks/grass2.ogg'
@@ -31,77 +32,113 @@ import leaf1 from './blocks/leaf1.ogg'
 import leaf2 from './blocks/leaf2.ogg'
 import leaf3 from './blocks/leaf3.ogg'
 import leaf4 from './blocks/leaf4.ogg'
-import { isMobile } from '../utils'
+
+const uniqueSoundSources = {
+  grass1, grass2, grass3, grass4,
+  sand1, sand2, sand3, sand4,
+  stone1, stone2, stone3, stone4,
+  dirt1, dirt2, dirt3, dirt4,
+  tree1, tree2, tree3, tree4,
+  leaf1, leaf2, leaf3, leaf4
+} as const;
+
+const soundMapKeys = [
+  ['grass1', 'grass2', 'grass3', 'grass4'],
+  ['sand1', 'sand2', 'sand3', 'sand4'],
+  ['tree1', 'tree2', 'tree3', 'tree4'],
+  ['leaf1', 'leaf2', 'leaf3', 'leaf4'],
+  ['dirt1', 'dirt2', 'dirt3', 'dirt4'],
+  ['stone1', 'stone2', 'stone3', 'stone4'],
+  ['stone1', 'stone2', 'stone3', 'stone4'],
+  ['tree1', 'tree2', 'tree3', 'tree4'],
+  ['stone1', 'stone2', 'stone3', 'stone4'],
+  ['stone1', 'stone2', 'stone3', 'stone4'],
+  ['stone1', 'stone2', 'stone3', 'stone4']
+] as const;
+
+type SoundKey = keyof typeof uniqueSoundSources;
 
 export default class Audio {
   constructor(camera: THREE.PerspectiveCamera) {
     if (isMobile) return
+    camera.add(this.listener)
 
-    const listener = new THREE.AudioListener()
-    const audioLoader = new THREE.AudioLoader()
-    camera.add(listener)
+    this.loadBGM()
+    this.loadSoundEffects()
 
-    // load bgm
-    const bgm = new THREE.Audio(listener)
-    bgm.autoplay = false
-    audioLoader.load(hal3, buffer => {
-      bgm.setBuffer(buffer)
-      bgm.setVolume(0.1)
-      bgm.setLoop(true)
-      if (bgm.isPlaying) {
-        bgm.pause()
-        bgm.play()
-      }
-    })
-
-    // play / pause bgm
     document.addEventListener('pointerlockchange', () => {
-      if (document.pointerLockElement && !bgm.isPlaying && !this.disabled) {
-        bgm.play()
+      if (document.pointerLockElement && !this.bgm.isPlaying && !this.disabled) {
+        this.bgm.play()
       } else {
-        bgm.pause()
+        this.bgm.pause()
       }
     })
-
-    // load sound effect
-    for (const types of this.sourceSet) {
-      const audios: THREE.Audio[] = []
-      for (const type of types) {
-        audioLoader.load(type, buffer => {
-          const audio = new THREE.Audio(listener!)
-          audio.setBuffer(buffer)
-          audio.setVolume(0.15)
-          audios.push(audio)
-        })
-      }
-      this.soundSet.push(audios)
-    }
   }
 
   disabled = false
+  
+  private listener: THREE.AudioListener = new THREE.AudioListener();
+  private audioLoader: THREE.AudioLoader = new THREE.AudioLoader();
+  bgm!: THREE.Audio;
+  
+  private uniqueBuffers: Record<SoundKey, AudioBuffer> = {} as Record<SoundKey, AudioBuffer>;
 
-  sourceSet = [
-    [grass1, grass2, grass3, grass4],
-    [sand1, sand2, sand3, sand4],
-    [tree1, tree2, tree3, tree4],
-    [leaf1, leaf2, leaf3, leaf4],
-    [dirt1, dirt2, dirt3, dirt4],
-    [stone1, stone2, stone3, stone4],
-    [stone1, stone2, stone3, stone4],
-    [tree1, tree2, tree3, tree4],
-    [stone1, stone2, stone3, stone4],
-    [stone1, stone2, stone3, stone4],
-    [stone1, stone2, stone3, stone4]
-  ]
+  private soundMap: THREE.Audio[][] = [];
 
-  soundSet: THREE.Audio[][] = []
+  private loadBGM() {
+    this.bgm = new THREE.Audio(this.listener)
+    this.bgm.autoplay = false
+    this.audioLoader.load(hal3, buffer => {
+      this.bgm.setBuffer(buffer)
+      this.bgm.setVolume(0.1)
+      this.bgm.setLoop(true)
+      if (this.bgm.isPlaying) {
+        this.bgm.pause()
+        this.bgm.play()
+      }
+    })
+  }
+  
+  private loadSoundEffects() {
+    const keys = Object.keys(uniqueSoundSources) as SoundKey[];
+    let loadedCount = 0;
+    const totalCount = keys.length;
+    for (const key of keys) {
+      this.audioLoader.load(uniqueSoundSources[key], buffer => {
+        this.uniqueBuffers[key] = buffer;
+        loadedCount++;
+        if (loadedCount === totalCount) {
+          this.createSoundObjects();
+        }
+      });
+    }
+  }
 
+  private createSoundObjects() {
+    for (const typeKeys of soundMapKeys) {
+      const audioSet: THREE.Audio[] = [];
+      for (const key of typeKeys) {
+        const audio = new THREE.Audio(this.listener);
+        audio.setBuffer(this.uniqueBuffers[key as SoundKey]);
+        audio.setVolume(0.15);
+        audioSet.push(audio);
+      }
+      this.soundMap.push(audioSet);
+    }
+  }
   index = 0
-
-  playSound(type: BlockType) {
+  playSound(type: BlockType, volume = 0.15, index = -1) {
     if (!this.disabled && !isMobile) {
-      this.index++ === 3 && (this.index = 0)
-      this.soundSet[type]?.[this.index]?.play()
+      // this.index++ === 3 && (this.index = 0)
+      const randomIndex = Math.floor(Math.random() * 3);
+      if(randomIndex !== this.index) {
+        this.index = randomIndex
+      } else {
+        this.index = 3
+      }
+      index < 0 && (index = this.index);
+      this.soundMap[type]?.[index]?.setVolume(volume)
+      this.soundMap[type]?.[index]?.play()
     }
   }
 }
