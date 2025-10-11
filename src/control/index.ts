@@ -115,7 +115,21 @@ export default class Control {
     this.raycasterLeft.far = this.player.body.width
     this.raycasterRight.far = this.player.body.width
   }
-
+  changePlayerMode = (mode: Mode) => {
+    this.player.setMode(mode)
+    if (this.downKeys.w) {
+      this.velocity.x = this.player.speed
+    }
+    if (this.downKeys.s) {
+      this.velocity.x = -this.player.speed
+    }
+    if (this.downKeys.a) {
+      this.velocity.z = -this.player.speed
+    }
+    if (this.downKeys.d) {
+      this.velocity.z = this.player.speed
+    }
+  }
   downKeys = {
     a: false,
     d: false,
@@ -126,7 +140,6 @@ export default class Control {
     if (e.repeat) {
       return
     }
-
     switch (e.key) {
       case 'q':
         if (this.player.mode === Mode.walking) {
@@ -162,7 +175,7 @@ export default class Control {
         if (this.player.mode === Mode.sneaking && !this.isJumping) {
           return
         }
-        if (this.player.mode === Mode.walking) {
+        if (this.player.mode === Mode.walking || this.player.mode === Mode.sprinting) {
           // jump
           if (!this.isJumping) {
             this.velocity.y = 8
@@ -176,7 +189,7 @@ export default class Control {
         } else {
           this.velocity.y += this.player.speed
         }
-        if (this.player.mode === Mode.walking && !this.spaceHolding) {
+        if ((this.player.mode === Mode.walking || this.player.mode === Mode.sprinting) && !this.spaceHolding) {
           this.spaceHolding = true
           this.jumpInterval = setInterval(() => {
             this.setMovementHandler(e)
@@ -186,23 +199,18 @@ export default class Control {
       case 'Shift':
         if (this.player.mode === Mode.walking) {
           if (!this.isJumping) {
-            this.player.setMode(Mode.sneaking)
-            if (this.downKeys.w) {
-              this.velocity.x = this.player.speed
-            }
-            if (this.downKeys.s) {
-              this.velocity.x = -this.player.speed
-            }
-            if (this.downKeys.a) {
-              this.velocity.z = -this.player.speed
-            }
-            if (this.downKeys.d) {
-              this.velocity.z = this.player.speed
-            }
+            this.changePlayerMode(Mode.sneaking)
             this.camera.position.setY(this.camera.position.y - 0.2)
           }
         } else {
           this.velocity.y -= this.player.speed
+        }
+        break
+      case 'Control':
+        if (this.player.mode === Mode.walking) {
+          this.changePlayerMode(Mode.sprinting)
+        } else if (this.player.mode === Mode.flying) {
+          this.changePlayerMode(Mode.sprintFlying)
         }
         break
       default:
@@ -250,19 +258,7 @@ export default class Control {
       case 'Shift':
         if (this.player.mode === Mode.sneaking) {
           if (!this.isJumping) {
-            this.player.setMode(Mode.walking)
-            if (this.downKeys.w) {
-              this.velocity.x = this.player.speed
-            }
-            if (this.downKeys.s) {
-              this.velocity.x = -this.player.speed
-            }
-            if (this.downKeys.a) {
-              this.velocity.z = -this.player.speed
-            }
-            if (this.downKeys.d) {
-              this.velocity.z = this.player.speed
-            }
+            this.changePlayerMode(Mode.walking)
             this.camera.position.setY(this.camera.position.y + 0.2)
           }
         }
@@ -270,6 +266,13 @@ export default class Control {
           return
         }
         this.velocity.y = 0
+        break
+      case 'Control':
+        if (this.player.mode === Mode.sprinting) {
+          this.changePlayerMode(Mode.walking)
+        } else if (this.player.mode === Mode.sprintFlying) {
+          this.changePlayerMode(Mode.flying)
+        }
         break
       default:
         break
