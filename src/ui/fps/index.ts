@@ -26,7 +26,7 @@ export default class FPS {
     this.count++
 
     if (performance.now() - this.gap > 1000) {
-      this.fps.innerHTML = `FPS: ${this.count}<br/>Coords: ${this.coords.x}, ${this.coords.y}, ${this.coords.z}`
+      this.fps.innerHTML = `FPS: ${this.count} XYZ: ${this.coords.x}, ${this.coords.y}, ${this.coords.z}`
       this.gap = performance.now()
       this.count = 0
     }

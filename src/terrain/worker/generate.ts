@@ -82,16 +82,8 @@ onmessage = (
     )
   }
 
-  for (
-    let x = -chunkSize * distance + chunkSize * chunk.x;
-    x < chunkSize * distance + chunkSize + chunkSize * chunk.x;
-    x++
-  ) {
-    for (
-      let z = -chunkSize * distance + chunkSize * chunk.y;
-      z < chunkSize * distance + chunkSize + chunkSize * chunk.y;
-      z++
-    ) {
+  for (let x =  chunkSize * (chunk.x - distance); x < chunkSize * (chunk.x + distance + 1); x++) {
+    for (let z = chunkSize * (chunk.y - distance); z < chunkSize * (chunk.y + distance + 1); z++) {
       const y = 30
       const yOffset = Math.floor(
         noise.get(x / noise.gap, z / noise.gap, noise.seed) * noise.amp
@@ -199,10 +191,10 @@ onmessage = (
 
   for (const block of customBlocks) {
     if (
-      block.x > -chunkSize * distance + chunkSize * chunk.x &&
-      block.x < chunkSize * distance + chunkSize + chunkSize * chunk.x &&
-      block.z > -chunkSize * distance + chunkSize * chunk.y &&
-      block.z < chunkSize * distance + chunkSize + chunkSize * chunk.y
+      block.x > chunkSize * (chunk.x - distance) &&
+      block.x < chunkSize * (chunk.x + distance + 1) &&
+      block.z > chunkSize * (chunk.y - distance) &&
+      block.z < chunkSize * (chunk.y + distance + 1)
     ) {
       if (block.placed) {
         // placed blocks
@@ -215,22 +207,10 @@ onmessage = (
         blocks[block.type].setMatrixAt(
           id!,
           new THREE.Matrix4().set(
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0
           )
         )
       }

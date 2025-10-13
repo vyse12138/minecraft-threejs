@@ -1,0 +1,132 @@
+{
+    "description": {
+      "id": "oak_tree",
+      "type": "entity",
+      "realm": "plant",
+      "kind": "tree"
+    },
+    "components": {
+        "feature": {
+            "trunk": {
+                "range_height": {
+                    "min": 4,
+                    "max": 7
+                },
+                "block": {
+                    "id": "log"
+                }
+            },
+            "canopy": {
+                "offset": {
+                    "min": -3,
+                    "max": 0
+                },
+                "variation_chance": [
+                    {
+                        "numerator": 1,
+                        "denominator": 2
+                    },
+                    {
+                        "numerator": 1,
+                        "denominator": 2
+                    },
+                    {
+                        "numerator": 1,
+                        "denominator": 2
+                    },
+                    {
+                        "numerator": 1,
+                        "denominator": 1
+                    }
+                ],
+                "block": {
+                    "id": "leaf"
+                }
+            },
+            "base_block": [
+                "dirt",
+                {
+                    "id": "dirt",
+                    "states": {
+                        "dirt_type": "coarse"
+                    }
+                }
+            ],
+            "may_grow_on": [
+                "dirt",
+                "grass",
+                "podzol",
+                "dirt_with_roots",
+                "moss_block",
+                {
+                    "id": "dirt",
+                    "states": {
+                        "dirt_type": "coarse"
+                    }
+                },
+                {
+                    "id": "farmland",
+                    "states": {
+                        "moisturized_amount": 0
+                    }
+                },
+                {
+                    "id": "farmland",
+                    "states": {
+                        "moisturized_amount": 1
+                    }
+                },
+                {
+                    "id": "farmland",
+                    "states": {
+                        "moisturized_amount": 2
+                    }
+                },
+                {
+                    "id": "farmland",
+                    "states": {
+                        "moisturized_amount": 3
+                    }
+                },
+                {
+                    "id": "farmland",
+                    "states": {
+                        "moisturized_amount": 4
+                    }
+                },
+                {
+                    "id": "farmland",
+                    "states": {
+                        "moisturized_amount": 5
+                    }
+                },
+                {
+                    "id": "farmland",
+                    "states": {
+                        "moisturized_amount": 6
+                    }
+                },
+                {
+                    "id": "farmland",
+                    "states": {
+                        "moisturized_amount": 7
+                    }
+                }
+            ],
+            "may_replace": [
+                "air",
+                "leaf"
+            ],
+            "may_grow_through": [
+                "dirt",
+                "grass",
+                {
+                    "id": "dirt",
+                    "states": {
+                        "dirt_type": "coarse"
+                    }
+                }
+            ]
+        }
+    }
+}

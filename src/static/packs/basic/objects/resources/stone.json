@@ -1,0 +1,8 @@
+{
+    "description": {
+        "id": "stone",
+        "type": "resource",
+        "realm": "mineral",
+        "kind": "block"
+    }
+}
