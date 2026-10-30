@@ -4,8 +4,6 @@ English ｜ [中文](https://github.com/vyse12138/minecraft-threejs/blob/main/RE
 
 Minecraft clone made with Three.js and TypeScript
 
-Check it out: [Minecraft - Three.js](https://mc.yulei.me/)
-
 Recommend to use Chrome to get the best experience
 
 ![preview](https://user-images.githubusercontent.com/88306344/154383952-9b33bad4-eebb-4a98-a12e-f5f137422d06.gif)
