@@ -1,0 +1,20 @@
+{
+    "bedrock": "resource",
+    "coal": "resource",
+    "diamond": "resource",
+    "dirt": "resource",
+    "grass": "resource",
+    "leaf": "resource",
+    "quartz": "resource",
+    "stone": "resource",
+    "sand": "resource",
+    "oak_log": "resource",
+    "water": "resource",
+    
+    "glass": "item",
+    "charcoal": "item",
+    "cobblestone": "item",
+    "cobblestone_wall": "item",
+
+    "oak_tree": "entity"
+}

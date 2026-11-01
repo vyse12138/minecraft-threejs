@@ -278,6 +278,77 @@ export default class Terrain {
     this.setCount(type)
   }
 
+  getBlock = (x: number, y: number, z: number): BlockType | null => {
+      for (const block of this.customBlocks) {
+          if (block.x === x && block.y === y && block.z === z) {
+              if (!block.placed) {
+                  return null 
+              }
+              return block.type
+          }
+      }
+      const yOffset = Math.floor(
+          this.noise.get(x / this.noise.gap, z / this.noise.gap, this.noise.seed) *
+          this.noise.amp
+      )
+      const topY = 30 + yOffset
+
+      if (y < 0 || y > topY + this.noise.treeHeight + 1) {
+          return null
+      }
+
+      const stoneOffset =
+          this.noise.get(x / this.noise.stoneGap, z / this.noise.stoneGap, this.noise.stoneSeed) *
+          this.noise.stoneAmp
+
+      const treeOffset =
+          this.noise.get(x / this.noise.treeGap, z / this.noise.treeGap, this.noise.treeSeed) *
+          this.noise.treeAmp
+          
+      const isTree = treeOffset > this.noise.treeThreshold && yOffset >= -3 && stoneOffset < this.noise.stoneThreshold
+
+      if (isTree && y > topY) {
+          if (y >= topY && y < topY + this.noise.treeHeight) {
+              return BlockType.tree
+          }
+      }
+      if (y > topY) {
+          return null
+      }
+      if (stoneOffset > this.noise.stoneThreshold) {
+          const coalOffset =
+              this.noise.get(x / this.noise.coalGap, z / this.noise.coalGap, this.noise.coalSeed) *
+              this.noise.coalAmp
+              
+          if (coalOffset > this.noise.coalThreshold) {
+              return BlockType.coal
+          }
+          return BlockType.stone
+      } 
+      if (y === topY) {
+          if (yOffset < -3) {
+              return BlockType.sand
+          }
+          return BlockType.grass
+      }
+      if (y < topY) {
+          if (y === topY - 1) {
+              if (yOffset < -3) {
+                  return BlockType.sand
+              }
+              return BlockType.dirt
+          }
+          if (y > 0) {
+              return BlockType.stone
+          }
+          if (y === 0) {
+              return BlockType.bedrock
+          }
+      }
+
+      return null
+  }
+
   update = () => {
     this.chunk.set(
       Math.floor(this.camera.position.x / this.chunkSize),

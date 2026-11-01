@@ -1,0 +1,8 @@
+{
+    "description": {
+        "id": "coal",
+        "type": "resource",
+        "realm": "mineral",
+        "kind": "ore"
+    }
+}

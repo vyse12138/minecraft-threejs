@@ -47,6 +47,7 @@ export default class Control {
   control: PointerLockControls
   audio: Audio
   velocity = new THREE.Vector3(0, 0, 0)
+  lastStepPosition = new THREE.Vector3(0, 0, 0)
 
   // collide and jump properties
   frontCollide = false
@@ -79,6 +80,7 @@ export default class Control {
   p2 = performance.now()
   raycaster: THREE.Raycaster
   far: number
+  blockUnderPlayer: BlockType | null = null
 
   holdingBlock = BlockType.grass
   holdingBlocks = [
@@ -115,7 +117,21 @@ export default class Control {
     this.raycasterLeft.far = this.player.body.width
     this.raycasterRight.far = this.player.body.width
   }
-
+  changePlayerMode = (mode: Mode) => {
+    this.player.setMode(mode)
+    if (this.downKeys.w) {
+      this.velocity.x = this.player.speed
+    }
+    if (this.downKeys.s) {
+      this.velocity.x = -this.player.speed
+    }
+    if (this.downKeys.a) {
+      this.velocity.z = -this.player.speed
+    }
+    if (this.downKeys.d) {
+      this.velocity.z = this.player.speed
+    }
+  }
   downKeys = {
     a: false,
     d: false,
@@ -126,7 +142,6 @@ export default class Control {
     if (e.repeat) {
       return
     }
-
     switch (e.key) {
       case 'q':
         if (this.player.mode === Mode.walking) {
@@ -162,7 +177,7 @@ export default class Control {
         if (this.player.mode === Mode.sneaking && !this.isJumping) {
           return
         }
-        if (this.player.mode === Mode.walking) {
+        if (this.player.mode === Mode.walking || this.player.mode === Mode.sprinting) {
           // jump
           if (!this.isJumping) {
             this.velocity.y = 8
@@ -176,7 +191,7 @@ export default class Control {
         } else {
           this.velocity.y += this.player.speed
         }
-        if (this.player.mode === Mode.walking && !this.spaceHolding) {
+        if ((this.player.mode === Mode.walking || this.player.mode === Mode.sprinting) && !this.spaceHolding) {
           this.spaceHolding = true
           this.jumpInterval = setInterval(() => {
             this.setMovementHandler(e)
@@ -186,23 +201,18 @@ export default class Control {
       case 'Shift':
         if (this.player.mode === Mode.walking) {
           if (!this.isJumping) {
-            this.player.setMode(Mode.sneaking)
-            if (this.downKeys.w) {
-              this.velocity.x = this.player.speed
-            }
-            if (this.downKeys.s) {
-              this.velocity.x = -this.player.speed
-            }
-            if (this.downKeys.a) {
-              this.velocity.z = -this.player.speed
-            }
-            if (this.downKeys.d) {
-              this.velocity.z = this.player.speed
-            }
+            this.changePlayerMode(Mode.sneaking)
             this.camera.position.setY(this.camera.position.y - 0.2)
           }
         } else {
           this.velocity.y -= this.player.speed
+        }
+        break
+      case 'Control':
+        if (this.player.mode === Mode.walking) {
+          this.changePlayerMode(Mode.sprinting)
+        } else if (this.player.mode === Mode.flying) {
+          this.changePlayerMode(Mode.sprintFlying)
         }
         break
       default:
@@ -250,19 +260,7 @@ export default class Control {
       case 'Shift':
         if (this.player.mode === Mode.sneaking) {
           if (!this.isJumping) {
-            this.player.setMode(Mode.walking)
-            if (this.downKeys.w) {
-              this.velocity.x = this.player.speed
-            }
-            if (this.downKeys.s) {
-              this.velocity.x = -this.player.speed
-            }
-            if (this.downKeys.a) {
-              this.velocity.z = -this.player.speed
-            }
-            if (this.downKeys.d) {
-              this.velocity.z = this.player.speed
-            }
+            this.changePlayerMode(Mode.walking)
             this.camera.position.setY(this.camera.position.y + 0.2)
           }
         }
@@ -270,6 +268,13 @@ export default class Control {
           return
         }
         this.velocity.y = 0
+        break
+      case 'Control':
+        if (this.player.mode === Mode.sprinting) {
+          this.changePlayerMode(Mode.walking)
+        } else if (this.player.mode === Mode.sprintFlying) {
+          this.changePlayerMode(Mode.flying)
+        }
         break
       default:
         break
@@ -690,6 +695,11 @@ export default class Control {
       case Side.down: {
         const c1 = this.raycasterDown.intersectObject(this.tempMesh).length
         c1 ? (this.downCollide = true) : (this.downCollide = false)
+        if (c1) {
+            this.blockUnderPlayer = this.terrain.getBlock(x, y, z); 
+        } else {
+            this.blockUnderPlayer = null;
+        }
         break
       }
       case Side.up: {
@@ -697,6 +707,18 @@ export default class Control {
         c1 ? (this.upCollide = true) : (this.upCollide = false)
         break
       }
+    }
+  }
+
+  playSoundFootstep = () => {
+    const isMoving = (this.velocity.x !== 0 || this.velocity.z !== 0) && (this.player.mode === Mode.walking || this.player.mode === Mode.sprinting)
+    const distanceTraveled = this.camera.position.distanceTo(this.lastStepPosition)
+    const limitDistance = this.player.mode === Mode.sprinting ? 2 : 4;
+    const volumeStep = this.player.mode === Mode.sprinting ? 0.06 : 0.03;
+    const volumeRate = this.player.mode === Mode.sprinting ? 1.1 : 1.0;
+    if (this.downCollide && isMoving && this.blockUnderPlayer != null && distanceTraveled > limitDistance) {
+      this.audio.playSound(this.blockUnderPlayer, volumeStep, volumeRate, 2)
+      this.lastStepPosition.copy(this.camera.position)
     }
   }
 
@@ -1162,6 +1184,7 @@ export default class Control {
       }
 
       this.camera.position.y += this.velocity.y * delta
+      this.playSoundFootstep()
 
       // catching net
       if (this.camera.position.y < -100) {

@@ -1,0 +1,8 @@
+{
+    "description": {
+        "id": "oak_log",
+        "type": "resource",
+        "realm": "plant",
+        "kind": "log" 
+    }
+}
